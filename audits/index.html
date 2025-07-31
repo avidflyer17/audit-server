@@ -99,18 +99,70 @@
     }
     .copy-btn:hover {
       background: #666;
-    #themeToggle {
-      background: #444;
-      color: #fff;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 4px;
+    }
+
+    #themeSwitchWrapper {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
       cursor: pointer;
-      margin-left: 1rem;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #444;
+      transition: .4s;
+      border-radius: 24px;
     }
-    #themeToggle:hover {
-      background: #666;
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
     }
+    .switch input:checked + .slider {
+      background-color: #2196F3;
+    }
+    .switch input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    @media screen and (max-width: 600px) {
+      #themeSwitchWrapper {
+        top: 0.5rem;
+        right: 0.5rem;
+      }
+      .switch {
+        width: 40px;
+        height: 20px;
+      }
+      .slider:before {
+        height: 14px;
+        width: 14px;
+      }
+      .switch input:checked + .slider:before {
+        transform: translateX(20px);
+      }
     }
 
     .temp-wrapper {
@@ -289,8 +341,14 @@
 </head>
 <body>
 
+  <div id="themeSwitchWrapper">
+    <label class="switch">
+      <input type="checkbox" id="themeToggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+
   <h1>🧠 Audit Serveur DW</h1>
-  <button id="themeToggle">Mode Clair</button>
   <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
 
   <label for="auditSelector">Sélectionner un rapport :</label>
@@ -380,13 +438,13 @@
     }
   </script>
   <script>
-    const themeBtn = document.getElementById("themeToggle");
+    const themeSwitch = document.getElementById("themeToggle");
     function applyTheme(t){
       document.body.classList.toggle("light-theme", t === "light");
-      themeBtn.textContent = t === "light" ? "Mode Sombre" : "Mode Clair";
+      themeSwitch.checked = t === "light";
     }
-    themeBtn.addEventListener("click", () => {
-      const next = document.body.classList.contains("light-theme") ? "dark" : "light";
+    themeSwitch.addEventListener("change", () => {
+      const next = themeSwitch.checked ? "light" : "dark";
       localStorage.setItem("theme", next);
       applyTheme(next);
     });
