@@ -11,9 +11,23 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/scripts/viewer.js?v=1"></script>
   <style>
+    :root {
+      --bg: #191a24;
+      --text: #f8f8f2;
+      --heading: #8be9fd;
+      --subheading: #50fa7b;
+      --block-bg: #282a36;
+    }
+    .light-theme {
+      --bg: #f0f0f0;
+      --text: #1c1c1c;
+      --heading: #007acc;
+      --subheading: #2b8a3e;
+      --block-bg: #ffffff;
+    }
     body {
-      background-color: #191a24;
-      color: #f8f8f2;
+      background-color: var(--bg);
+      color: var(--text);
       font-family: "Segoe UI", sans-serif;
       padding: 2rem;
       max-width: 900px;
@@ -22,12 +36,12 @@
 
     h1 {
       font-size: 2rem;
-      color: #8be9fd;
+      color: var(--heading);
       margin-bottom: 0.5rem;
     }
 
     h2 {
-      color: #50fa7b;
+      color: var(--subheading);
       margin-top: 2rem;
     }
 
@@ -53,7 +67,7 @@
 
     .code-block {
       width: 100%;
-      background-color: #282a36;
+      background-color: var(--block-bg);
       color: white;
       padding: 1rem;
       border-radius: 5px;
@@ -85,12 +99,24 @@
     }
     .copy-btn:hover {
       background: #666;
+    #themeToggle {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 1rem;
+    }
+    #themeToggle:hover {
+      background: #666;
+    }
     }
 
     .temp-wrapper {
       margin-top: 1rem;
       font-family: monospace;
-      color: #f8f8f2;
+      color: var(--text);
     }
     .temp-bar {
       width: 100%;
@@ -124,7 +150,7 @@
 
     .ip-container {
       font-family: monospace;
-      background: #282a36;
+      background: var(--block-bg);
       padding: 0.5rem 1rem;
       border-radius: 5px;
       display: inline-block;
@@ -172,7 +198,7 @@
 
     .port-ip {
       font-weight: bold;
-      color: #8be9fd;
+      color: var(--heading);
       margin-bottom: 0.2rem;
       display: flex;
       justify-content: space-between;
@@ -192,7 +218,7 @@
 
     .port-address {
       font-family: monospace;
-      color: #f8f8f2;
+      color: var(--text);
       word-break: break-word;      /* Permet de casser les longues IPv6 */
       overflow-wrap: anywhere;     /* Pour forcer le retour à la ligne */
     }
@@ -201,7 +227,7 @@
       align-items: center;
       justify-content: space-between;
       font-size: 1.2rem;
-      color: #8be9fd;
+      color: var(--heading);
       margin-top: 1.5rem;
       margin-bottom: 0.4rem;
       border-bottom: 1px solid #444;
@@ -264,6 +290,7 @@
 <body>
 
   <h1>🧠 Audit Serveur DW</h1>
+  <button id="themeToggle">Mode Clair</button>
   <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
 
   <label for="auditSelector">Sélectionner un rapport :</label>
@@ -351,6 +378,19 @@
         alert("Copié dans le presse-papiers !");
       });
     }
+  </script>
+  <script>
+    const themeBtn = document.getElementById("themeToggle");
+    function applyTheme(t){
+      document.body.classList.toggle("light-theme", t === "light");
+      themeBtn.textContent = t === "light" ? "Mode Sombre" : "Mode Clair";
+    }
+    themeBtn.addEventListener("click", () => {
+      const next = document.body.classList.contains("light-theme") ? "dark" : "light";
+      localStorage.setItem("theme", next);
+      applyTheme(next);
+    });
+    applyTheme(localStorage.getItem("theme") || "dark");
   </script>
 
 </body>
