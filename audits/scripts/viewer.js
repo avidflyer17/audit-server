@@ -181,11 +181,54 @@ function renderText(json) {
     groupAndDisplayPorts(tcpPorts, tcpPortsDiv, "fas fa-network-wired");
   }, 0);
 
-  const topCpu = json.top_cpu?.slice(1).map(p => `${p.cmd} (PID ${p.pid}) - CPU ${p.cpu}%, RAM ${p.mem}%`) || [];
-  document.getElementById('topCpuText').textContent = topCpu.length ? topCpu.join('\n') : 'Aucun processus';
+  const procContainer = document.getElementById('processContainer');
+  procContainer.innerHTML = '';
+  const processes = json.top_cpu?.slice(1) || [];
+  if (processes.length) {
+    processes.forEach(p => {
+      const row = document.createElement('div');
+      row.className = 'process-row';
 
-  const topMem = json.top_mem?.slice(1).map(p => `${p.cmd} (PID ${p.pid}) - RAM ${p.mem}%, CPU ${p.cpu}%`) || [];
-  document.getElementById('topMemText').textContent = topMem.length ? topMem.join('\n') : 'Aucun processus';
+      const name = document.createElement('div');
+      name.className = 'process-name';
+      name.textContent = `${p.cmd} (PID ${p.pid})`;
+
+      const bars = document.createElement('div');
+      bars.className = 'process-bars';
+
+      const cpuBar = document.createElement('div');
+      cpuBar.className = 'process-bar';
+      const cpuFill = document.createElement('div');
+      cpuFill.className = 'process-bar-fill cpu-fill';
+      cpuFill.style.width = p.cpu + '%';
+      cpuFill.textContent = p.cpu + '%';
+      cpuBar.appendChild(cpuFill);
+
+      const ramBar = document.createElement('div');
+      ramBar.className = 'process-bar';
+      const ramFill = document.createElement('div');
+      ramFill.className = 'process-bar-fill ram-fill';
+      ramFill.style.width = p.mem + '%';
+      ramFill.textContent = p.mem + '%';
+      ramBar.appendChild(ramFill);
+
+      bars.appendChild(cpuBar);
+      bars.appendChild(ramBar);
+
+      row.appendChild(name);
+      row.appendChild(bars);
+      procContainer.appendChild(row);
+    });
+  } else {
+    procContainer.textContent = 'Aucun processus';
+  }
+
+  // legacy text fields kept for backward compatibility if present
+  const topCpuText = document.getElementById('topCpuText');
+  if (topCpuText) topCpuText.textContent = processes.map(p => `${p.cmd} (PID ${p.pid}) - CPU ${p.cpu}%, RAM ${p.mem}%`).join('\n');
+  const topMemText = document.getElementById('topMemText');
+  const topMem = json.top_mem?.slice(1) || [];
+  if (topMemText) topMemText.textContent = topMem.map(p => `${p.cmd} (PID ${p.pid}) - RAM ${p.mem}%, CPU ${p.cpu}%`).join('\n');
 
   const docker = json.docker?.join('\n') || 'Aucun conteneur';
   document.getElementById('dockerText').textContent = docker;
