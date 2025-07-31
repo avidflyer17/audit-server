@@ -105,6 +105,14 @@
       position: fixed;
       top: 1rem;
       right: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .theme-icon {
+      color: var(--text);
+      font-size: 1.2rem;
     }
 
     .switch {
@@ -151,6 +159,9 @@
       #themeSwitchWrapper {
         top: 0.5rem;
         right: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
       }
       .switch {
         width: 40px;
@@ -342,6 +353,7 @@
 <body>
 
   <div id="themeSwitchWrapper">
+    <i id="themeIcon" class="fas fa-moon theme-icon"></i>
     <label class="switch">
       <input type="checkbox" id="themeToggle">
       <span class="slider"></span>
@@ -439,9 +451,11 @@
   </script>
   <script>
     const themeSwitch = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
     function applyTheme(t){
       document.body.classList.toggle("light-theme", t === "light");
       themeSwitch.checked = t === "light";
+      if (themeIcon) themeIcon.className = t === "light" ? "fas fa-sun theme-icon" : "fas fa-moon theme-icon";
     }
     themeSwitch.addEventListener("change", () => {
       const next = themeSwitch.checked ? "light" : "dark";
