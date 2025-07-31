@@ -1,0 +1,526 @@
+{
+  "generated": "30/07/2025 à 14:47",
+  "hostname": "homelabz",
+  "ip_local": "192.168.1.30",
+  "ip_pub": "90.78.117.33",
+  "uptime": "up 18 hours, 22 minutes",
+  "load_average": "0.17,0.19,0.22",
+  "temperature": "+27.8°C",
+  "memory": {
+    "ram": {
+      "total": "15Gi",
+      "used": "4.6Gi",
+      "free": "530Mi",
+      "shared": "113Mi",
+      "buff_cache": "10Gi",
+      "available": "10Gi"
+    },
+    "swap": {
+      "total": "4.0Gi",
+      "used": "512Ki",
+      "free": "4.0Gi"
+    }
+  },
+  "disks": [
+    {
+      "filesystem": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+      "size": "98G",
+      "used": "25G",
+      "available": "69G",
+      "used_percent": "27%",
+      "mountpoint": "/"
+    },
+    {
+      "filesystem": "/dev/mapper/ubuntu--vg-lv--0",
+      "size": "367G",
+      "used": "25G",
+      "available": "324G",
+      "used_percent": "7%",
+      "mountpoint": "/home"
+    }
+  ],
+  "cpu": {
+    "model": "                          Intel(R) N95",
+    "cores": 4,
+    "usage": [
+      {
+        "core": "0",
+        "usage": 1.0
+      },
+      {
+        "core": "1",
+        "usage": 4.0
+      },
+      {
+        "core": "2",
+        "usage": 2.0
+      },
+      {
+        "core": "3",
+        "usage": 3.0
+      }
+    ]
+  },
+  "cpu_load_color": "green",
+  "services": [
+    "bluetooth.service",
+    "containerd.service",
+    "cron.service",
+    "dbus-broker.service",
+    "docker.service",
+    "nmbd.service",
+    "ntpsec.service",
+    "polkit.service",
+    "rpc-statd.service",
+    "rpcbind.service",
+    "rsyslog.service",
+    "smbd.service",
+    "ssh.service",
+    "systemd-journald.service",
+    "systemd-logind.service",
+    "systemd-networkd.service",
+    "systemd-resolved.service",
+    "systemd-udevd.service",
+    "thermald.service",
+    "unattended-upgrades.service"
+  ],
+  "top_cpu": [
+    {
+      "pid": "PID",
+      "cmd": "COMMAND",
+      "cpu": "%CPU",
+      "mem": "%MEM"
+    },
+    {
+      "pid": "2509",
+      "cmd": "AdGuardHome",
+      "cpu": "4.2",
+      "mem": "0.7"
+    },
+    {
+      "pid": "317946",
+      "cmd": "node",
+      "cpu": "2.5",
+      "mem": "4.6"
+    },
+    {
+      "pid": "317957",
+      "cmd": "node",
+      "cpu": "1.5",
+      "mem": "0.5"
+    },
+    {
+      "pid": "2094",
+      "cmd": "python3",
+      "cpu": "1.4",
+      "mem": "8.4"
+    },
+    {
+      "pid": "1830",
+      "cmd": "redis-server",
+      "cpu": "1.2",
+      "mem": "0.1"
+    }
+  ],
+  "top_mem": [
+    {
+      "pid": "PID",
+      "cmd": "COMMAND",
+      "mem": "%MEM",
+      "cpu": "%CPU"
+    },
+    {
+      "pid": "2094",
+      "cmd": "python3",
+      "mem": "8.4",
+      "cpu": "1.4"
+    },
+    {
+      "pid": "6684",
+      "cmd": "jellyfin",
+      "mem": "4.9",
+      "cpu": "0.8"
+    },
+    {
+      "pid": "317946",
+      "cmd": "node",
+      "mem": "4.6",
+      "cpu": "2.5"
+    },
+    {
+      "pid": "318022",
+      "cmd": "node",
+      "mem": "1.1",
+      "cpu": "0.3"
+    },
+    {
+      "pid": "2661",
+      "cmd": "traefik",
+      "mem": "1.0",
+      "cpu": "0.2"
+    }
+  ],
+  "ports": [
+    {
+      "proto": "udp",
+      "port": "172.17.0.1:60583"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:36364"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:36651"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:53632"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.1:37358"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.1:37699"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:5353"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:54686"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:5683"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:47177"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:55487"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:48138"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:7359"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.54:53"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.53%lo:53"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:111"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:123"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:123"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.1:123"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:123"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.255:137"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:137"
+    },
+    {
+      "proto": "udp",
+      "port": "172.17.255.255:137"
+    },
+    {
+      "proto": "udp",
+      "port": "172.17.0.1:137"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.255:137"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:137"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:137"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.255:138"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:138"
+    },
+    {
+      "proto": "udp",
+      "port": "172.17.255.255:138"
+    },
+    {
+      "proto": "udp",
+      "port": "172.17.0.1:138"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.255:138"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:138"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:138"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.1:818"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:50063"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "172.17.0.1:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.1:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:34733"
+    },
+    {
+      "proto": "udp",
+      "port": "*:37597"
+    },
+    {
+      "proto": "udp",
+      "port": "*:5353"
+    },
+    {
+      "proto": "udp",
+      "port": "[fe80::6a1d:efff:fe34:eef6]%enp1s0:5353"
+    },
+    {
+      "proto": "udp",
+      "port": "*:47413"
+    },
+    {
+      "proto": "udp",
+      "port": "[::]:111"
+    },
+    {
+      "proto": "udp",
+      "port": "[fd34:6a79:6518:cb41:6a1d:efff:fe34:eef6]:123"
+    },
+    {
+      "proto": "udp",
+      "port": "[fe80::6a1d:efff:fe34:eef6]%enp1s0:123"
+    },
+    {
+      "proto": "udp",
+      "port": "[::]:123"
+    },
+    {
+      "proto": "udp",
+      "port": "[::]:50147"
+    },
+    {
+      "proto": "udp",
+      "port": "*:58993"
+    },
+    {
+      "proto": "udp",
+      "port": "*:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "*:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "[::]:59494"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:38583"
+    },
+    {
+      "proto": "tcp",
+      "port": "192.168.1.30:40000"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.54:53"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.53%lo:53"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:8096"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:8123"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:8080"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.1:40511"
+    },
+    {
+      "proto": "tcp",
+      "port": "192.168.1.30:44013"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.1:41493"
+    },
+    {
+      "proto": "tcp",
+      "port": "192.168.1.30:36231"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:443"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:445"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:111"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:80"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:22"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:139"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.1:11984"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:43399"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.1:18554"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:46077"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:8123"
+    },
+    {
+      "proto": "tcp",
+      "port": "[fe80::6a1d:efff:fe34:eef6]%enp1s0:40000"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:59313"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:445"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:111"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:22"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:139"
+    },
+    {
+      "proto": "tcp",
+      "port": "*:18555"
+    }
+  ],
+  "docker": [
+    "nodered (Up 13 hours (healthy))",
+    "audit-server (Up 25 minutes)",
+    "homeassistant (Up 18 hours)",
+    "adguardhome (Up 18 hours (healthy))",
+    "adguard-exporter (Up 18 hours)",
+    "sablier (Up 18 hours)",
+    "twingate_connector (Up 18 hours (healthy))",
+    "crowdsec (Up 18 hours)",
+    "traefik (Up 18 hours)",
+    "mqtt5 (Up 18 hours)",
+    "zigbee2mqtt (Up 18 hours)",
+    "redis (Up 18 hours)",
+    "prometheus (Up 18 hours)",
+    "authelia (Up 18 hours)",
+    "jellyfin (Up 18 hours (healthy))",
+    "watchtower (Up 18 hours (healthy))",
+    "myelectricaldata (Up 18 hours)",
+    "lldap (Up 18 hours (healthy))",
+    "dockersocket (Up 18 hours)"
+  ]
+}

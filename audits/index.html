@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Audit Serveur DW</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/scripts/viewer.js?v=1"></script>
+  <style>
+    body {
+      background-color: #191a24;
+      color: #f8f8f2;
+      font-family: "Segoe UI", sans-serif;
+      padding: 2rem;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #8be9fd;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      color: #50fa7b;
+      margin-top: 2rem;
+    }
+
+    .subtitle {
+      font-style: italic;
+      margin-bottom: 1.5rem;
+      color: #bbb;
+    }
+
+    select {
+      background-color: #333;
+      color: white;
+      padding: 0.4rem;
+      border-radius: 5px;
+      border: none;
+      margin-left: 0.5rem;
+    }
+
+    canvas {
+      width: 100% !important;
+      max-height: 300px;
+    }
+
+    .code-block {
+      width: 100%;
+      background-color: #282a36;
+      color: white;
+      padding: 1rem;
+      border-radius: 5px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-x: auto;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+
+    .block-wrapper {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background 0.3s ease;
+    }
+    .copy-btn:hover {
+      background: #666;
+    }
+
+    .temp-wrapper {
+      margin-top: 1rem;
+      font-family: monospace;
+      color: #f8f8f2;
+    }
+    .temp-bar {
+      width: 100%;
+      max-width: 400px;
+      height: 25px;
+      background-color: #444;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 0.5rem auto 0 auto;
+    }
+    .temp-fill {
+      height: 100%;
+      width: 0%;
+      background-color: green;
+      transition: width 0.5s ease, background-color 0.5s ease;
+    }
+    #tempValue {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin-left: 1rem;
+      font-weight: bold;
+      font-family: monospace;
+    }
+    .green  { background-color: #4caf50; color: white; }
+    .orange { background-color: #ff9800; color: black; }
+    .red    { background-color: #f44336; color: white; }
+
+    .ip-container {
+      font-family: monospace;
+      background: #282a36;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      display: inline-block;
+      margin-top: 0.5rem;
+    }
+    .ip-container div {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.2rem;
+    }
+    .ip-icon {
+      font-size: 1.2rem;
+    }
+
+    .disk-bar-container {
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+    }
+    .disk-bar {
+      background: #444;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .disk-bar-fill {
+      height: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #fff;
+    }
+
+    .memory-container {
+      max-width: 400px;
+      margin: auto;
+      padding: 1rem 0;
+    }
+    .port-group {
+      position: relative;
+      margin-bottom: 1rem;
+      padding-left: 1rem;
+      border-left: 3px solid #444;
+    }
+
+    .port-ip {
+      font-weight: bold;
+      color: #8be9fd;
+      margin-bottom: 0.2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .port-entry {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 2px 0;
+    }
+
+    .port-entry i {
+      color: #ffb86c;
+    }
+
+    .port-address {
+      font-family: monospace;
+      color: #f8f8f2;
+      word-break: break-word;      /* Permet de casser les longues IPv6 */
+      overflow-wrap: anywhere;     /* Pour forcer le retour à la ligne */
+    }
+    .protocol-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 1.2rem;
+      color: #8be9fd;
+      margin-top: 1.5rem;
+      margin-bottom: 0.4rem;
+      border-bottom: 1px solid #444;
+      padding-bottom: 0.3rem;
+    }
+
+
+    .protocol-header i {
+      color: #ffb86c;
+      font-size: 1.3rem;
+    }
+
+    .protocol-header .left {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .protocol-header .count {
+      background: #444;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 0.9rem;
+      font-family: monospace;
+      color: #fff;
+    }
+    .copy-ip-btn {
+      background: #444;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.8rem;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .copy-ip-btn:hover {
+      background: #666;
+    }
+
+    @media screen and (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      h2 {
+        font-size: 1.2rem;
+        margin-top: 1.5rem;
+      }
+      .code-block {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧠 Audit Serveur DW</h1>
+  <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
+
+  <label for="auditSelector">Sélectionner un rapport :</label>
+  <select id="auditSelector"></select>
+
+  <h2>Date de génération</h2>
+  <p id="generated">--</p>
+
+  <h2>Adressage réseau</h2>
+  <div id="ipInfo" class="ip-container">
+    <div><span class="ip-icon">📡</span> IP Locale : <span id="ipLocal">--</span></div>
+    <div><span class="ip-icon">🌐</span> IP Externe : <span id="ipPublic">--</span></div>
+  </div>
+
+  <h2>Utilisation CPU par cœur <span id="cpuLoadBadge" class="badge">--</span></h2>
+  <canvas id="cpuChart"></canvas>
+
+  <h2>Température CPU</h2>
+  <div class="temp-wrapper">
+    <span id="tempValue">-- °C</span>
+    <div class="temp-bar">
+      <div id="tempFill" class="temp-fill"></div>
+    </div>
+  </div>
+
+  <h2>Mémoire RAM</h2>
+  <div class="memory-container">
+    <canvas id="memoryChart"></canvas>
+  </div>
+
+  <h2>Disques</h2>
+  <div id="disksContainer" class="disk-bar-container"></div>
+
+  <h2>Services actifs</h2>
+  <div class="block-wrapper">
+    <button class="copy-btn" onclick="copyToClipboard('servicesText')">📋</button>
+    <pre id="servicesText" class="code-block"></pre>
+  </div>
+
+  <h2>Ports ouverts</h2>
+  <div class="block-wrapper">
+    <div id="portsText" class="code-block">
+      <div class="protocol-header">
+        <div class="left">
+          <i class="fas fa-broadcast-tower"></i>
+          <span>UDP</span>
+        </div>
+        <span class="count" id="udpCount">0</span>
+      </div>
+      <div id="udpPorts"></div>
+
+      <div class="protocol-header">
+        <div class="left">
+          <i class="fas fa-network-wired"></i>
+          <span>TCP</span>
+        </div>
+        <span class="count" id="tcpCount">0</span>
+      </div>
+      <div id="tcpPorts"></div>
+    </div>
+  </div>
+
+  <h2>Top 5 processus - CPU</h2>
+  <div class="block-wrapper">
+    <button class="copy-btn" onclick="copyToClipboard('topCpuText')">📋</button>
+    <pre id="topCpuText" class="code-block"></pre>
+  </div>
+
+  <h2>Top 5 processus - RAM</h2>
+  <div class="block-wrapper">
+    <button class="copy-btn" onclick="copyToClipboard('topMemText')">📋</button>
+    <pre id="topMemText" class="code-block"></pre>
+  </div>
+
+  <h2>Conteneurs Docker</h2>
+  <div class="block-wrapper">
+    <button class="copy-btn" onclick="copyToClipboard('dockerText')">📋</button>
+    <pre id="dockerText" class="code-block"></pre>
+  </div>
+
+  <script>
+    function copyToClipboard(id) {
+      const text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Copié dans le presse-papiers !");
+      });
+    }
+  </script>
+
+</body>
+</html>

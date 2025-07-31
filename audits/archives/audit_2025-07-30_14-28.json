@@ -1,0 +1,62 @@
+{
+  "generated": "30/07/2025 à 14:28",
+  "hostname": "homelabz",
+  "uptime": "up 18 hours, 3 minutes",
+  "load_average": "0.18,0.26,0.26",
+  "temperature": "+27.8°C",
+  "memory": {
+    "ram": {
+      "total": "15Gi",
+      "used": "4.6Gi",
+      "free": "512Mi",
+      "shared": "113Mi",
+      "buff_cache": "10Gi",
+      "available": "10Gi"
+    },
+    "swap": {
+      "total": "4.0Gi",
+      "used": "512Ki",
+      "free": "4.0Gi"
+    }
+  },
+  "disks": [
+    {
+      "filesystem": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+      "size": "98G",
+      "used": "25G",
+      "available": "69G",
+      "used_percent": "27%",
+      "mountpoint": "/"
+    },
+    {
+      "filesystem": "/dev/mapper/ubuntu--vg-lv--0",
+      "size": "367G",
+      "used": "25G",
+      "available": "324G",
+      "used_percent": "7%",
+      "mountpoint": "/home"
+    }
+  ],
+  "cpu": {
+    "model": "                          Intel(R) N95",
+    "cores": 4,
+    "usage": [
+      {
+        "core": "0",
+        "usage": 19.2
+      },
+      {
+        "core": "1",
+        "usage": 15.2
+      },
+      {
+        "core": "2",
+        "usage": 14.4
+      },
+      {
+        "core": "3",
+        "usage": 16.0
+      }
+    ]
+  }
+}
