@@ -247,6 +247,41 @@
       color: #fff;
     }
 
+    #processContainer {
+      margin-top: 1rem;
+    }
+    .process-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+    .process-name {
+      width: 40%;
+      font-family: monospace;
+      word-break: break-word;
+    }
+    .process-bars {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .process-bar {
+      background: #444;
+      border-radius: 4px;
+      overflow: hidden;
+      height: 18px;
+    }
+    .process-bar-fill {
+      height: 100%;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #fff;
+    }
+    .cpu-fill { background-color: #64b5f6; }
+    .ram-fill { background-color: #ff9800; }
+
     .memory-container {
       max-width: 400px;
       margin: auto;
@@ -423,17 +458,8 @@
     </div>
   </div>
 
-  <h2>Top 5 processus - CPU</h2>
-  <div class="block-wrapper">
-    <button class="copy-btn" onclick="copyToClipboard('topCpuText')">📋</button>
-    <pre id="topCpuText" class="code-block"></pre>
-  </div>
-
-  <h2>Top 5 processus - RAM</h2>
-  <div class="block-wrapper">
-    <button class="copy-btn" onclick="copyToClipboard('topMemText')">📋</button>
-    <pre id="topMemText" class="code-block"></pre>
-  </div>
+  <h2>Processus principaux</h2>
+  <div id="processContainer"></div>
 
   <h2>Conteneurs Docker</h2>
   <div class="block-wrapper">
