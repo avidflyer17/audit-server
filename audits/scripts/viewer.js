@@ -240,7 +240,10 @@ async function init() {
     selector.appendChild(option);
   });
 
-  search.addEventListener('input', e => filterAudits(e.target.value));
+  // Attach search filtering if the search input exists
+  if (search) {
+    search.addEventListener('input', e => filterAudits(e.target.value));
+  }
 
   selector.addEventListener('change', async (e) => {
     const json = await loadAudit(e.target.value);
@@ -271,7 +274,9 @@ async function refreshAudits() {
   });
 
   // Reapply current search filter if any
-  filterAudits(search.value);
+  if (search) {
+    filterAudits(search.value);
+  }
 
   if (list.length > 0) {
     const latest = list[list.length - 1];
@@ -284,6 +289,9 @@ async function refreshAudits() {
   }
 }
 
-init().then(() => {
-  setInterval(refreshAudits, 60000);
+// Ensure initialization runs after the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+  init().then(() => {
+    setInterval(refreshAudits, 60000);
+  });
 });
