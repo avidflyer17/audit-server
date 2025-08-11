@@ -105,15 +105,37 @@ function renderText(json) {
     disksContainer.innerHTML = "<p>Aucun disque détecté.</p>";
   }
 
-  const temp = parseFloat(json.temperature);
-  document.getElementById("tempValue").textContent = temp.toFixed(1) + "°C";
-  const fill = document.getElementById("tempFill");
-  const percentage = Math.min(100, Math.max(0, temp));
-  fill.style.width = percentage + "%";
-  fill.classList.remove("green", "orange", "red");
-  if (temp < 50) fill.classList.add("green");
-  else if (temp < 70) fill.classList.add("orange");
-  else fill.classList.add("red");
+  const tempsContainer = document.getElementById("tempsContainer");
+  tempsContainer.innerHTML = "";
+  const temps = json.cpu?.temperatures;
+  if (Array.isArray(temps) && temps.length > 0) {
+    temps.forEach(t => {
+      const value = parseFloat(t.temp);
+      const wrapper = document.createElement("div");
+      wrapper.className = "temp-wrapper";
+
+      const label = document.createElement("span");
+      label.textContent = `Core ${t.core}: ${isNaN(value) ? "N/A" : value.toFixed(1) + "°C"}`;
+      wrapper.appendChild(label);
+
+      const bar = document.createElement("div");
+      bar.className = "temp-bar";
+      const fill = document.createElement("div");
+      fill.className = "temp-fill";
+      if (!isNaN(value)) {
+        const percentage = Math.min(100, Math.max(0, value));
+        fill.style.width = percentage + "%";
+        if (value < 50) fill.classList.add("green");
+        else if (value < 70) fill.classList.add("orange");
+        else fill.classList.add("red");
+      }
+      bar.appendChild(fill);
+      wrapper.appendChild(bar);
+      tempsContainer.appendChild(wrapper);
+    });
+  } else {
+    tempsContainer.textContent = "N/A";
+  }
 
   const badge = document.getElementById('cpuLoadBadge');
   const color = json.cpu_load_color ? json.cpu_load_color.toLowerCase() : "";
