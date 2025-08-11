@@ -257,4 +257,33 @@ async function init() {
   }
 }
 
-init();
+async function refreshAudits() {
+  const list = await fetchIndex();
+  const selector = document.getElementById('auditSelector');
+  const search = document.getElementById('auditSearch');
+
+  selector.innerHTML = '';
+  list.forEach(file => {
+    const option = document.createElement('option');
+    option.value = file;
+    option.textContent = decodeURIComponent(file.replace('audit_', '').replace('.json', '').replace('_', ' à '));
+    selector.appendChild(option);
+  });
+
+  // Reapply current search filter if any
+  filterAudits(search.value);
+
+  if (list.length > 0) {
+    const latest = list[list.length - 1];
+    selector.value = latest;
+    const json = await loadAudit(latest);
+    if (json) {
+      renderCpuChart(json.cpu.usage);
+      renderText(json);
+    }
+  }
+}
+
+init().then(() => {
+  setInterval(refreshAudits, 60000);
+});
