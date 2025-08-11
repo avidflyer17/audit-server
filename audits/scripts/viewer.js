@@ -46,6 +46,8 @@ function renderText(json) {
   document.getElementById('generated').textContent = json.generated;
   document.getElementById('hostname').textContent = json.hostname;
   document.getElementById('ipInfo').textContent = `${json.ip_local || 'N/A'} / ${json.ip_pub || 'N/A'}`;
+  document.getElementById('uptime').textContent = json.uptime || '--';
+  document.getElementById('loadAvg').textContent = json.load_average || '--';
 
   const mem = json.memory?.ram;
   if (mem) {
