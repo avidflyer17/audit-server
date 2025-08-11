@@ -37,8 +37,9 @@ CPU_CORES=$(nproc)
 CPU_USAGE_PER_CORE=$(mpstat -P ALL 1 1 | awk '/Average/ && $2 ~ /[0-9]/ {usage=100-$12; printf "{\"core\":\"%s\",\"usage\":%.1f},", $2, usage}' | sed 's/,$//')
 cpu_data=$(echo "[$CPU_USAGE_PER_CORE]")
 
-# 🌡️ Température CPU
-TEMP=$(sensors 2>/dev/null | grep -m1 -Eo '[+-][0-9]+\.[0-9]°C' || echo "N/A")
+# 🌡️ Température CPU par cœur
+TEMP_CORES=$(sensors 2>/dev/null | grep -E '^Core [0-9]+' | sed 's/+//g; s/°C//g' | awk '{core=$2; temp=$3; gsub(":","",core); printf "{\"core\":%s,\"temp\":%s}\\n",core,temp}' | jq -s '.')
+[ -z "$TEMP_CORES" ] && TEMP_CORES="[]"
 
 # 🎯 Couleur charge CPU
 cpu_total_usage=$(echo "$cpu_data" | jq '[.[] | .usage | tonumber] | add / length')
@@ -71,7 +72,7 @@ jq -n \
   --arg hostname "$HOSTNAME" \
   --arg ip_local "$IP_LOCAL" \
   --arg ip_pub "$IP_PUBLIQUE" \
-  --arg temp_cpu "$TEMP" \
+  --argjson temp_cores "$TEMP_CORES" \
   --argjson memory "$MEMORY" \
   --argjson swap "$SWAP" \
   --argjson disk_root "$DISK_ROOT" \
@@ -92,7 +93,6 @@ jq -n \
     ip_pub: $ip_pub,
     uptime: $uptime,
     load_average: $load_avg,
-    temperature: $temp_cpu,
     memory: {
       ram: $memory,
       swap: $swap
@@ -101,7 +101,8 @@ jq -n \
     cpu: {
       model: $cpu_model,
       cores: $cpu_cores,
-      usage: $cpu_usage
+      usage: $cpu_usage,
+      temperatures: $temp_cores
     },
     cpu_load_color: $cpu_color,
     services: $services,
