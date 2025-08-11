@@ -125,9 +125,14 @@ function renderText(json) {
       if (!isNaN(value)) {
         const percentage = Math.min(100, Math.max(0, value));
         fill.style.width = percentage + "%";
-        if (value < 50) fill.classList.add("green");
-        else if (value < 70) fill.classList.add("orange");
-        else fill.classList.add("red");
+        // Color zones: 0-80°C green, 80-95°C orange, 95°C+ red
+        if (value < 80) {
+          fill.classList.add("green");
+        } else if (value < 95) {
+          fill.classList.add("orange");
+        } else {
+          fill.classList.add("red");
+        }
       }
       bar.appendChild(fill);
       wrapper.appendChild(bar);
