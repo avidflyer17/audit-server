@@ -38,7 +38,7 @@ CPU_USAGE_PER_CORE=$(mpstat -P ALL 1 1 | awk '/Average/ && $2 ~ /[0-9]/ {usage=1
 cpu_data=$(echo "[$CPU_USAGE_PER_CORE]")
 
 # 🌡️ Température CPU par cœur
-TEMP_CORES=$(sensors 2>/dev/null | grep -E '^Core [0-9]+' | sed 's/+//g; s/°C//g' | awk '{core=$2; temp=$3; gsub(":","",core); printf "{\"core\":%s,\"temp\":%s}\\n",core,temp}' | jq -s '.')
+TEMP_CORES=$(sensors 2>/dev/null | grep -E '^[[:space:]]*Core [0-9]+' | sed 's/+//g; s/°C//g' | awk '{core=$2; temp=$3; gsub(":","",core); printf "{\"core\":%s,\"temp\":%s}\\n",core,temp}' | jq -s '.')
 [ -z "$TEMP_CORES" ] && TEMP_CORES="[]"
 
 # 🎯 Couleur charge CPU
