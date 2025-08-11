@@ -218,9 +218,18 @@ function renderText(json) {
   document.getElementById('dockerText').textContent = docker;
 }
 
+function filterAudits(query) {
+  const selector = document.getElementById('auditSelector');
+  const q = query.toLowerCase();
+  Array.from(selector.options).forEach(opt => {
+    opt.style.display = opt.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
 async function init() {
   const list = await fetchIndex();
   const selector = document.getElementById('auditSelector');
+  const search = document.getElementById('auditSearch');
 
   list.forEach(file => {
     const option = document.createElement('option');
@@ -228,6 +237,8 @@ async function init() {
     option.textContent = decodeURIComponent(file.replace('audit_', '').replace('.json', '').replace('_', ' à '));
     selector.appendChild(option);
   });
+
+  search.addEventListener('input', e => filterAudits(e.target.value));
 
   selector.addEventListener('change', async (e) => {
     const json = await loadAudit(e.target.value);
