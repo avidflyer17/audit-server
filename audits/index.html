@@ -196,10 +196,6 @@
       background-color: green;
       transition: width 0.5s ease, background-color 0.5s ease;
     }
-    #tempValue {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
     .badge {
       padding: 4px 10px;
       border-radius: 8px;
@@ -378,13 +374,8 @@
   <h2>Utilisation CPU par cœur <span id="cpuLoadBadge" class="badge">--</span></h2>
   <canvas id="cpuChart"></canvas>
 
-  <h2>Température CPU</h2>
-  <div class="temp-wrapper">
-    <span id="tempValue">-- °C</span>
-    <div class="temp-bar">
-      <div id="tempFill" class="temp-fill"></div>
-    </div>
-  </div>
+  <h2>Températures CPU</h2>
+  <div id="tempsContainer"></div>
 
   <h2>Mémoire RAM</h2>
   <div class="memory-container">
