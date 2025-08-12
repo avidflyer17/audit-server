@@ -1012,10 +1012,9 @@ function renderText(json) {
   upEl.textContent = upInfo.text;
   setupCopy('copyUptime', () => upEl.textContent);
   const upBadge = document.getElementById('uptimeBadge');
-  upBadge.className = 'badge';
-  if (upInfo.days > 7) { upBadge.textContent = 'Stable'; upBadge.classList.add('color-success'); }
-  else if (upInfo.days >= 1) { upBadge.textContent = 'Récemment redémarré'; upBadge.classList.add('color-warning'); }
-  else { upBadge.textContent = 'Tout juste démarré'; upBadge.classList.add('color-danger'); }
+  if (upBadge) {
+    upBadge.style.display = 'none';
+  }
   const bootTs = json.boot_ts || json.boot_time || null;
   const sinceEl = document.getElementById('uptimeSince');
   if (bootTs) {
