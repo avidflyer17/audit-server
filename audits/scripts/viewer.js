@@ -146,17 +146,85 @@ function renderCpuChart(usages) {
   });
 }
 
-function formatLoadAverage(value) {
-  if (!value) return '--';
-  const parts = value.split(',');
-  if (parts.length >= 6) {
-    const formatted = [];
-    for (let i = 0; i < 6; i += 2) {
-      formatted.push(parts[i] + ',' + parts[i + 1]);
-    }
-    return `1 min: ${formatted[0]} | 5 min: ${formatted[1]} | 15 min: ${formatted[2]}`;
+function parseLoadAverage(value) {
+  if (!value) return [null, null, null];
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    const v1 = Number(value['1min'] ?? value['1m']);
+    const v5 = Number(value['5min'] ?? value['5m']);
+    const v15 = Number(value['15min'] ?? value['15m']);
+    return [v1, v5, v15].map(v => isNaN(v) ? null : Math.round(v));
   }
-  return value;
+  const parts = String(value).split(/[ ,]+/).filter(Boolean).slice(0,3);
+  return parts.map(p => {
+    const v = parseFloat(p.replace(',', '.'));
+    return isNaN(v) ? null : Math.round(v);
+  });
+}
+
+function loadColor(v) {
+  if (v == null) return '#666';
+  if (v < 50) return '#4caf50';
+  if (v < 80) return '#ff9800';
+  return '#f44336';
+}
+
+function arrowFromDiff(d) {
+  if (d > 5) return '↑';
+  if (d < -5) return '↓';
+  return '→';
+}
+
+function trendLabel(d) {
+  if (d > 5) return 'en hausse';
+  if (d < -5) return 'en baisse';
+  return 'stable';
+}
+
+function renderMini(label, value, prev) {
+  const card = document.getElementById(`load${label}Card`);
+  const valEl = document.getElementById(`load${label}Val`);
+  const bar = document.getElementById(`load${label}Bar`);
+  const trend = document.getElementById(`load${label}Trend`);
+  if (value == null) {
+    card.classList.add('na');
+    valEl.textContent = 'N/A';
+    bar.style.width = '0%';
+    trend.textContent = 'donnée manquante';
+  } else {
+    card.classList.remove('na');
+    valEl.textContent = value + '%';
+    const display = Math.max(0, Math.min(100, value));
+    bar.style.width = display + '%';
+    const color = loadColor(value);
+    card.style.setProperty('--load-color', color);
+    const diff = prev != null ? value - prev : 0;
+    trend.textContent = trendLabel(diff);
+  }
+}
+
+function renderLoadAverage(raw) {
+  const [v1, v5, v15] = parseLoadAverage(raw);
+  const gauge = document.getElementById('loadGauge');
+  const path = document.getElementById('loadGaugePath');
+  const trendEl = document.getElementById('loadTrend');
+  const color1 = loadColor(v1);
+  gauge.style.setProperty('--load-color', color1);
+  const dashVal = v1 != null ? Math.max(0, Math.min(100, v1)) : 0;
+  path.setAttribute('stroke-dasharray', `${dashVal} 100`);
+  document.getElementById('load1Val').textContent = v1 != null ? v1 + '%' : 'N/A';
+  trendEl.textContent = arrowFromDiff((v1 != null && v5 != null) ? v1 - v5 : 0);
+  trendEl.style.color = color1;
+  renderMini('5', v5, v1);
+  renderMini('15', v15, v5);
+
+  const badge = document.getElementById('loadAvgBadge');
+  if ([v1, v5, v15].every(v => v != null && v < 20)) {
+    badge.textContent = '🟢 Système à l’aise';
+  } else if ([v1, v5, v15].some(v => v != null && v >= 90)) {
+    badge.textContent = '🔴 Saturation probable';
+  } else {
+    badge.textContent = '';
+  }
 }
 
 function renderText(json) {
@@ -165,7 +233,7 @@ function renderText(json) {
   document.getElementById('ipLocal').textContent = json.ip_local || '--';
   document.getElementById('ipPublic').textContent = json.ip_pub || '--';
   document.getElementById('uptime').textContent = json.uptime || '--';
-  document.getElementById('loadAvg').textContent = formatLoadAverage(json.load_average);
+  renderLoadAverage(json.load_average);
 
   const mem = json.memory?.ram;
   if (mem) {
