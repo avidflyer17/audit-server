@@ -707,23 +707,19 @@
     .proc-row:focus-visible { outline: 2px solid var(--heading); outline-offset: 2px; }
     .proc-icon { width: 1.5rem; text-align: center; flex: 0 0 1.5rem; }
     .proc-name { font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-    .proc-bars { display: flex; gap: 4px; flex: 1; height: 8px; }
-    .bar { flex: 1; position: relative; background: #444; border-radius: 4px; overflow: hidden; }
-    .bar .fill { display: block; height: 100%; width: 0; border-radius: 4px; transition: width 0.3s ease; }
+    .proc-bars { display: flex; gap: 8px; flex: 1; }
+    .bar { flex: 1; background: var(--bar-bg, #333); border-radius: 6px; overflow: hidden; height: 14px; position: relative; }
+    .bar .fill { display: flex; align-items: center; justify-content: center; height: 100%; width: 0; color: #fff; font-size: 0.75rem; font-weight: 600; white-space: nowrap; border-radius: 6px; transition: width 250ms ease; }
     .fill.green { background: #4caf50; }
     .fill.orange { background: #ff9800; }
     .fill.red { background: #f44336; }
     .fill.blue { background: #2196f3; }
-    .fill.yellow { background: #ffeb3b; }
-    .proc-values { font-size: 0.75rem; display: flex; gap: 0.25rem; white-space: nowrap; }
-    .proc-values .badge { margin-left: 0; background: #444; padding: 2px 4px; border-radius: 4px; }
+    .fill.yellow { background: #ffeb3b; color: #000; }
     @media (min-width: 900px) {
       .proc-name { flex: 0 0 12rem; }
-      .proc-values { flex: 0 0 6rem; justify-content: flex-end; }
     }
     @media (max-width: 899px) {
       .proc-bars { flex: 1 0 100%; }
-      .proc-values { flex: 1 0 100%; justify-content: flex-end; }
     }
     .proc-footer { margin-top: 0.25rem; font-size: 0.8rem; text-align: right; opacity: 0.8; }
 

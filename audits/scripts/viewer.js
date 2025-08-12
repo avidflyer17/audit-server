@@ -395,10 +395,9 @@ function renderTopProcesses(data, containerId, main){
       <span class="proc-icon">${icon}</span>
       <span class="proc-name">${p.cmd}</span>
       <div class="proc-bars">
-        <div class="bar" role="progressbar" aria-label="Utilisation CPU" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cpu}"><span class="fill ${colorClassCpu(cpu)}"></span></div>
-        <div class="bar" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${mem}"><span class="fill ${colorClassRam(mem)}"></span></div>
-      </div>
-      <div class="proc-values"><span class="badge">CPU ${cpu}%</span><span class="badge">RAM ${mem}%</span></div>`;
+        <div class="bar bar-cpu" role="progressbar" aria-label="Utilisation CPU" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cpu}"><span class="fill ${colorClassCpu(cpu)}" style="width:0">${cpu}%</span></div>
+        <div class="bar bar-ram" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${mem}"><span class="fill ${colorClassRam(mem)}" style="width:0">${mem}%</span></div>
+      </div>`;
     container.appendChild(row);
     const fills = row.querySelectorAll('.bar .fill');
     requestAnimationFrame(() => {
