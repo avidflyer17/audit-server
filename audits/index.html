@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
   crossorigin="anonymous"
   referrerpolicy="no-referrer" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="/scripts/viewer.js?v=3"></script>
   <style>
     :root {
@@ -800,7 +799,13 @@
     .docker-bars { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
     .bar-outer { height: 8px; background: #444; border-radius: 4px; overflow: hidden; }
     .bar-outer .fill { height: 100%; width: 0; transition: width 0.3s ease; }
-    .ram-text { font-size: 0.75rem; text-align: right; }
+    .ram-text { font-size: 0.75rem; text-align: center; }
+
+    .bar-temp { height: 14px; }
+    .chip.used { background: #ff9800; color: #000; }
+    .chip.free { background: #4caf50; color: #fff; }
+    .disk-card { margin-bottom: 0.5rem; }
+    #cpuCores .docker-card { cursor: default; }
 
     @media (max-width: 600px) {
       .services-grid { grid-template-columns: 1fr; }
@@ -933,18 +938,16 @@
   </div>
 
   <h2><i class="fa-solid fa-microchip heading-icon"></i>Utilisation CPU par cœur <span id="cpuLoadBadge" class="badge">--</span></h2>
-  <canvas id="cpuChart"></canvas>
+  <div id="cpuCores" class="docker-grid"></div>
 
   <h2><i class="fa-solid fa-temperature-three-quarters heading-icon"></i>Températures CPU</h2>
-  <div id="tempsContainer"></div>
+  <div id="tempsContainer" class="proc-list"></div>
 
   <h2><i class="fa-solid fa-memory heading-icon"></i>Mémoire RAM</h2>
-  <div class="memory-container">
-    <canvas id="memoryChart"></canvas>
-  </div>
+  <div id="memoryContainer" class="memory-container"></div>
 
   <h2><i class="fa-solid fa-hard-drive heading-icon"></i>Disques</h2>
-  <div id="disksContainer" class="disk-bar-container"></div>
+  <div id="disksContainer" class="proc-list"></div>
 
     <div class="services-title-row">
       <h2><i class="fa-solid fa-list-check heading-icon"></i>Services actifs</h2>
