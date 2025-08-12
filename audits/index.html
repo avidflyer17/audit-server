@@ -619,6 +619,123 @@
     .dot.orange { background: #ff9800; }
     .dot.red { background: #f44336; }
 
+    .services-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .services-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .services-help {
+      font-size: 0.9rem;
+      color: #bbb;
+      margin-top: -0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    #serviceSearch {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .filter-chip {
+      background: #444;
+      color: var(--text);
+      border: none;
+      border-radius: 9999px;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .filter-chip.active {
+      background: var(--heading);
+      color: var(--bg);
+    }
+    .services-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.5rem;
+    }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 0.5rem;
+    }
+    .service-item {
+      background: var(--block-bg);
+      padding: 0.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .service-item:focus-visible {
+      outline: 2px solid var(--heading);
+      outline-offset: 2px;
+    }
+    .service-main {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .service-icon {
+      width: 1.5rem;
+      text-align: center;
+    }
+    .service-name {
+      font-weight: bold;
+    }
+    .service-badge {
+      margin-left: auto;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      background: #555;
+    }
+    .service-details {
+      display: none;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .service-item.expanded .service-details {
+      display: block;
+    }
+    .copy-btn.small {
+      font-size: 0.8rem;
+      padding: 0.2rem;
+      margin-left: 0.3rem;
+    }
+    .service-skeleton {
+      height: 2rem;
+      border-radius: 6px;
+    }
+    .empty {
+      text-align: center;
+      padding: 1rem 0;
+      color: #bbb;
+    }
+    .empty.hidden { display: none; }
+    .service-badge.cat-systeme { background: #6c757d; }
+    .service-badge.cat-reseau { background: #0d6efd; }
+    .service-badge.cat-stockage-partages { background: #6f42c1; }
+    .service-badge.cat-conteneurs { background: #198754; }
+    .service-badge.cat-securite { background: #d63384; }
+    .service-badge.cat-journalisation { background: #fd7e14; }
+    .service-badge.cat-mises-a-jour { background: #20c997; }
+    .service-badge.cat-autre { background: #adb5bd; }
+
+    @media (max-width: 600px) {
+      .services-grid { grid-template-columns: 1fr; }
+      .services-toolbar { justify-content: flex-start; }
+      .filter-chips { position: sticky; top: 0; background: var(--bg); padding-top: 0.5rem; }
+    }
+
     .gauge:focus-visible,
     .mini-card:focus-visible { outline: 2px solid var(--heading); outline-offset: 4px; }
 
@@ -757,10 +874,33 @@
   <h2><i class="fa-solid fa-hard-drive heading-icon"></i>Disques</h2>
   <div id="disksContainer" class="disk-bar-container"></div>
 
-  <h2><i class="fa-solid fa-list-check heading-icon"></i>Services actifs</h2>
+  <div class="services-title-row">
+    <h2><i class="fa-solid fa-list-check heading-icon"></i>Services actifs</h2>
+    <div class="services-actions">
+      <span id="servicesCount">0 service</span>
+      <button id="copyServicesBtn" class="copy-btn" title="Copier tous les noms">📋</button>
+    </div>
+  </div>
+  <p class="services-help">Survolez un service pour voir sa description.</p>
   <div class="block-wrapper">
-    <button class="copy-btn" onclick="copyToClipboard('servicesText')">📋</button>
-    <pre id="servicesText" class="code-block"></pre>
+    <input type="text" id="serviceSearch" placeholder="Filtrer un service… ex. ssh" />
+    <div id="categoryFilters" class="filter-chips"></div>
+    <div class="services-toolbar">
+      <select id="serviceSort">
+        <option value="az">A→Z</option>
+        <option value="za">Z→A</option>
+        <option value="cat">Par catégorie</option>
+      </select>
+    </div>
+    <div id="servicesList" class="services-grid">
+      <div class="service-skeleton skeleton"></div>
+      <div class="service-skeleton skeleton"></div>
+      <div class="service-skeleton skeleton"></div>
+    </div>
+    <div id="servicesEmpty" class="empty hidden">
+      Aucun service ne correspond au filtre.
+      <button id="resetFilters" class="btn">Réinitialiser les filtres</button>
+    </div>
   </div>
 
   <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts</h2>
