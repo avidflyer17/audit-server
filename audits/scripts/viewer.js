@@ -1,5 +1,4 @@
-let cpuChartInstance = null;
-let memoryChartInstance = null;
+/* chart instances removed after redesign */
 
 let auditsIndex = [];
 let auditsMap = {};
@@ -69,6 +68,20 @@ function colorClassRam(v){
   const val = Number(v);
   if (val < 40) return 'blue';
   if (val < 70) return 'yellow';
+  return 'red';
+}
+
+function colorClassTemp(v){
+  const val = Number(v);
+  if (val < 60) return 'green';
+  if (val < 80) return 'orange';
+  return 'red';
+}
+
+function colorClassDisk(v){
+  const val = Number(v);
+  if (val < 50) return 'green';
+  if (val < 80) return 'orange';
   return 'red';
 }
 
@@ -632,7 +645,6 @@ async function selectTime(file) {
   const json = await loadAudit(file);
   if (json) {
     currentFile = file;
-    renderCpuChart(json.cpu.usage);
     renderText(json);
     setActiveTime(file);
   }
@@ -652,27 +664,124 @@ function showUpdateBadge() {
   setTimeout(() => badge.classList.remove('show'), 1000);
 }
 
-function renderCpuChart(usages) {
-  const ctx = document.getElementById('cpuChart').getContext('2d');
-  if (cpuChartInstance) cpuChartInstance.destroy();
+function renderCpuCores(usages){
+  const container = document.getElementById('cpuCores');
+  container.innerHTML = '';
+  if(!Array.isArray(usages) || usages.length === 0){
+    container.innerHTML = '<div class="empty">Aucune donnée CPU</div>';
+    return;
+  }
+  usages.forEach(u => {
+    const val = Number(u.usage);
+    const card = document.createElement('div');
+    card.className = 'docker-card';
+    card.innerHTML = `
+      <div class="docker-head"><div class="docker-title"><span class="docker-name">CPU ${u.core}</span></div></div>
+      <div class="docker-bars">
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${val}">
+          <span class="fill ${colorClassCpu(val)}" style="width:0"></span>
+          <span class="value">${val}%</span>
+        </div>
+      </div>`;
+    container.appendChild(card);
+    const fill = card.querySelector('.bar .fill');
+    const valueEl = card.querySelector('.bar .value');
+    requestAnimationFrame(() => {
+      fill.style.width = val + '%';
+      adjustBarValue(valueEl, fill, val);
+    });
+  });
+}
 
-  cpuChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: usages.map(u => 'CPU ' + u.core),
-      datasets: [{
-        label: 'Utilisation (%)',
-        data: usages.map(u => parseFloat(u.usage)),
-        backgroundColor: 'rgba(100, 181, 246, 0.7)'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true, max: 100 }
-      }
+function renderCpuTemps(temps){
+  const container = document.getElementById('tempsContainer');
+  container.innerHTML = '';
+  if(!Array.isArray(temps) || temps.length === 0){
+    container.innerHTML = '<div class="empty">N/A</div>';
+    return;
+  }
+  temps.forEach(t => {
+    const temp = Number(t.temp);
+    const row = document.createElement('div');
+    row.className = 'proc-row';
+    row.innerHTML = `
+      <span class="proc-icon">🔥</span>
+      <span class="proc-name">Core ${t.core}</span>
+      <div class="proc-bars">
+        <div class="bar bar-temp" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${temp}">
+          <span class="fill ${colorClassTemp(temp)}" style="width:0"></span>
+          <span class="value">${isNaN(temp)?'N/A':temp.toFixed(1)+'°C'}</span>
+        </div>
+      </div>`;
+    container.appendChild(row);
+    if(!isNaN(temp)){
+      const fill = row.querySelector('.bar .fill');
+      const valueEl = row.querySelector('.bar .value');
+      requestAnimationFrame(()=>{
+        fill.style.width = Math.min(100, temp) + '%';
+        adjustBarValue(valueEl, fill, Math.min(100, temp));
+      });
     }
+  });
+}
+
+function renderMemory(mem){
+  const container = document.getElementById('memoryContainer');
+  container.classList.add('memory-container');
+  if(!mem){
+    container.innerHTML = '<div class="empty">N/A</div>';
+    return;
+  }
+  const total = Number(mem.total);
+  const used = Number(mem.used);
+  const free = Number(mem.free);
+  const pct = total ? (used/total)*100 : 0;
+  container.innerHTML = `
+    <div id="memoryBar" class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct.toFixed(1)}" style="--bar-bg:#4caf50">
+      <span class="fill orange" style="width:0"></span>
+      <span class="value">${pct.toFixed(1)}%</span>
+    </div>
+    <div id="memoryText" class="ram-text">Utilisée : ${used} / ${total}</div>
+    <div class="chips"><span class="chip used">Utilisée</span><span class="chip free">Libre</span></div>`;
+  const bar = container.querySelector('.bar');
+  const fill = container.querySelector('.bar .fill');
+  const valueEl = container.querySelector('.bar .value');
+  requestAnimationFrame(()=>{
+    fill.style.width = pct + '%';
+    adjustBarValue(valueEl, fill, pct);
+  });
+}
+
+function renderDisks(disks){
+  const container = document.getElementById('disksContainer');
+  container.innerHTML = '';
+  if(!Array.isArray(disks) || disks.length === 0){
+    container.innerHTML = '<div class="empty">Aucun disque détecté.</div>';
+    return;
+  }
+  const sorted = [...disks].sort((a,b)=>parseInt(b.used_percent)-parseInt(a.used_percent));
+  sorted.forEach(disk => {
+    const usedPercent = Number(disk.used_percent);
+    const card = document.createElement('div');
+    card.className = 'disk-card';
+    card.innerHTML = `
+      <div class="proc-row">
+        <span class="proc-name">${disk.mountpoint} <span class="badge-total">${disk.size}</span></span>
+        <div class="proc-bars">
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${usedPercent}">
+            <span class="fill ${colorClassDisk(usedPercent)}" style="width:0"></span>
+            <span class="value">${usedPercent}%</span>
+          </div>
+        </div>
+      </div>
+      <div class="ram-text">${disk.used} utilisé / ${disk.size} (${disk.available} libre)</div>`;
+    container.appendChild(card);
+    const fill = card.querySelector('.bar .fill');
+    const valueEl = card.querySelector('.bar .value');
+    requestAnimationFrame(()=>{
+      fill.style.width = usedPercent + '%';
+      adjustBarValue(valueEl, fill, usedPercent);
+    });
   });
 }
 
@@ -799,111 +908,18 @@ function renderText(json) {
   document.getElementById('ipPublic').textContent = json.ip_pub || '--';
   document.getElementById('uptime').textContent = json.uptime || '--';
   renderLoadAverage(json.load_average, json.cpu?.cores);
-
-  const mem = json.memory?.ram;
-  if (mem) {
-    const total = parseFloat(mem.total);
-    const used = parseFloat(mem.used);
-    const free = parseFloat(mem.free);
-
-    const memCtx = document.getElementById('memoryChart').getContext('2d');
-    if (memoryChartInstance) memoryChartInstance.destroy();
-
-    memoryChartInstance = new Chart(memCtx, {
-      type: 'pie',
-      data: {
-        labels: ['Utilisée', 'Libre'],
-        datasets: [{
-          data: [used, free],
-          backgroundColor: ['#ff9800', '#4caf50']
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            labels: {
-              color: '#fff',
-              font: { size: 14 }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  const disksContainer = document.getElementById("disksContainer");
-  disksContainer.innerHTML = "";
-  if (json.disks && json.disks.length > 0) {
-    json.disks.forEach(disk => {
-      const usedPercent = parseInt(disk.used_percent);
-      let colorClass = "green";
-      if (usedPercent > 80) colorClass = "red";
-      else if (usedPercent > 50) colorClass = "orange";
-
-      const bar = `
-        <div style="margin-bottom: 1rem;">
-          <strong>${disk.mountpoint}</strong> – ${disk.used} / ${disk.size} (${disk.available} libre)
-          <div class="disk-bar">
-            <div class="disk-bar-fill ${colorClass}" style="width: ${usedPercent}%">
-              ${usedPercent}%
-            </div>
-          </div>
-        </div>
-      `;
-
-      disksContainer.innerHTML += bar;
-    });
-  } else {
-    disksContainer.innerHTML = "<p>Aucun disque détecté.</p>";
-  }
-
-  const tempsContainer = document.getElementById("tempsContainer");
-  tempsContainer.innerHTML = "";
-  const temps = json.cpu?.temperatures;
-  if (Array.isArray(temps) && temps.length > 0) {
-    temps.forEach(t => {
-      const value = parseFloat(t.temp);
-      const wrapper = document.createElement("div");
-      wrapper.className = "temp-wrapper";
-
-      const label = document.createElement("span");
-      label.textContent = `Core ${t.core}: ${isNaN(value) ? "N/A" : value.toFixed(1) + "°C"}`;
-      wrapper.appendChild(label);
-
-      const bar = document.createElement("div");
-      bar.className = "temp-bar";
-      const fill = document.createElement("div");
-      fill.className = "temp-fill";
-      if (!isNaN(value)) {
-        const percentage = Math.min(100, Math.max(0, value));
-        fill.style.width = percentage + "%";
-        // Color zones: 0-80°C green, 80-95°C orange, 95°C+ red
-        if (value < 80) {
-          fill.classList.add("green");
-        } else if (value < 95) {
-          fill.classList.add("orange");
-        } else {
-          fill.classList.add("red");
-        }
-      }
-      bar.appendChild(fill);
-      wrapper.appendChild(bar);
-      tempsContainer.appendChild(wrapper);
-    });
-  } else {
-    tempsContainer.textContent = "N/A";
-  }
+  renderCpuCores(json.cpu?.usage);
+  renderMemory(json.memory?.ram);
+  renderDisks(json.disks);
+  renderCpuTemps(json.cpu?.temperatures);
 
   const badge = document.getElementById('cpuLoadBadge');
-  const color = json.cpu_load_color ? json.cpu_load_color.toLowerCase() : "";
-  badge.textContent = json.cpu_load_color?.toUpperCase() || "N/A";
-  badge.className = "badge " + color;
+  const color = json.cpu_load_color ? json.cpu_load_color.toLowerCase() : '';
+  badge.textContent = json.cpu_load_color?.toUpperCase() || 'N/A';
+  badge.className = 'badge ' + color;
 
   renderServices(json.services);
-
   renderPorts(json.ports);
-
   renderTopProcesses(json.top_cpu, 'topCpu', 'cpu');
   renderTopProcesses(json.top_mem, 'topMem', 'mem');
   renderDocker(json.docker);
