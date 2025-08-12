@@ -15,50 +15,55 @@
   <script src="/scripts/viewer.js?v=3"></script>
 </head>
 <body class="theme-dark">
+  <button id="menuToggle" class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
 
-  <div id="themeSwitchWrapper">
-    <i id="themeIcon" class="fas fa-moon theme-icon"></i>
-    <label class="switch">
-      <input type="checkbox" id="themeToggle">
-      <span class="slider"></span>
-    </label>
-  </div>
-
-  <h1>🧠 Audit Serveur DW</h1>
-  <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
-
-  <div id="reportCard" class="report-card">
-    <div class="card-header">
-      <h2>Rapports</h2>
-      <p class="subtitle">Choisissez un moment</p>
-    </div>
-
-    <div class="report-grid">
-      <button id="btnLatest" class="btn primary">
-        <span><i class="fa-solid fa-bolt"></i></span>
-        <span class="label">Voir le dernier rapport</span>
-        <small id="latestInfo" class="subinfo"></small>
-      </button>
-
-      <div class="timeline-wrapper">
-        <div id="timeTimeline" class="timeline" aria-live="polite"></div>
+  <aside id="sidebar" class="sidebar">
+    <div id="reportCard" class="report-card">
+      <div class="card-header">
+        <h2>Rapports</h2>
+        <p class="subtitle">Choisissez un moment</p>
       </div>
 
-      <div id="selectorStatus" aria-live="polite"></div>
+      <div class="report-grid">
+        <button id="btnLatest" class="btn primary">
+          <span><i class="fa-solid fa-bolt"></i></span>
+          <span class="label">Voir le dernier rapport</span>
+          <small id="latestInfo" class="subinfo"></small>
+        </button>
 
-      <div class="day-control" role="group" aria-label="Choisir un jour">
-        <button id="dayToday" class="seg">Aujourd'hui</button>
-        <button id="dayYesterday" class="seg">Hier</button>
-        <button id="dayCalendar" class="seg" aria-label="Choisir une date" title="Choisir une date"><i class="fa-solid fa-calendar"></i></button>
-        <input type="date" id="datePicker" class="sr-only" />
+        <div class="timeline-wrapper">
+          <div id="timeTimeline" class="timeline" aria-live="polite"></div>
+        </div>
+
+        <div id="selectorStatus" aria-live="polite"></div>
+
+        <div class="day-control" role="group" aria-label="Choisir un jour">
+          <button id="dayToday" class="seg">Aujourd'hui</button>
+          <button id="dayYesterday" class="seg">Hier</button>
+          <button id="dayCalendar" class="seg" aria-label="Choisir une date" title="Choisir une date"><i class="fa-solid fa-calendar"></i></button>
+          <input type="date" id="datePicker" class="sr-only" />
+        </div>
       </div>
+
+      <span id="refreshDot" class="refresh-dot" aria-label="Actualisation automatique" title="Actualisation automatique"></span>
+      <span id="updateBadge" class="update-badge">Mis à jour</span>
+    </div>
+  </aside>
+  <div id="menuOverlay"></div>
+
+  <main>
+    <div id="themeSwitchWrapper">
+      <i id="themeIcon" class="fas fa-moon theme-icon"></i>
+      <label class="switch">
+        <input type="checkbox" id="themeToggle">
+        <span class="slider"></span>
+      </label>
     </div>
 
-    <span id="refreshDot" class="refresh-dot" aria-label="Actualisation automatique" title="Actualisation automatique"></span>
-    <span id="updateBadge" class="update-badge">Mis à jour</span>
-  </div>
+    <h1>🧠 Audit Serveur DW</h1>
+    <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
 
-  <div class="info-grid">
+    <div class="info-grid">
     <div class="info-card" id="generatedCard" aria-labelledby="generatedTitle">
       <div class="card-head">
         <div class="card-title" id="generatedTitle"><i class="fa-solid fa-calendar-day"></i><span>Date de génération</span></div>
@@ -219,6 +224,7 @@
   </div>
   <div id="dockerGrid" class="docker-grid"></div>
   <div id="dockerEmpty" class="empty hidden">Aucun conteneur actif</div>
+  </main>
   <script>
     const themeSwitch = document.getElementById("themeToggle");
     const themeIcon = document.getElementById("themeIcon");

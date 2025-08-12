@@ -1167,4 +1167,12 @@ async function refreshAudits() {
   }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('menuOverlay');
+  const toggle = document.getElementById('menuToggle');
+  toggle.onclick = () => sidebar.classList.toggle('open');
+  overlay.onclick = () => sidebar.classList.remove('open');
+});
+
 document.addEventListener('DOMContentLoaded', init);
