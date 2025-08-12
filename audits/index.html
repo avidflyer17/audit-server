@@ -9,7 +9,7 @@
   crossorigin="anonymous"
   referrerpolicy="no-referrer" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="/scripts/viewer.js?v=1"></script>
+  <script src="/scripts/viewer.js?v=2"></script>
   <style>
     :root {
       --bg: #191a24;
@@ -51,13 +51,30 @@
       color: #bbb;
     }
 
-    select {
+    select, input[type="date"] {
       background-color: #333;
       color: white;
       padding: 0.4rem;
       border-radius: 5px;
       border: none;
-      margin-left: 0.5rem;
+    }
+
+    .light-theme select,
+    .light-theme input[type="date"] {
+      background-color: #ddd;
+      color: #000;
+    }
+
+    #selectorContainer {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+      margin-bottom: 1rem;
+    }
+
+    #selectorContainer > div {
+      display: flex;
+      flex-direction: column;
     }
 
     canvas {
@@ -359,9 +376,17 @@
   <h1>🧠 Audit Serveur DW</h1>
   <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
 
-  <label for="auditSelector">Sélectionner un rapport :</label>
-  <select id="auditSelector"></select>
-  <input type="text" id="auditSearch">
+  <div id="selectorContainer">
+    <div>
+      <label for="auditDate">Choisir une date :</label>
+      <input type="date" id="auditDate" list="auditDates">
+      <datalist id="auditDates"></datalist>
+    </div>
+    <div>
+      <label for="auditSelector">Rapports disponibles :</label>
+      <select id="auditSelector"></select>
+    </div>
+  </div>
 
   <h2>Date de génération</h2>
   <p id="generated">--</p>
