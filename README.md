@@ -5,18 +5,42 @@ gathers metrics such as CPU usage, memory consumption, open ports and running se
 writes the results to JSON files. A small web frontend served by Nginx lets you browse these
 reports over time.
 
-## Requirements
+## 🚀 Installation
+
+1. 📥 Clone the repository
+
+   ```bash
+   git clone https://github.com/your-org/audit-server.git
+   cd audit-server
+   ```
+
+2. 🧰 Install dependencies
+
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y bc jq curl lm-sensors sysstat
+   ```
+
+   You will also need [Node.js](https://nodejs.org/) if you plan to run the bundled server.
+
+3. ▶️ Generate your first audit
+
+   ```bash
+   ./generate-audit-json.sh
+   ```
+
+## 🛠️ Requirements
 
 The `generate-audit-json.sh` script relies on a few common utilities:
 
-- `mpstat` and `bc` for CPU statistics
-- `jq` for JSON formatting
-- `sensors` for temperature readings (optional)
-- `curl` to retrieve the public IP address
+- ⚙️ `mpstat` and `bc` for CPU statistics
+- 📦 `jq` for JSON formatting
+- 🌡️ `sensors` for temperature readings (optional)
+- 🌐 `curl` to retrieve the public IP address
 
 Make sure these commands are available on the machine where you run the script.
 
-## Generating an audit
+## 🧾 Generating an audit
 
 The script stores reports under `/home/damswallace/docker/audits-nginx/audits` by default. You can
 override the location by setting the `BASE_DIR` environment variable before running:
@@ -29,7 +53,7 @@ Each execution creates an `audit_YYYY-MM-DD_HH-MM.json` file inside `archives/` 
 `index.json` with the list of available reports. You can schedule the script via cron to capture
 snapshots at regular intervals.
 
-## Managing reports
+## 📂 Managing reports
 
 Run the lightweight Node server and use the web interface to create or remove audits:
 
@@ -40,7 +64,7 @@ node server.js
 The dashboard exposes buttons to generate a fresh report or delete the currently selected one.
 Each action updates `archives/index.json` automatically.
 
-## Serving the reports
+## 🌐 Serving the reports
 
 `server.js` serves the `audits` directory and provides the `/api/reports` endpoint used by the UI.
 It also exposes a `/healthz` path that returns `{ "ok": true }`, which is convenient for Docker
@@ -49,7 +73,7 @@ Traefik or any other proxy at that port. Start it with the command above and ope
 `http://localhost:8080/` in a browser. The included `docker-compose.yaml` can still be used if you
 prefer an Nginx setup.
 
-## Directory structure
+## 🗂️ Directory structure
 
 ```
 ├── audits
@@ -61,11 +85,11 @@ prefer an Nginx setup.
 └── nginx.conf             # Basic Nginx configuration
 ```
 
-## Documentation
+## 📚 Documentation
 
 Additional usage instructions are available in the [docs](docs/USAGE.md) directory.
 
-## Testing
+## 🧪 Testing
 
 Run the provided test script to generate a sample report and validate its JSON structure:
 
@@ -73,6 +97,6 @@ Run the provided test script to generate a sample report and validate its JSON s
 ./tests/run.sh
 ```
 
-## License
+## 📄 License
 
 This project is released under the MIT License. See [LICENSE](LICENSE) for details.
