@@ -181,23 +181,6 @@
     </div>
   </div>
 
-  <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts <span id="portsTotal" class="badge badge-total">0</span></h2>
-  <p class="subtitle">Interfaces et services détectés</p>
-  <div id="portsLegend" class="ports-legend"></div>
-  <div class="ports-toolbar">
-    <input type="text" id="portSearch" placeholder="Filtrer… ex. 22, ssh, 0.0.0.0" />
-    <div id="portFilters" class="filter-chips"></div>
-    <select id="portSort">
-      <option value="port-asc">Port ↑</option>
-      <option value="port-desc">Port ↓</option>
-      <option value="service">Service A→Z</option>
-      <option value="risk">Risque</option>
-    </select>
-    <button id="portsCopy" class="btn" title="Copier tous"><i class="fa-solid fa-copy"></i></button>
-  </div>
-  <div id="portsContainer" class="block-wrapper"></div>
-  <div id="portsEmpty" class="empty hidden">Aucun port ne correspond. <button id="portsReset" class="btn">Réinitialiser</button></div>
-
   <div class="top-grid">
     <div class="top-panel">
       <h2><i class="fa-solid fa-fire heading-icon"></i>Top 5 processus - CPU</h2>
@@ -226,6 +209,22 @@
   </div>
   <div id="dockerGrid" class="docker-grid"></div>
   <div id="dockerEmpty" class="empty hidden">Aucun conteneur actif</div>
+  <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts <span id="portsTotal" class="badge badge-total">0</span></h2>
+  <p class="subtitle">Interfaces et services détectés</p>
+  <div id="portsLegend" class="ports-legend"></div>
+  <div class="ports-toolbar">
+    <input type="text" id="portSearch" placeholder="Filtrer… ex. 22, ssh, 0.0.0.0" />
+    <div id="portFilters" class="filter-chips"></div>
+    <select id="portSort">
+      <option value="port-asc">Port ↑</option>
+      <option value="port-desc">Port ↓</option>
+      <option value="service">Service A→Z</option>
+      <option value="risk">Risque</option>
+    </select>
+    <button id="portsCopy" class="btn" title="Copier tous"><i class="fa-solid fa-copy"></i></button>
+  </div>
+  <div id="portsContainer" class="block-wrapper"></div>
+  <div id="portsEmpty" class="empty hidden">Aucun port ne correspond. <button id="portsReset" class="btn">Réinitialiser</button></div>
   </main>
   <script>
     const themeSwitch = document.getElementById("themeToggle");
