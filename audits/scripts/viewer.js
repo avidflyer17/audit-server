@@ -59,30 +59,30 @@ function iconFor(name){
 
 function colorClassCpu(v){
   const val = Number(v);
-  if (val < 40) return 'green';
-  if (val < 70) return 'orange';
-  return 'red';
+  if (val < 40) return 'color-success';
+  if (val < 70) return 'color-warning';
+  return 'color-danger';
 }
 
 function colorClassRam(v){
   const val = Number(v);
-  if (val < 40) return 'blue';
-  if (val < 70) return 'yellow';
-  return 'red';
+  if (val < 40) return 'color-info';
+  if (val < 70) return 'color-warning';
+  return 'color-danger';
 }
 
 function colorClassTemp(v){
   const val = Number(v);
-  if (val < 60) return 'green';
-  if (val < 80) return 'orange';
-  return 'red';
+  if (val < 60) return 'color-success';
+  if (val < 80) return 'color-warning';
+  return 'color-danger';
 }
 
 function colorClassDisk(v){
   const val = Number(v);
-  if (val < 50) return 'green';
-  if (val < 80) return 'orange';
-  return 'red';
+  if (val < 50) return 'color-success';
+  if (val < 80) return 'color-warning';
+  return 'color-danger';
 }
 
 function parseSizeToBytes(val){
@@ -818,7 +818,7 @@ function renderMemory(mem){
   const freeStr = formatBytes(freeBytes);
   container.innerHTML = `
     <div id="memoryBar" class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctStr}">
-      <span class="fill green" style="width:0"></span>
+      <span class="fill color-info" style="width:0"></span>
       <span class="value">${pctStr}%</span>
     </div>
     <div class="ram-text">Utilisée : ${usedStr} / ${totalStr} • Libre : ${freeStr}</div>`;
@@ -905,9 +905,9 @@ function loadToPercent(load, cores) {
 
 function loadColor(v) {
   if (v == null) return '#666';
-  if (v < 70) return '#4caf50';
-  if (v < 100) return '#ff9800';
-  return '#f44336';
+  if (v < 70) return 'var(--success)';
+  if (v < 100) return 'var(--warning)';
+  return 'var(--danger)';
 }
 
 function arrowFromDiff(d) {
@@ -953,7 +953,7 @@ function renderLoadAverage(raw, cores) {
   const trendEl = document.getElementById('loadTrend');
   const badge = document.getElementById('loadAvgBadge');
 
-  badge.classList.remove('green', 'orange', 'red');
+  badge.classList.remove('color-success', 'color-warning', 'color-danger');
 
   if (!loads || !cores) {
     document.getElementById('load1Val').textContent = '—';
@@ -986,13 +986,13 @@ function renderLoadAverage(raw, cores) {
     badge.textContent = '';
   } else if (one.rawPct < 70) {
     badge.textContent = '🟢 Système OK';
-    badge.classList.add('green');
+    badge.classList.add('color-success');
   } else if (one.rawPct < 100) {
     badge.textContent = '🟠 Système chargé';
-    badge.classList.add('orange');
+    badge.classList.add('color-warning');
   } else {
     badge.textContent = '🔴 Système surchargé';
-    badge.classList.add('red');
+    badge.classList.add('color-danger');
   }
 }
 
@@ -1011,9 +1011,9 @@ function renderText(json) {
   setupCopy('copyUptime', () => upEl.textContent);
   const upBadge = document.getElementById('uptimeBadge');
   upBadge.className = 'badge';
-  if (upInfo.days > 7) { upBadge.textContent = 'Stable'; upBadge.classList.add('success'); }
-  else if (upInfo.days >= 1) { upBadge.textContent = 'Récemment redémarré'; upBadge.classList.add('warning'); }
-  else { upBadge.textContent = 'Tout juste démarré'; upBadge.classList.add('danger'); }
+  if (upInfo.days > 7) { upBadge.textContent = 'Stable'; upBadge.classList.add('color-success'); }
+  else if (upInfo.days >= 1) { upBadge.textContent = 'Récemment redémarré'; upBadge.classList.add('color-warning'); }
+  else { upBadge.textContent = 'Tout juste démarré'; upBadge.classList.add('color-danger'); }
   const bootTs = json.boot_ts || json.boot_time || null;
   const sinceEl = document.getElementById('uptimeSince');
   if (bootTs) {
@@ -1050,9 +1050,10 @@ function renderText(json) {
   renderCpuTemps(json.cpu?.temperatures);
 
   const badge = document.getElementById('cpuLoadBadge');
+  const colorMap = { green: 'color-success', orange: 'color-warning', red: 'color-danger', blue: 'color-info', yellow: 'color-warning' };
   const color = json.cpu_load_color ? json.cpu_load_color.toLowerCase() : '';
   badge.textContent = json.cpu_load_color?.toUpperCase() || 'N/A';
-  badge.className = 'badge ' + color;
+  badge.className = 'badge ' + (colorMap[color] || '');
 
   renderServices(json.services);
   renderPorts(json.ports);
