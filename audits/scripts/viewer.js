@@ -197,6 +197,19 @@ function initPortsUI(){
   const searchInput = document.getElementById('portSearch');
   const filtersDiv = document.getElementById('portFilters');
   const sortSelect = document.getElementById('portSort');
+  const legendDiv = document.getElementById('portsLegend');
+  if (legendDiv){
+    legendDiv.innerHTML='';
+    [
+      {cls:'low', label:'faible risque'},
+      {cls:'medium', label:'exposé localement'},
+      {cls:'high', label:'potentiellement exposé / critique'}
+    ].forEach(item=>{
+      const span=document.createElement('span');
+      span.innerHTML=`<span class="risk-dot ${item.cls}"></span>${item.label}`;
+      legendDiv.appendChild(span);
+    });
+  }
   PORT_FILTERS.forEach(f => {
     const chip = document.createElement('button');
     chip.className='filter-chip active';

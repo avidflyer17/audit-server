@@ -470,7 +470,7 @@
     }
     .ports-legend {
       font-size: 0.9rem;
-      margin-bottom: 0.5rem;
+      margin: 0.5rem 0;
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
@@ -870,11 +870,7 @@
 
   <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts <span id="portsTotal" class="badge">0</span></h2>
   <p class="subtitle">Interfaces et services détectés</p>
-  <div class="ports-legend">
-    <span><span class="risk-dot low"></span>🟢 faible risque</span>
-    <span><span class="risk-dot medium"></span>🟠 exposé localement</span>
-    <span><span class="risk-dot high"></span>🔴 potentiellement exposé / critique</span>
-  </div>
+  <div id="portsLegend" class="ports-legend"></div>
   <div class="ports-toolbar">
     <input type="text" id="portSearch" placeholder="Filtrer… ex. 22, ssh, 0.0.0.0" />
     <div id="portFilters" class="filter-chips"></div>
