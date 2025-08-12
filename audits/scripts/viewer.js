@@ -505,12 +505,14 @@ function contrastColor(bg){
 }
 
 function adjustBarValue(valueEl, fillEl, val){
+  let bg;
   if (val >= 20){
-    const bg = getComputedStyle(fillEl).backgroundColor;
-    valueEl.style.color = contrastColor(bg);
+    bg = getComputedStyle(fillEl).backgroundColor;
   } else {
-    valueEl.style.color = '#fff';
+    // For small fills, use the bar background to ensure contrast
+    bg = getComputedStyle(fillEl.parentElement).backgroundColor;
   }
+  valueEl.style.color = contrastColor(bg);
 }
 
 function parseDocker(item){
