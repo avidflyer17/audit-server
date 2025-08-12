@@ -1172,19 +1172,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('menuOverlay');
   const toggle = document.getElementById('menuToggle');
 
-  const updateSidebar = () => {
-    if (window.innerWidth >= 768) {
-      sidebar.classList.add('open');
-    } else {
-      sidebar.classList.remove('open');
-    }
-  };
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
 
-  toggle.onclick = () => sidebar.classList.toggle('open');
-  overlay.onclick = () => sidebar.classList.remove('open');
-
-  updateSidebar();
-  window.addEventListener('resize', updateSidebar);
+  overlay.addEventListener('click', () => {
+    sidebar.classList.remove('open');
+  });
 });
 
 document.addEventListener('DOMContentLoaded', init);
