@@ -10,19 +10,53 @@
   referrerpolicy="no-referrer" />
   <script src="/scripts/viewer.js?v=3"></script>
   <style>
-    :root {
+    body.theme-dark {
       --bg: #191a24;
       --text: #f8f8f2;
-      --heading: #8be9fd;
-      --subheading: #50fa7b;
-      --block-bg: #282a36;
+      --muted: #bbb;
+      --subtle: #888;
+      --card-bg: #282a36;
+      --card-border: #444;
+      --card-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      --chip-bg: #444;
+      --chip-text: #f8f8f2;
+      --chip-active-bg: #8be9fd;
+      --bar-bg: #444;
+      --bar-fill-green: #2ecc71;
+      --bar-fill-orange: #f39c12;
+      --bar-fill-red: #e74c3c;
+      --accent: #8be9fd;
+      --success: #2ecc71;
+      --warning: #f39c12;
+      --danger: #e74c3c;
+      --heading: var(--accent);
+      --subheading: var(--success);
+      --block-bg: var(--card-bg);
+      --accent-color: var(--accent);
     }
-    .light-theme {
+    body.theme-light {
       --bg: #f0f0f0;
       --text: #1c1c1c;
-      --heading: #007acc;
-      --subheading: #2b8a3e;
-      --block-bg: #ffffff;
+      --muted: #555;
+      --subtle: #777;
+      --card-bg: #ffffff;
+      --card-border: #ddd;
+      --card-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      --chip-bg: #ddd;
+      --chip-text: #1c1c1c;
+      --chip-active-bg: #007acc;
+      --bar-bg: #ddd;
+      --bar-fill-green: #2ecc71;
+      --bar-fill-orange: #ff9800;
+      --bar-fill-red: #e74c3c;
+      --accent: #007acc;
+      --success: #2b8a3e;
+      --warning: #ff9800;
+      --danger: #e74c3c;
+      --heading: var(--accent);
+      --subheading: var(--success);
+      --block-bg: var(--card-bg);
+      --accent-color: var(--accent);
     }
     body {
       background-color: var(--bg);
@@ -52,39 +86,32 @@
     .subtitle {
       font-style: italic;
       margin-bottom: 1.5rem;
-      color: #bbb;
+      color: var(--muted);
     }
 
     select,
     input[type="date"],
     input[type="text"] {
-      background-color: #333;
-      color: white;
+      background-color: var(--card-bg);
+      color: var(--text);
       padding: 0.4rem;
       border-radius: 5px;
-      border: none;
-    }
-
-    .light-theme select,
-    .light-theme input[type="date"],
-    .light-theme input[type="text"] {
-      background-color: #ddd;
-      color: #000;
+      border: 1px solid var(--card-border);
     }
 
     .btn {
-      background: #444;
-      color: #fff;
+      background: var(--chip-bg);
+      color: var(--chip-text);
       border: none;
       padding: 0.4rem 0.8rem;
       border-radius: 5px;
       cursor: pointer;
     }
 
-    .btn:hover { background: #666; }
+    .btn:hover { filter: brightness(1.1); }
 
     .btn.primary {
-      background: var(--heading);
+      background: var(--accent);
       color: var(--bg);
     }
 
@@ -415,6 +442,8 @@
       margin-left: 1rem;
       font-weight: bold;
       font-family: monospace;
+      background: var(--chip-bg);
+      color: var(--chip-text);
     }
     .load-header .badge { margin-left: 0; }
     .load-header {
@@ -472,6 +501,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
+      color: var(--muted);
     }
     .ports-legend span {
       display: flex;
@@ -484,9 +514,9 @@
       border-radius: 50%;
       display: inline-block;
     }
-    .risk-dot.low { background: #2ecc71; }
-    .risk-dot.medium { background: #f39c12; }
-    .risk-dot.high { background: #e74c3c; }
+    .risk-dot.low { background: var(--success); }
+    .risk-dot.medium { background: var(--warning); }
+    .risk-dot.high { background: var(--danger); }
     .ports-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -495,21 +525,23 @@
       align-items: center;
     }
     #portSearch { flex: 1; min-width: 180px; }
-    #portSort { background: #333; color: var(--text); border: none; padding: 0.25rem; border-radius: 4px; }
-    .port-accordion { border: 1px solid #444; border-radius: 6px; margin-bottom: 0.5rem; overflow: hidden; }
+    #portSort { background: var(--card-bg); color: var(--text); border: 1px solid var(--card-border); padding: 0.25rem; border-radius: 4px; }
+    .port-accordion { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 0.5rem; box-shadow: var(--card-shadow); overflow: hidden; }
     .port-accordion + .port-accordion { margin-top: 0.5rem; }
-    .accordion-header { background: #333; width: 100%; text-align: left; padding: 0.4rem 0.6rem; border: none; color: var(--text); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .accordion-header .count { background:#444; border-radius:6px; padding:2px 8px; font-family:monospace; }
-    .accordion-content { display: none; padding:0.4rem; }
+    .accordion-header { background: var(--card-bg); width: 100%; text-align: left; padding: 0.4rem 0.6rem; border: none; color: var(--text); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .accordion-header .count { background: var(--chip-bg); border-radius:6px; padding:2px 8px; font-family:monospace; }
+    .accordion-content { display: none; padding:0.4rem; background: var(--card-bg); }
     .port-accordion.open > .accordion-content { display:block; }
-    .ip-accordion { border:1px solid #444; border-radius:6px; margin:0.3rem 0; overflow:hidden; }
+    .ip-accordion { background: var(--card-bg); border:1px solid var(--card-border); border-radius:8px; margin:0.3rem 0; overflow:hidden; }
     .ip-accordion.open > .accordion-content { display:block; }
-    .ip-accordion .accordion-header { background:#222; }
+    .ip-accordion .accordion-header { background: var(--card-bg); }
     .port-line { display:flex; align-items:center; gap:0.5rem; padding:0.2rem 0.3rem; font-size:0.9rem; }
-    .port-line .service-name { flex:1; }
+    .port-line .service-name { flex:1; font-weight:500; }
     .port-line .port-mono { font-family:monospace; }
-    .port-line .badge { margin-left:0.2rem; font-size:0.7rem; padding:0.1rem 0.3rem; }
-    .port-line .actions { margin-left:auto; display:flex; align-items:center; gap:0.3rem; }
+    .port-line .badges { margin-left:auto; display:flex; gap:0.2rem; }
+    .port-line .badge { font-size:0.7rem; padding:0.1rem 0.3rem; }
+    .port-line .risk-dot { margin-left:0.3rem; }
+    .port-line .copy-btn { margin-left:0.3rem; }
 
     .load-container {
       display: flex;
@@ -610,8 +642,8 @@
       margin-bottom: 0.5rem;
     }
     .filter-chip {
-      background: #444;
-      color: var(--text);
+      background: var(--chip-bg);
+      color: var(--chip-text);
       border: none;
       border-radius: 9999px;
       padding: 0.25rem 0.6rem;
@@ -619,7 +651,7 @@
       font-size: 0.85rem;
     }
     .filter-chip.active {
-      background: var(--heading);
+      background: var(--chip-active-bg);
       color: var(--bg);
     }
     .services-toolbar {
@@ -779,8 +811,8 @@
     .docker-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
     .docker-toolbar input { flex: 1; }
     .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .chip { background: #444; border: none; border-radius: 9999px; padding: 0.25rem 0.6rem; cursor: pointer; color: var(--text); }
-    .chip.active { background: var(--heading); color: var(--bg); }
+    .chip { background: var(--chip-bg); border: none; border-radius: 9999px; padding: 0.25rem 0.6rem; cursor: pointer; color: var(--chip-text); }
+    .chip.active { background: var(--chip-active-bg); color: var(--bg); }
     .docker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 0.5rem; }
     .docker-card { background: var(--block-bg); padding: 0.75rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s ease; }
     .docker-card:hover { transform: translateY(-2px); }
@@ -844,7 +876,7 @@
     }
   </style>
 </head>
-<body>
+<body class="theme-dark">
 
   <div id="themeSwitchWrapper">
     <i id="themeIcon" class="fas fa-moon theme-icon"></i>
@@ -976,7 +1008,7 @@
     </div>
   </div>
 
-  <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts <span id="portsTotal" class="badge">0</span></h2>
+  <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts <span id="portsTotal" class="badge badge-total">0</span></h2>
   <p class="subtitle">Interfaces et services détectés</p>
   <div id="portsLegend" class="ports-legend"></div>
   <div class="ports-toolbar">
@@ -988,6 +1020,7 @@
       <option value="service">Service A→Z</option>
       <option value="risk">Risque</option>
     </select>
+    <button id="portsCopy" class="btn" title="Copier tous"><i class="fa-solid fa-copy"></i></button>
   </div>
   <div id="portsContainer" class="block-wrapper"></div>
   <div id="portsEmpty" class="empty hidden">Aucun port ne correspond. <button id="portsReset" class="btn">Réinitialiser</button></div>
@@ -1024,7 +1057,8 @@
     const themeSwitch = document.getElementById("themeToggle");
     const themeIcon = document.getElementById("themeIcon");
     function applyTheme(t){
-      document.body.classList.toggle("light-theme", t === "light");
+      document.body.classList.toggle("theme-light", t === "light");
+      document.body.classList.toggle("theme-dark", t !== "light");
       themeSwitch.checked = t === "light";
       if (themeIcon) themeIcon.className = t === "light" ? "fas fa-sun theme-icon" : "fas fa-moon theme-icon";
     }

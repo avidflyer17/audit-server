@@ -285,6 +285,7 @@ function initPortsUI(){
   const searchInput = document.getElementById('portSearch');
   const filtersDiv = document.getElementById('portFilters');
   const sortSelect = document.getElementById('portSort');
+  const copyAllBtn = document.getElementById('portsCopy');
   const legendDiv = document.getElementById('portsLegend');
   if (legendDiv){
     legendDiv.innerHTML='';
@@ -312,6 +313,12 @@ function initPortsUI(){
   });
   searchInput.addEventListener('input', e=>{ portSearch = e.target.value.toLowerCase(); applyPortFilters(); });
   sortSelect.addEventListener('change', e=>{ portSort = e.target.value; applyPortFilters(); });
+  if (copyAllBtn){
+    copyAllBtn.addEventListener('click', ()=>{
+      const text = filteredPorts.map(p=>`${p.ip}:${p.port}/${p.proto.toLowerCase()}`).join('\n');
+      navigator.clipboard.writeText(text);
+    });
+  }
   document.getElementById('portsReset').addEventListener('click', ()=>{
     portSearch='';
     portSort='port-asc';
@@ -385,7 +392,7 @@ function renderPortsList(){
         line.className='port-line';
         line.title=`${p.ip} • ${p.port} • ${p.service}`;
         const badgesHtml=p.badges.map(b=>`<span class="badge">${b}</span>`).join('');
-        line.innerHTML=`<span class="service-icon">${p.icon}</span><span class="service-name">${p.service}</span><span class="port-mono">:${p.port}/${p.proto.toLowerCase()}</span><span class="actions"><span class="risk-dot ${p.risk}"></span>${badgesHtml}<button class="copy-btn small" title="Copier">📋</button></span>`;
+        line.innerHTML=`<span class="service-icon">${p.icon}</span><span class="service-name">${p.service}</span><span class="port-mono">:${p.port}/${p.proto.toLowerCase()}</span><span class="badges">${badgesHtml}</span><span class="risk-dot ${p.risk}"></span><button class="copy-btn small" title="Copier">📋</button>`;
         line.querySelector('.copy-btn').addEventListener('click',e=>{e.stopPropagation();navigator.clipboard.writeText(`${p.ip}:${p.port}/${p.proto.toLowerCase()}`);});
         ipBody.appendChild(line);
       });
