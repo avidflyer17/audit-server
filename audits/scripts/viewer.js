@@ -800,7 +800,6 @@ function renderCpuTemps(temps){
 
 function renderMemory(mem){
   const container = document.getElementById('memoryContainer');
-  container.classList.add('memory-container');
   container.innerHTML = '';
   const usedBytes = parseSizeToBytes(mem?.used_bytes ?? mem?.used);
   const totalBytes = parseSizeToBytes(mem?.total_bytes ?? mem?.total);
@@ -818,14 +817,22 @@ function renderMemory(mem){
   const usedStr = formatBytes(usedBytes);
   const totalStr = formatBytes(totalBytes);
   const freeStr = formatBytes(freeBytes);
-  container.innerHTML = `
-    <div id="memoryBar" class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctStr}">
-      <span class="fill color-info" style="width:0"></span>
-      <span class="value">${pctStr}%</span>
+  const card = document.createElement('div');
+  card.className = 'disk-card';
+  card.innerHTML = `
+    <div class="proc-row">
+      <span class="proc-name">RAM <span class="badge-total">${totalStr}</span></span>
+      <div class="proc-bars">
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctStr}">
+          <span class="fill ${colorClassRam(pct)}" style="width:0"></span>
+          <span class="value">${pctStr}%</span>
+        </div>
+      </div>
     </div>
     <div class="ram-text">Utilisée : ${usedStr} / ${totalStr} • Libre : ${freeStr}</div>`;
-  const fill = container.querySelector('.bar .fill');
-  const valueEl = container.querySelector('.bar .value');
+  container.appendChild(card);
+  const fill = card.querySelector('.bar .fill');
+  const valueEl = card.querySelector('.bar .value');
   requestAnimationFrame(()=>{
     fill.style.width = pct + '%';
     adjustBarValue(valueEl, fill, pct);
@@ -953,9 +960,6 @@ function renderLoadAverage(raw, cores) {
   const gauge = document.getElementById('loadGauge');
   const path = document.getElementById('loadGaugePath');
   const trendEl = document.getElementById('loadTrend');
-  const badge = document.getElementById('loadAvgBadge');
-
-  badge.classList.remove('color-success', 'color-warning', 'color-danger');
 
   if (!loads || !cores) {
     document.getElementById('load1Val').textContent = '—';
@@ -964,7 +968,6 @@ function renderLoadAverage(raw, cores) {
     path.setAttribute('stroke-dasharray', '0 100');
     renderMini('5', null, null);
     renderMini('15', null, null);
-    badge.textContent = '';
     return;
   }
 
@@ -983,19 +986,6 @@ function renderLoadAverage(raw, cores) {
   trendEl.style.color = color1;
   renderMini('5', five.pct, one.pct, five.rawPct);
   renderMini('15', fifteen.pct, five.pct, fifteen.rawPct);
-
-  if (one.rawPct == null) {
-    badge.textContent = '';
-  } else if (one.rawPct < 70) {
-    badge.textContent = '🟢 Système OK';
-    badge.classList.add('color-success');
-  } else if (one.rawPct < 100) {
-    badge.textContent = '🟠 Système chargé';
-    badge.classList.add('color-warning');
-  } else {
-    badge.textContent = '🔴 Système surchargé';
-    badge.classList.add('color-danger');
-  }
 }
 
 function renderText(json) {
@@ -1049,12 +1039,6 @@ function renderText(json) {
   renderMemory(json.memory?.ram);
   renderDisks(json.disks);
   renderCpuTemps(json.cpu?.temperatures);
-
-  const badge = document.getElementById('cpuLoadBadge');
-  const colorMap = { green: 'color-success', orange: 'color-warning', red: 'color-danger', blue: 'color-info', yellow: 'color-warning' };
-  const color = json.cpu_load_color ? json.cpu_load_color.toLowerCase() : '';
-  badge.textContent = json.cpu_load_color?.toUpperCase() || 'N/A';
-  badge.className = 'badge ' + (colorMap[color] || '');
 
   renderServices(json.services);
   renderPorts(json.ports);
