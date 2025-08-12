@@ -455,22 +455,45 @@
     .orange { background-color: #ff9800; color: black; }
     .red    { background-color: #f44336; color: white; }
 
-    .ip-container {
-      font-family: monospace;
-      background: var(--block-bg);
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      display: inline-block;
-      margin-top: 0.5rem;
-    }
-    .ip-container div {
+    /* General info & network cards */
+    .info-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+    .info-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      padding: 0.75rem;
+      position: relative;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       gap: 0.5rem;
-      margin-bottom: 0.2rem;
     }
-    .ip-icon {
-      font-size: 1.2rem;
+    .info-card .card-head { display: flex; align-items: center; gap: 0.5rem; }
+    .info-card .card-title { display: flex; align-items: center; gap: 0.5rem; font-weight: bold; }
+    .info-card .card-main { font-weight: bold; }
+    .info-card .card-meta { font-size: 0.85rem; color: var(--muted); display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .info-card .copy-icon {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      margin-left: auto;
+    }
+    .info-card .copy-icon:hover { color: var(--text); }
+    .badge.success { background: var(--success); color: #fff; }
+    .badge.warning { background: var(--warning); color: #000; }
+    .badge.danger  { background: var(--danger); color: #fff; }
+
+    .network-card .ip-row { display: flex; align-items: center; gap: 0.5rem; }
+    .network-card .ip-row + .ip-row { margin-top: 0.5rem; }
+    .network-card .ip-icon { width: 1.25rem; text-align: center; }
+    .network-card .chip { display: flex; gap: 0.25rem; font-family: monospace; cursor: default; }
+    .network-card .chip.na { opacity: 0.6; }
+    .network-card .ip-row .copy-icon { position: static; }
+
+    @media (min-width: 900px) {
+      .info-grid { flex-direction: row; }
+      .info-grid .info-card { flex: 1; }
     }
 
     .disk-bar-container {
@@ -920,11 +943,45 @@
     <span id="updateBadge" class="update-badge">Mis à jour</span>
   </div>
 
-  <h2><i class="fa-solid fa-calendar-day heading-icon"></i>Date de génération</h2>
-  <p id="generated">--</p>
+  <div class="info-grid">
+    <div class="info-card" id="generatedCard" aria-labelledby="generatedTitle">
+      <div class="card-head">
+        <div class="card-title" id="generatedTitle"><i class="fa-solid fa-calendar-day"></i><span>Date de génération</span></div>
+        <button id="copyGenerated" class="copy-icon" title="Copier la date" aria-label="Copier la date"><i class="fa-regular fa-copy"></i></button>
+      </div>
+      <div id="generatedValue" class="card-main">--</div>
+      <div class="card-meta"><span id="tzBadge" class="badge"></span></div>
+    </div>
+    <div class="info-card" id="uptimeCard" aria-labelledby="uptimeTitle">
+      <div class="card-head">
+        <div class="card-title" id="uptimeTitle"><i class="fa-solid fa-clock"></i><span>Temps de fonctionnement</span></div>
+        <span id="uptimeBadge" class="badge"></span>
+        <button id="copyUptime" class="copy-icon" title="Copier la durée" aria-label="Copier la durée"><i class="fa-regular fa-copy"></i></button>
+      </div>
+      <div id="uptimeValue" class="card-main">--</div>
+      <div id="uptimeSince" class="card-meta"></div>
+    </div>
+  </div>
 
-  <h2><i class="fa-solid fa-clock heading-icon"></i>Temps de fonctionnement</h2>
-  <p id="uptime">--</p>
+  <div class="info-card network-card" id="networkCard" aria-labelledby="networkTitle">
+    <div class="card-head">
+      <div class="card-title" id="networkTitle"><i class="fa-solid fa-network-wired"></i><span>Adressage réseau</span></div>
+    </div>
+    <div class="card-body">
+      <div class="ip-row">
+        <i class="fa-solid fa-computer ip-icon" aria-hidden="true"></i>
+        <span id="ipLocalChip" class="chip ip-chip" title="Adresse IP locale détectée par le host"><span class="chip-label">IP locale</span> <span id="ipLocal" class="chip-value">N/A</span></span>
+        <span id="netBadge" class="badge"></span>
+        <button id="copyIpLocal" class="copy-icon" title="Copier l'IP locale" aria-label="Copier l'IP locale"><i class="fa-regular fa-copy"></i></button>
+      </div>
+      <div class="ip-row">
+        <i class="fa-solid fa-globe ip-icon" aria-hidden="true"></i>
+        <span id="ipPublicChip" class="chip ip-chip" title="Adresse IP externe détectée"><span class="chip-label">IP externe</span> <span id="ipPublic" class="chip-value">N/A</span></span>
+        <span id="ispBadge" class="badge"></span>
+        <button id="copyIpPublic" class="copy-icon" title="Copier l'IP externe" aria-label="Copier l'IP externe"><i class="fa-regular fa-copy"></i></button>
+      </div>
+    </div>
+  </div>
 
   <div class="load-header">
     <h2><i class="fa-solid fa-gauge-high heading-icon"></i>Charge moyenne</h2>
@@ -960,12 +1017,6 @@
         <div id="load15Trend" class="mini-trend">--</div>
       </div>
     </div>
-  </div>
-
-  <h2><i class="fa-solid fa-network-wired heading-icon"></i>Adressage réseau</h2>
-  <div id="ipInfo" class="ip-container">
-    <div><span class="ip-icon">📡</span> IP Locale : <span id="ipLocal">--</span></div>
-    <div><span class="ip-icon">🌐</span> IP Externe : <span id="ipPublic">--</span></div>
   </div>
 
   <h2><i class="fa-solid fa-microchip heading-icon"></i>Utilisation CPU par cœur <span id="cpuLoadBadge" class="badge">--</span></h2>
