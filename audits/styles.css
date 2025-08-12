@@ -933,8 +933,9 @@ body {
     .status-running { background: #4caf50; color: #fff; }
     .docker-uptime { font-size: 0.8rem; opacity: 0.8; margin-top: 0.25rem; }
     .docker-bars { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
-    .bar-outer { height: 8px; background: #444; border-radius: 4px; overflow: hidden; }
-    .bar-outer .fill { height: 100%; width: 0; transition: width 0.3s ease; }
+    .bar-outer { position: relative; height: 16px; background: var(--bar-bg); border-radius: 4px; overflow: hidden; }
+    .bar-outer .fill { position: absolute; top: 0; left: 0; bottom: 0; width: 0; transition: width 0.3s ease; }
+    .bar-outer .bar-value { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: var(--font-sm); font-weight: 600; color: var(--text); text-shadow: 0 0 2px var(--bg); pointer-events: none; }
     .ram-text { font-size: 0.75rem; text-align: center; }
 
     .bar-temp { height: 14px; }
