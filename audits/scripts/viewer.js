@@ -115,6 +115,40 @@ function formatBytes(bytes){
   return val.toFixed(dec) + units[i];
 }
 
+function parseUptime(str){
+  if(!str) return {text:'--', days:0};
+  const parts = {days:0, hours:0, minutes:0};
+  str.replace(/(\d+)\s+(year|week|day|hour|minute|years|weeks|days|hours|minutes)/g,(m,n,unit)=>{
+    const num = parseInt(n,10);
+    if(unit.startsWith('year')) parts.days += num*365;
+    else if(unit.startsWith('week')) parts.days += num*7;
+    else if(unit.startsWith('day')) parts.days += num;
+    else if(unit.startsWith('hour')) parts.hours += num;
+    else if(unit.startsWith('minute')) parts.minutes += num;
+  });
+  const segments = [];
+  if(parts.days) segments.push(parts.days+ ' j');
+  if(parts.hours) segments.push(parts.hours+ ' h');
+  if(parts.minutes) segments.push(parts.minutes+ ' min');
+  if(segments.length===0) segments.push('0 min');
+  const totalDays = parts.days + parts.hours/24 + parts.minutes/1440;
+  return {text:segments.join(' '), days:totalDays};
+}
+
+function setupCopy(id, getter){
+  const btn = document.getElementById(id);
+  if(!btn) return;
+  btn.onclick = () => {
+    const text = getter();
+    if(!text || text==='--' || text==='N/A') return;
+    navigator.clipboard.writeText(text).then(()=>{
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+      setTimeout(()=>{ btn.innerHTML = original; },1000);
+    });
+  };
+}
+
 let dockerData = [];
 let dockerFiltered = [];
 let dockerFilters = new Set(['healthy','unhealthy','running','exited']);
@@ -963,11 +997,52 @@ function renderLoadAverage(raw, cores) {
 }
 
 function renderText(json) {
-  document.getElementById('generated').textContent = json.generated;
+  const genEl = document.getElementById('generatedValue');
+  genEl.textContent = json.generated || '--';
   document.getElementById('hostname').textContent = json.hostname;
-  document.getElementById('ipLocal').textContent = json.ip_local || '--';
-  document.getElementById('ipPublic').textContent = json.ip_pub || '--';
-  document.getElementById('uptime').textContent = json.uptime || '--';
+  const tz = json.timezone || json.tz;
+  const tzBadge = document.getElementById('tzBadge');
+  if (tz) { tzBadge.textContent = tz; tzBadge.style.display='inline-block'; } else { tzBadge.style.display='none'; }
+  setupCopy('copyGenerated', () => genEl.textContent);
+
+  const upInfo = parseUptime(json.uptime);
+  const upEl = document.getElementById('uptimeValue');
+  upEl.textContent = upInfo.text;
+  setupCopy('copyUptime', () => upEl.textContent);
+  const upBadge = document.getElementById('uptimeBadge');
+  upBadge.className = 'badge';
+  if (upInfo.days > 7) { upBadge.textContent = 'Stable'; upBadge.classList.add('success'); }
+  else if (upInfo.days >= 1) { upBadge.textContent = 'Récemment redémarré'; upBadge.classList.add('warning'); }
+  else { upBadge.textContent = 'Tout juste démarré'; upBadge.classList.add('danger'); }
+  const bootTs = json.boot_ts || json.boot_time || null;
+  const sinceEl = document.getElementById('uptimeSince');
+  if (bootTs) {
+    let d = new Date(typeof bootTs === 'number' ? bootTs*1000 : bootTs);
+    if (!isNaN(d)) {
+      const dateStr = d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'}) + ' à ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      sinceEl.textContent = `depuis ${dateStr}`;
+    } else sinceEl.textContent = '';
+  } else {
+    sinceEl.textContent = '';
+  }
+
+  const ipLocal = json.ip_local || null;
+  const ipLocalSpan = document.getElementById('ipLocal');
+  ipLocalSpan.textContent = ipLocal || 'N/A';
+  document.getElementById('ipLocalChip').classList.toggle('na', !ipLocal);
+  setupCopy('copyIpLocal', () => ipLocalSpan.textContent);
+  const ipPub = json.ip_pub || null;
+  const ipPubSpan = document.getElementById('ipPublic');
+  ipPubSpan.textContent = ipPub || 'N/A';
+  document.getElementById('ipPublicChip').classList.toggle('na', !ipPub);
+  setupCopy('copyIpPublic', () => ipPubSpan.textContent);
+  const netBadge = document.getElementById('netBadge');
+  const netInfo = json.local_net || json.ip_local_net;
+  if (netInfo) { netBadge.textContent = netInfo; netBadge.style.display='inline-block'; } else { netBadge.style.display='none'; }
+  const ispBadge = document.getElementById('ispBadge');
+  const isp = json.ip_pub_asn || json.ip_pub_isp || json.ip_pub_org;
+  if (isp) { ispBadge.textContent = isp; ispBadge.style.display='inline-block'; } else { ispBadge.style.display='none'; }
+
   renderLoadAverage(json.load_average, json.cpu?.cores);
   renderCpuCores(json.cpu?.usage);
   renderMemory(json.memory?.ram);
