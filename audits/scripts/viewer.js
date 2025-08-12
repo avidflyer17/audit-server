@@ -204,7 +204,7 @@ function applyServiceFilters(){
 
 function renderServicesList(){
   const list = document.getElementById('servicesList');
-  list.innerHTML = '';
+  list.textContent = '';
   const countSpan = document.getElementById('servicesCount');
   if (filteredServices.length === 0){
     countSpan.textContent = '0 service';
@@ -218,8 +218,56 @@ function renderServicesList(){
     item.tabIndex = 0;
     item.title = s.desc;
     item.setAttribute('aria-expanded', 'false');
-    item.innerHTML = `<div class="service-main"><span class="service-icon">${s.icon}</span><span class="service-name">${s.name}</span><span class="service-badge cat-${s.category.toLowerCase().replace(/[\s/]+/g,'-')}">${s.category}</span></div><div class="service-details"><div><strong>Nom de l’unité :</strong> <code>${s.name}</code> <button class="copy-btn small" title="Copier le nom">📋</button></div><div><strong>Type :</strong> service</div><div><strong>Description :</strong> ${s.desc}</div></div>`;
-    const copyBtn = item.querySelector('.copy-btn');
+
+    const main = document.createElement('div');
+    main.className = 'service-main';
+
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'service-icon';
+    iconSpan.textContent = s.icon;
+    main.appendChild(iconSpan);
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'service-name';
+    nameSpan.textContent = s.name;
+    main.appendChild(nameSpan);
+
+    const badgeSpan = document.createElement('span');
+    badgeSpan.className = 'service-badge cat-' + s.category.toLowerCase().replace(/[\s/]+/g,'-');
+    badgeSpan.textContent = s.category;
+    main.appendChild(badgeSpan);
+
+    item.appendChild(main);
+
+    const details = document.createElement('div');
+    details.className = 'service-details';
+
+    const nameDiv = document.createElement('div');
+    const strongName = document.createElement('strong');
+    strongName.textContent = 'Nom de l’unité :';
+    const code = document.createElement('code');
+    code.textContent = s.name;
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn small';
+    copyBtn.title = 'Copier le nom';
+    copyBtn.textContent = '📋';
+    nameDiv.append(strongName, ' ', code, ' ', copyBtn);
+    details.appendChild(nameDiv);
+
+    const typeDiv = document.createElement('div');
+    const strongType = document.createElement('strong');
+    strongType.textContent = 'Type :';
+    typeDiv.append(strongType, ' service');
+    details.appendChild(typeDiv);
+
+    const descDiv = document.createElement('div');
+    const strongDesc = document.createElement('strong');
+    strongDesc.textContent = 'Description :';
+    descDiv.append(strongDesc, ' ', s.desc);
+    details.appendChild(descDiv);
+
+    item.appendChild(details);
+
     copyBtn.addEventListener('click', e => { e.stopPropagation(); navigator.clipboard.writeText(s.name).then(()=>alert('Copié dans le presse-papiers !')); });
     const toggle = () => {
       const expanded = item.classList.toggle('expanded');
