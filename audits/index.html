@@ -417,6 +417,12 @@
       font-weight: bold;
       font-family: monospace;
     }
+    .load-header .badge { margin-left: 0; }
+    .load-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
     .green  { background-color: #4caf50; color: white; }
     .orange { background-color: #ff9800; color: black; }
     .red    { background-color: #f44336; color: white; }
@@ -549,7 +555,12 @@
       align-items: center;
     }
 
-    .load-main { flex: 1; }
+    .load-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
     .gauge {
       position: relative;
@@ -560,8 +571,8 @@
     .gauge svg { width: 100%; height: 100%; transform: rotate(-90deg); }
     .gauge .bg { fill: none; stroke: #444; stroke-width: 4; }
     .gauge .progress { fill: none; stroke: var(--load-color, #4caf50); stroke-width: 4; stroke-linecap: round; transition: stroke 0.3s; }
-    .gauge-value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: bold; display: flex; align-items: center; }
-    .gauge-label { text-align: center; margin-top: 0.5rem; font-size: 0.9rem; }
+    .gauge-value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: bold; display: flex; align-items: baseline; }
+    .gauge-label { text-align: center; margin-top: 0.25rem; font-size: 0.8rem; opacity: 0.8; }
     .trend { font-size: 1rem; margin-left: 0.25rem; }
 
     .load-cards {
@@ -575,6 +586,9 @@
       background: var(--block-bg);
       padding: 0.75rem;
       border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     .mini-title { font-size: 0.8rem; opacity: 0.8; }
     .mini-value { font-weight: bold; font-size: 1.3rem; }
@@ -593,15 +607,15 @@
     .gauge:focus-visible,
     .mini-card:focus-visible { outline: 2px solid var(--heading); outline-offset: 4px; }
 
-    @media (min-width: 601px) {
+    @media (min-width: 900px) {
       .load-container { flex-direction: row; align-items: center; }
-      .load-main { flex: 1; }
       .load-cards { flex: none; width: 200px; }
     }
 
     @media (max-width: 600px) {
       .load-container { align-items: stretch; }
       .gauge { width: 160px; height: 160px; }
+      .load-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
     }
 
     @media screen and (max-width: 600px) {
@@ -671,7 +685,11 @@
 
   <h2><i class="fa-solid fa-clock heading-icon"></i>Temps de fonctionnement</h2>
   <p id="uptime">--</p>
-  <h2><i class="fa-solid fa-gauge-high heading-icon"></i>Charge moyenne <span id="loadAvgBadge" class="badge"></span></h2>
+
+  <div class="load-header">
+    <h2><i class="fa-solid fa-gauge-high heading-icon"></i>Charge moyenne</h2>
+    <span id="loadAvgBadge" class="badge" aria-live="polite"></span>
+  </div>
   <div id="loadAvg" class="load-container">
     <div class="load-main">
       <div id="loadGauge" class="gauge" title="Charge CPU moyenne sur 1 min" tabindex="0">
@@ -681,6 +699,11 @@
         </svg>
         <div class="gauge-value"><span id="load1Val">--</span><span id="loadTrend" class="trend">→</span></div>
         <div class="gauge-label">charge sur 1 min</div>
+      </div>
+      <div class="load-legend">
+        <span class="legend-item"><span class="dot green"></span> Faible</span>
+        <span class="legend-item"><span class="dot orange"></span> Élevée</span>
+        <span class="legend-item"><span class="dot red"></span> Critique</span>
       </div>
     </div>
     <div class="load-cards">
@@ -697,11 +720,6 @@
         <div id="load15Trend" class="mini-trend">--</div>
       </div>
     </div>
-  </div>
-  <div class="load-legend">
-    <span class="legend-item"><span class="dot green"></span> Faible</span>
-    <span class="legend-item"><span class="dot orange"></span> Élevée</span>
-    <span class="legend-item"><span class="dot red"></span> Critique</span>
   </div>
 
   <h2><i class="fa-solid fa-network-wired heading-icon"></i>Adressage réseau</h2>

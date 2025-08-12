@@ -218,12 +218,18 @@ function renderLoadAverage(raw) {
   renderMini('15', v15, v5);
 
   const badge = document.getElementById('loadAvgBadge');
-  if ([v1, v5, v15].every(v => v != null && v < 20)) {
-    badge.textContent = '🟢 Système à l’aise';
-  } else if ([v1, v5, v15].some(v => v != null && v >= 90)) {
-    badge.textContent = '🔴 Saturation probable';
-  } else {
+  badge.classList.remove('green', 'orange', 'red');
+  if (v1 == null) {
     badge.textContent = '';
+  } else if (v1 <= 50) {
+    badge.textContent = '🟢 Système OK';
+    badge.classList.add('green');
+  } else if (v1 <= 80) {
+    badge.textContent = '🟠 Système chargé';
+    badge.classList.add('orange');
+  } else {
+    badge.textContent = '🔴 Système surchargé';
+    badge.classList.add('red');
   }
 }
 
