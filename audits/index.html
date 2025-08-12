@@ -56,7 +56,9 @@
       color: #bbb;
     }
 
-    select, input[type="date"] {
+    select,
+    input[type="date"],
+    input[type="text"] {
       background-color: #333;
       color: white;
       padding: 0.4rem;
@@ -65,7 +67,8 @@
     }
 
     .light-theme select,
-    .light-theme input[type="date"] {
+    .light-theme input[type="date"],
+    .light-theme input[type="text"] {
       background-color: #ddd;
       color: #000;
     }
@@ -75,11 +78,91 @@
       gap: 1rem;
       align-items: flex-end;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
 
     #selectorContainer > div {
       display: flex;
       flex-direction: column;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      background: #444;
+      color: #fff;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #666;
+    }
+
+    .refresh-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--subheading);
+      opacity: 0.3;
+    }
+
+    .refresh-dot.active {
+      animation: blink 1s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .visually-muted {
+      color: #bbb;
+      font-size: 0.8rem;
+    }
+
+    input:focus,
+    select:focus,
+    button:focus {
+      outline: 2px solid var(--heading);
+      outline-offset: 2px;
+    }
+
+    #selectorStatus {
+      margin-bottom: 1rem;
+    }
+
+    #selectorStatus.error { color: #ff5555; }
+    #selectorStatus.empty { color: #bbb; }
+
+    .skeleton {
+      height: 1rem;
+      background: #444;
+      border-radius: 4px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
     }
 
     canvas {
@@ -195,6 +278,10 @@
       }
       .switch input:checked + .slider:before {
         transform: translateX(20px);
+      }
+      #selectorContainer {
+        flex-direction: column;
+        align-items: stretch;
       }
     }
 
@@ -381,8 +468,33 @@
   <h1>🧠 Audit Serveur DW</h1>
   <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
 
-  <label for="auditSelector">Rapports disponibles :</label>
-  <select id="auditSelector"></select>
+  <div id="selectorContainer" role="group" aria-labelledby="reportsTitle">
+    <h2 id="reportsTitle" class="sr-only">Sélection des rapports</h2>
+
+    <div>
+      <label for="datePicker">Jour</label>
+      <input id="datePicker" type="date" />
+    </div>
+
+    <div>
+      <label for="timeFilter">Filtrer</label>
+      <input id="timeFilter" type="text" placeholder="Rechercher une heure…" aria-describedby="timeHelp">
+      <small id="timeHelp" class="visually-muted">Ex. 06 ou 06:30</small>
+    </div>
+
+    <div>
+      <label for="timeSelect">Heures disponibles</label>
+      <select id="timeSelect" size="6" aria-live="polite"></select>
+    </div>
+
+    <div class="actions">
+      <button id="btnLatest" class="btn">Dernier rapport</button>
+      <span id="refreshDot" class="refresh-dot" aria-label="Actualisation automatique" title="Actualisation automatique"></span>
+    </div>
+  </div>
+
+  <!-- État de chargement / erreurs -->
+  <div id="selectorStatus" aria-live="polite"></div>
 
   <h2><i class="fa-solid fa-calendar-day heading-icon"></i>Date de génération</h2>
   <p id="generated">--</p>

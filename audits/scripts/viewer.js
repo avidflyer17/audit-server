@@ -1,6 +1,11 @@
 let cpuChartInstance = null;
 let memoryChartInstance = null;
 
+let auditsIndex = [];
+let auditsMap = {};
+let latestEntry = null;
+let currentFile = null;
+
 async function fetchIndex() {
   const res = await fetch('/archives/index.json');
   return await res.json();
@@ -15,6 +20,81 @@ async function loadAudit(file) {
     console.error("Erreur chargement :", err);
     alert("Erreur lors du chargement de l'audit !");
     return null;
+  }
+}
+
+function parseIndex(list) {
+  auditsIndex = list || [];
+  auditsMap = {};
+  latestEntry = null;
+  auditsIndex.forEach(file => {
+    const match = file.match(/audit_(\d{4}-\d{2}-\d{2})_(\d{2}-\d{2})\.json/);
+    if (!match) return;
+    const date = match[1];
+    const time = match[2].replace('-', ':');
+    const iso = new Date(`${date}T${time}:00`);
+    const entry = { file, time, iso, date };
+    if (!auditsMap[date]) auditsMap[date] = [];
+    auditsMap[date].push(entry);
+    if (!latestEntry || iso > latestEntry.iso) latestEntry = entry;
+  });
+  Object.keys(auditsMap).forEach(d => auditsMap[d].sort((a, b) => a.iso - b.iso));
+  return auditsMap;
+}
+
+function setDateToLatest() {
+  if (latestEntry) {
+    document.getElementById('datePicker').value = latestEntry.date;
+  }
+}
+
+function formatRelative(date) {
+  const diffMs = Date.now() - date.getTime();
+  const minutes = Math.round(diffMs / 60000);
+  const rtf = new Intl.RelativeTimeFormat(navigator.language, { numeric: 'auto' });
+  return rtf.format(-minutes, 'minute');
+}
+
+function populateTimesForDay(day) {
+  const select = document.getElementById('timeSelect');
+  select.innerHTML = '';
+  const list = auditsMap[day] || [];
+  if (list.length === 0) {
+    showStatus('Aucun rapport pour ce jour', 'empty');
+    return null;
+  }
+  showStatus('');
+  list.forEach(item => {
+    const option = document.createElement('option');
+    const locale = item.iso.toLocaleTimeString(navigator.language, { hour: '2-digit', minute: '2-digit' });
+    option.textContent = `${locale} — ${formatRelative(item.iso)}`;
+    option.value = item.file;
+    option.dataset.iso = item.iso.toISOString();
+    select.appendChild(option);
+  });
+  const last = list[list.length - 1];
+  select.value = last.file;
+  return last.file;
+}
+
+function applyTimeFilter(query) {
+  const q = query.toLowerCase();
+  const select = document.getElementById('timeSelect');
+  Array.from(select.options).forEach(opt => {
+    opt.hidden = !opt.textContent.toLowerCase().includes(q);
+  });
+}
+
+function showStatus(message, type) {
+  const div = document.getElementById('selectorStatus');
+  div.className = type || '';
+  if (type === 'loading') {
+    div.innerHTML = `<div class="skeleton"></div> ${message}`;
+  } else if (type === 'error') {
+    div.innerHTML = `${message} <button id="retryBtn" class="btn">Réessayer</button>`;
+    document.getElementById('retryBtn').addEventListener('click', init);
+  } else {
+    div.textContent = message || '';
   }
 }
 
@@ -234,55 +314,83 @@ function renderText(json) {
   document.getElementById('dockerText').textContent = docker;
 }
 
-function groupByDate(list) {
-  const selector = document.getElementById('auditSelector');
-  selector.innerHTML = '';
-
-  const map = {};
-  list.forEach(file => {
-    const parts = file.replace('audit_', '').replace('.json', '').split('_');
-    const date = parts[0];
-    const time = parts[1];
-    if (!map[date]) map[date] = [];
-    map[date].push({ file, time: time.replace('-', ':') });
-  });
-
-  const dates = Object.keys(map).sort();
-  let latest = null;
-  dates.forEach(d => {
-    map[d].sort((a, b) => a.time.localeCompare(b.time));
-    const group = document.createElement('optgroup');
-    group.label = d;
-    map[d].forEach(item => {
-      const option = document.createElement('option');
-      option.value = item.file;
-      option.textContent = item.time;
-      group.appendChild(option);
-      latest = item.file;
-    });
-    selector.appendChild(group);
-  });
-
-  return latest;
-}
-
 async function init() {
-  const list = await fetchIndex();
-  const selector = document.getElementById('auditSelector');
-  const latest = groupByDate(list);
-
-  if (latest) {
-    selector.value = latest;
-    const initial = await loadAudit(latest);
-    if (initial) {
-      renderCpuChart(initial.cpu.usage);
-      renderText(initial);
+  try {
+    showStatus('Chargement…', 'loading');
+    const list = await fetchIndex();
+    parseIndex(list);
+    if (!latestEntry) {
+      showStatus('Aucun rapport', 'empty');
+      return;
     }
+    setDateToLatest();
+    const file = populateTimesForDay(document.getElementById('datePicker').value);
+    if (file) {
+      const json = await loadAudit(file);
+      if (json) {
+        currentFile = file;
+        renderCpuChart(json.cpu.usage);
+        renderText(json);
+      }
+    }
+    showStatus('');
+  } catch (err) {
+    console.error(err);
+    showStatus('Erreur de chargement — Réessayer', 'error');
+    return;
   }
 
-  selector.addEventListener('change', async e => {
-    const json = await loadAudit(e.target.value);
+  const datePicker = document.getElementById('datePicker');
+  const timeFilter = document.getElementById('timeFilter');
+  const timeSelect = document.getElementById('timeSelect');
+  const btnLatest = document.getElementById('btnLatest');
+
+  datePicker.addEventListener('change', async function () {
+    const file = populateTimesForDay(this.value);
+    timeFilter.value = '';
+    applyTimeFilter('');
+    if (file) {
+      const json = await loadAudit(timeSelect.value);
+      if (json) {
+        currentFile = timeSelect.value;
+        renderCpuChart(json.cpu.usage);
+        renderText(json);
+      }
+    }
+  });
+
+  timeFilter.addEventListener('input', e => applyTimeFilter(e.target.value));
+
+  timeSelect.addEventListener('change', async function () {
+    const json = await loadAudit(this.value);
     if (json) {
+      currentFile = this.value;
+      renderCpuChart(json.cpu.usage);
+      renderText(json);
+    }
+  });
+
+  timeSelect.addEventListener('keydown', async function (e) {
+    if (e.key === 'Enter') {
+      const json = await loadAudit(this.value);
+      if (json) {
+        currentFile = this.value;
+        renderCpuChart(json.cpu.usage);
+        renderText(json);
+      }
+    }
+  });
+
+  btnLatest.addEventListener('click', async () => {
+    if (!latestEntry) return;
+    document.getElementById('datePicker').value = latestEntry.date;
+    populateTimesForDay(latestEntry.date);
+    timeFilter.value = '';
+    applyTimeFilter('');
+    document.getElementById('timeSelect').value = latestEntry.file;
+    const json = await loadAudit(latestEntry.file);
+    if (json) {
+      currentFile = latestEntry.file;
       renderCpuChart(json.cpu.usage);
       renderText(json);
     }
@@ -292,21 +400,38 @@ async function init() {
 }
 
 async function refreshAudits() {
-  const list = await fetchIndex();
-  const selector = document.getElementById('auditSelector');
-  const currentFile = selector.value;
-  const latest = groupByDate(list);
-
-  const options = Array.from(selector.querySelectorAll('option'));
-  if (options.some(o => o.value === currentFile)) {
-    selector.value = currentFile;
-  } else if (latest) {
-    selector.value = latest;
-    const json = await loadAudit(latest);
-    if (json) {
-      renderCpuChart(json.cpu.usage);
-      renderText(json);
+  const dot = document.getElementById('refreshDot');
+  dot.classList.add('active');
+  const selectedDate = document.getElementById('datePicker').value;
+  const previousCount = (auditsMap[selectedDate] || []).length;
+  const wasOnLatest = currentFile && latestEntry && currentFile === latestEntry.file;
+  try {
+    const list = await fetchIndex();
+    parseIndex(list);
+    const newCount = (auditsMap[selectedDate] || []).length;
+    if (newCount > previousCount) {
+      const previousFile = document.getElementById('timeSelect').value;
+      populateTimesForDay(selectedDate);
+      const select = document.getElementById('timeSelect');
+      if (Array.from(select.options).some(o => o.value === previousFile)) {
+        select.value = previousFile;
+      }
     }
+    if (wasOnLatest && latestEntry && latestEntry.file !== currentFile) {
+      document.getElementById('datePicker').value = latestEntry.date;
+      populateTimesForDay(latestEntry.date);
+      document.getElementById('timeSelect').value = latestEntry.file;
+      const json = await loadAudit(latestEntry.file);
+      if (json) {
+        currentFile = latestEntry.file;
+        renderCpuChart(json.cpu.usage);
+        renderText(json);
+      }
+    }
+  } catch (err) {
+    console.error('refresh error', err);
+  } finally {
+    dot.classList.remove('active');
   }
 }
 
