@@ -708,8 +708,34 @@
     .proc-icon { width: 1.5rem; text-align: center; flex: 0 0 1.5rem; }
     .proc-name { font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
     .proc-bars { display: flex; gap: 8px; flex: 1; }
-    .bar { flex: 1; background: var(--bar-bg, #333); border-radius: 6px; overflow: hidden; height: 14px; position: relative; }
-    .bar .fill { display: flex; align-items: center; justify-content: center; height: 100%; width: 0; color: #fff; font-size: 0.75rem; font-weight: 600; white-space: nowrap; border-radius: 6px; transition: width 250ms ease; }
+    .bar {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 16px;
+      border-radius: 6px;
+      overflow: hidden;
+      background-color: var(--bar-bg, #333);
+    }
+    .bar .fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      border-radius: 6px;
+      transition: width 250ms ease;
+    }
+    .bar .value {
+      position: relative;
+      z-index: 1;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
     .fill.green { background: #4caf50; }
     .fill.orange { background: #ff9800; }
     .fill.red { background: #f44336; }
@@ -721,7 +747,35 @@
     @media (max-width: 899px) {
       .proc-bars { flex: 1 0 100%; }
     }
-    .proc-footer { margin-top: 0.25rem; font-size: 0.8rem; text-align: right; opacity: 0.8; }
+    .total-summary {
+      margin-top: 8px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-align: right;
+      color: var(--accent-color, #4cafef);
+    }
+    .badge-total {
+      background-color: var(--accent-color, #4cafef);
+      color: #fff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    @media (max-width: 899px) {
+      .total-summary {
+        text-align: center;
+        max-width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+    @media (min-width: 900px) {
+      .total-summary {
+        font-size: 1rem;
+      }
+    }
 
     /* Docker */
     .docker-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }

@@ -395,20 +395,44 @@ function renderTopProcesses(data, containerId, main){
       <span class="proc-icon">${icon}</span>
       <span class="proc-name">${p.cmd}</span>
       <div class="proc-bars">
-        <div class="bar bar-cpu" role="progressbar" aria-label="Utilisation CPU" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cpu}"><span class="fill ${colorClassCpu(cpu)}" style="width:0">${cpu}%</span></div>
-        <div class="bar bar-ram" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${mem}"><span class="fill ${colorClassRam(mem)}" style="width:0">${mem}%</span></div>
+        <div class="bar bar-cpu" role="progressbar" aria-label="Utilisation CPU" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cpu}">
+          <span class="fill ${colorClassCpu(cpu)}" style="width:0"></span>
+          <span class="value">${cpu}%</span>
+        </div>
+        <div class="bar bar-ram" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${mem}">
+          <span class="fill ${colorClassRam(mem)}" style="width:0"></span>
+          <span class="value">${mem}%</span>
+        </div>
       </div>`;
     container.appendChild(row);
     const fills = row.querySelectorAll('.bar .fill');
+    const values = row.querySelectorAll('.bar .value');
     requestAnimationFrame(() => {
       fills[0].style.width = cpu + '%';
       fills[1].style.width = mem + '%';
+      adjustBarValue(values[0], fills[0], cpu);
+      adjustBarValue(values[1], fills[1], mem);
     });
   });
   const footer = document.createElement('div');
-  footer.className = 'proc-footer';
-  footer.textContent = `Total ${main === 'cpu' ? 'CPU' : 'RAM'} des 5 : ${total.toFixed(1)}%`;
+  footer.className = 'total-summary';
+  footer.innerHTML = `Total ${main === 'cpu' ? 'CPU' : 'RAM'} des 5 : <span class="badge-total">${total.toFixed(1)}%</span>`;
   container.appendChild(footer);
+}
+
+function contrastColor(bg){
+  const rgb = bg.match(/\d+/g).map(Number);
+  const luminance = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2];
+  return luminance > 140 ? '#000' : '#fff';
+}
+
+function adjustBarValue(valueEl, fillEl, val){
+  if (val >= 20){
+    const bg = getComputedStyle(fillEl).backgroundColor;
+    valueEl.style.color = contrastColor(bg);
+  } else {
+    valueEl.style.color = '#fff';
+  }
 }
 
 function parseDocker(item){
