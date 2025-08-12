@@ -58,10 +58,17 @@ function iconFor(name){
   return '⚙️';
 }
 
-function colorClass(v){
+function colorClassCpu(v){
   const val = Number(v);
   if (val < 40) return 'green';
   if (val < 70) return 'orange';
+  return 'red';
+}
+
+function colorClassRam(v){
+  const val = Number(v);
+  if (val < 40) return 'blue';
+  if (val < 70) return 'yellow';
   return 'red';
 }
 
@@ -383,15 +390,20 @@ function renderTopProcesses(data, containerId, main){
     row.className = 'proc-row';
     row.tabIndex = 0;
     row.title = `CPU ${cpu}% — RAM ${mem}%`;
-    const mainVal = main === 'cpu' ? cpu : mem;
-    const subVal = main === 'cpu' ? mem : cpu;
     const icon = iconFor(p.cmd);
-    row.innerHTML = `<span class="proc-icon">${icon}</span><span class="proc-name">${p.cmd}</span><div class="proc-bars"><div class="bar main"><div class="fill ${colorClass(mainVal)}"></div></div><div class="bar sub"><div class="fill"></div></div></div><div class="proc-badges"><span class="badge">CPU ${cpu}%</span><span class="badge">RAM ${mem}%</span></div>`;
+    row.innerHTML = `
+      <span class="proc-icon">${icon}</span>
+      <span class="proc-name">${p.cmd}</span>
+      <div class="proc-bars">
+        <div class="bar" role="progressbar" aria-label="Utilisation CPU" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cpu}"><span class="fill ${colorClassCpu(cpu)}"></span></div>
+        <div class="bar" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${mem}"><span class="fill ${colorClassRam(mem)}"></span></div>
+      </div>
+      <div class="proc-values"><span class="badge">CPU ${cpu}%</span><span class="badge">RAM ${mem}%</span></div>`;
     container.appendChild(row);
-    const fills = row.querySelectorAll('.fill');
+    const fills = row.querySelectorAll('.bar .fill');
     requestAnimationFrame(() => {
-      fills[0].style.width = mainVal + '%';
-      fills[1].style.width = subVal + '%';
+      fills[0].style.width = cpu + '%';
+      fills[1].style.width = mem + '%';
     });
   });
   const footer = document.createElement('div');
@@ -488,8 +500,8 @@ function renderDockerList(){
     card.className = 'docker-card';
     card.tabIndex = 0;
     card.title = `CPU ${c.cpu}% — RAM ${c.mem}% — Status ${c.health}`;
-    const cpuColor = colorClass(c.cpu);
-    const ramColor = colorClass(c.mem);
+    const cpuColor = colorClassCpu(c.cpu);
+    const ramColor = colorClassRam(c.mem);
     const icon = iconFor(c.name);
     card.innerHTML = `<div class="docker-head"><div class="docker-title"><span class="docker-icon">${icon}</span><span class="docker-name">${c.name}</span></div><span class="status-badge status-${c.health}">${c.health}</span></div><div class="docker-uptime">${c.uptime}</div><div class="docker-bars"><div class="bar-outer cpu"><div class="fill ${cpuColor}"></div></div><div class="bar-outer ram"><div class="fill ${ramColor}"></div></div>${c.memText?`<div class="ram-text">${c.memText}</div>`:''}</div>`;
     grid.appendChild(card);
