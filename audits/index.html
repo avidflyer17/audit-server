@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
   crossorigin="anonymous"
   referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="styles.css">
   <script src="/scripts/viewer.js?v=3"></script>
   <style>
     body.theme-dark {
@@ -433,7 +434,7 @@
     .temp-fill {
       height: 100%;
       width: 0%;
-      background-color: green;
+      background-color: var(--success);
       transition: width 0.5s ease, background-color 0.5s ease;
     }
     .badge {
@@ -451,9 +452,9 @@
       align-items: center;
       justify-content: space-between;
     }
-    .green  { background-color: #4caf50; color: white; }
-    .orange { background-color: #ff9800; color: black; }
-    .red    { background-color: #f44336; color: white; }
+    .color-success { background-color: var(--success); color: white; }
+    .color-warning { background-color: var(--warning); color: black; }
+    .color-danger  { background-color: var(--danger); color: white; }
 
     /* General info & network cards */
     .info-grid { display: flex; flex-direction: column; gap: 0.75rem; }
@@ -633,9 +634,9 @@
     }
     .legend-item { display: flex; align-items: center; gap: 0.25rem; }
     .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .dot.green { background: #4caf50; }
-    .dot.orange { background: #ff9800; }
-    .dot.red { background: #f44336; }
+    .dot.color-success { background: var(--success); }
+    .dot.color-warning { background: var(--warning); }
+    .dot.color-danger { background: var(--danger); }
 
     .services-title-row {
       display: flex;
@@ -789,11 +790,10 @@
       font-weight: 600;
       white-space: nowrap;
     }
-    .fill.green { background: #4caf50; }
-    .fill.orange { background: #ff9800; }
-    .fill.red { background: #f44336; }
-    .fill.blue { background: #2196f3; }
-    .fill.yellow { background: #ffeb3b; color: #000; }
+    .fill.color-success { background: var(--success); }
+    .fill.color-warning { background: var(--warning); color: #000; }
+    .fill.color-danger { background: var(--danger); }
+    .fill.color-info { background: var(--info); }
     @media (min-width: 900px) {
       .proc-name { flex: 0 0 12rem; }
     }
@@ -998,9 +998,9 @@
       </div>
       <div class="gauge-label">charge sur 1 min</div>
       <div class="load-legend">
-        <span class="legend-item"><span class="dot green"></span> Faible</span>
-        <span class="legend-item"><span class="dot orange"></span> Élevée</span>
-        <span class="legend-item"><span class="dot red"></span> Critique</span>
+        <span class="legend-item"><span class="dot color-success"></span> Faible</span>
+        <span class="legend-item"><span class="dot color-warning"></span> Élevée</span>
+        <span class="legend-item"><span class="dot color-danger"></span> Critique</span>
       </div>
     </div>
     <div class="load-cards">
