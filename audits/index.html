@@ -695,6 +695,55 @@
     .service-badge.cat-mises-a-jour { background: #20c997; }
     .service-badge.cat-autre { background: #adb5bd; }
 
+    /* Top processus */
+    .top-grid { display: flex; flex-direction: column; gap: 1rem; }
+    @media (min-width: 900px) {
+      .top-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    }
+    .proc-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    .proc-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem; border-radius: 6px; cursor: default; }
+    .proc-row:hover { background: #333; }
+    .proc-row:focus-visible { outline: 2px solid var(--heading); outline-offset: 2px; }
+    .proc-icon { width: 1.5rem; text-align: center; }
+    .proc-name { font-weight: bold; }
+    .proc-bars { flex: 1; display: flex; flex-direction: column; gap: 4px; margin: 0 0.5rem; }
+    .bar { position: relative; background: #444; border-radius: 4px; overflow: hidden; }
+    .bar.main { height: 8px; }
+    .bar.sub { height: 4px; }
+    .bar .fill { height: 100%; width: 0; transition: width 0.3s ease; }
+    .bar.sub .fill { background: #888; }
+    .fill.green { background: #4caf50; }
+    .fill.orange { background: #ff9800; }
+    .fill.red { background: #f44336; }
+    .proc-badges { font-size: 0.75rem; display: flex; gap: 0.25rem; }
+    .proc-badges .badge { background: #444; padding: 2px 4px; border-radius: 4px; }
+    .proc-footer { margin-top: 0.25rem; font-size: 0.8rem; text-align: right; opacity: 0.8; }
+
+    /* Docker */
+    .docker-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
+    .docker-toolbar input { flex: 1; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .chip { background: #444; border: none; border-radius: 9999px; padding: 0.25rem 0.6rem; cursor: pointer; color: var(--text); }
+    .chip.active { background: var(--heading); color: var(--bg); }
+    .docker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 0.5rem; }
+    .docker-card { background: var(--block-bg); padding: 0.75rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s ease; }
+    .docker-card:hover { transform: translateY(-2px); }
+    .docker-card:focus-within { outline: 2px solid var(--heading); outline-offset: 2px; }
+    .docker-head { display: flex; align-items: center; justify-content: space-between; }
+    .docker-title { display: flex; align-items: center; gap: 0.5rem; }
+    .docker-name { font-weight: bold; }
+    .status-badge { padding: 2px 6px; border-radius: 6px; font-size: 0.75rem; }
+    .status-healthy { background: #4caf50; color: #fff; }
+    .status-starting { background: #ff9800; color: #000; }
+    .status-unhealthy { background: #f44336; color: #fff; }
+    .status-exited { background: #777; color: #fff; }
+    .status-running { background: #4caf50; color: #fff; }
+    .docker-uptime { font-size: 0.8rem; opacity: 0.8; margin-top: 0.25rem; }
+    .docker-bars { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
+    .bar-outer { height: 8px; background: #444; border-radius: 4px; overflow: hidden; }
+    .bar-outer .fill { height: 100%; width: 0; transition: width 0.3s ease; }
+    .ram-text { font-size: 0.75rem; text-align: right; }
+
     @media (max-width: 600px) {
       .services-grid { grid-template-columns: 1fr; }
       .services-toolbar { justify-content: flex-start; }
@@ -885,32 +934,34 @@
   <div id="portsContainer" class="block-wrapper"></div>
   <div id="portsEmpty" class="empty hidden">Aucun port ne correspond. <button id="portsReset" class="btn">Réinitialiser</button></div>
 
-  <h2><i class="fa-solid fa-fire heading-icon"></i>Top 5 processus - CPU</h2>
-  <div class="block-wrapper">
-    <button class="copy-btn" onclick="copyToClipboard('topCpuText')">📋</button>
-    <pre id="topCpuText" class="code-block"></pre>
-  </div>
-
-  <h2><i class="fa-solid fa-memory heading-icon"></i>Top 5 processus - RAM</h2>
-  <div class="block-wrapper">
-    <button class="copy-btn" onclick="copyToClipboard('topMemText')">📋</button>
-    <pre id="topMemText" class="code-block"></pre>
+  <div class="top-grid">
+    <div class="top-panel">
+      <h2><i class="fa-solid fa-fire heading-icon"></i>Top 5 processus - CPU</h2>
+      <div id="topCpu" class="report-card proc-list"></div>
+    </div>
+    <div class="top-panel">
+      <h2><i class="fa-solid fa-memory heading-icon"></i>Top 5 processus - RAM</h2>
+      <div id="topMem" class="report-card proc-list"></div>
+    </div>
   </div>
 
   <h2><i class="fa-brands fa-docker heading-icon"></i>Conteneurs Docker</h2>
-  <div class="block-wrapper">
-    <button class="copy-btn" onclick="copyToClipboard('dockerText')">📋</button>
-    <pre id="dockerText" class="code-block"></pre>
+  <div class="docker-toolbar">
+    <input type="text" id="dockerSearch" placeholder="Rechercher un conteneur…" aria-label="Rechercher un conteneur…">
+    <div id="dockerFilters" class="chips">
+      <button class="chip active" data-filter="healthy">healthy</button>
+      <button class="chip active" data-filter="unhealthy">unhealthy</button>
+      <button class="chip active" data-filter="running">running</button>
+      <button class="chip active" data-filter="exited">exited</button>
+    </div>
+    <select id="dockerSort" aria-label="Tri">
+      <option value="cpu">CPU</option>
+      <option value="ram">RAM</option>
+      <option value="name" selected>Nom</option>
+    </select>
   </div>
-
-  <script>
-    function copyToClipboard(id) {
-      const text = document.getElementById(id).textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Copié dans le presse-papiers !");
-      });
-    }
-  </script>
+  <div id="dockerGrid" class="docker-grid"></div>
+  <div id="dockerEmpty" class="empty hidden">Aucun conteneur actif</div>
   <script>
     const themeSwitch = document.getElementById("themeToggle");
     const themeIcon = document.getElementById("themeIcon");

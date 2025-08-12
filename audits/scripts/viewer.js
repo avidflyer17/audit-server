@@ -31,6 +31,47 @@ let serviceSearch = '';
 let serviceSort = 'az';
 let servicesInit = false;
 
+const ICON_MAP = [
+  {regex:/docker|containerd/i, icon:'🐳'},
+  {regex:/nginx|traefik|caddy/i, icon:'🌐'},
+  {regex:/node|nodejs/i, icon:'🟩'},
+  {regex:/python|gunicorn|uvicorn/i, icon:'🐍'},
+  {regex:/java/i, icon:'☕'},
+  {regex:/redis/i, icon:'⚡'},
+  {regex:/postgres|postgre/i, icon:'🐘'},
+  {regex:/mysql|mariadb/i, icon:'🛢️'},
+  {regex:/mongodb/i, icon:'🍃'},
+  {regex:/jellyfin|plex|emby/i, icon:'🎬'},
+  {regex:/adguard/i, icon:'🛡️'},
+  {regex:/crowdsec/i, icon:'🧱'},
+  {regex:/zigbee2mqtt|mqtt|mosquitto/i, icon:'📶'},
+  {regex:/ssh|openssh/i, icon:'🔐'},
+  {regex:/smb|samba/i, icon:'🗂️'},
+  {regex:/prometheus|exporter|grafana/i, icon:'📈'},
+  {regex:/.*/, icon:'⚙️'}
+];
+
+function iconFor(name){
+  for(const m of ICON_MAP){
+    if(m.regex.test(name)) return m.icon;
+  }
+  return '⚙️';
+}
+
+function colorClass(v){
+  const val = Number(v);
+  if (val < 40) return 'green';
+  if (val < 70) return 'orange';
+  return 'red';
+}
+
+let dockerData = [];
+let dockerFiltered = [];
+let dockerFilters = new Set(['healthy','unhealthy','running','exited']);
+let dockerSearch = '';
+let dockerSort = 'name';
+let dockerInit = false;
+
 function getServiceMeta(name){
   for (const p of SERVICE_PATTERNS){
     if (p.regex.test(name)) return p;
@@ -323,6 +364,128 @@ function renderPorts(ports){
     return {proto:p.proto.toUpperCase(), ip, port:Number(port), service, badges, risk, icon};
   });
   applyPortFilters();
+}
+
+function renderTopProcesses(data, containerId, main){
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  const items = data?.slice(1,6) || [];
+  if (!items.length){
+    container.innerHTML = '<div class="empty">Aucun processus significatif</div>';
+    return;
+  }
+  let total = 0;
+  items.forEach(p => {
+    const cpu = Number(p.cpu);
+    const mem = Number(p.mem);
+    if (main === 'cpu') total += cpu; else total += mem;
+    const row = document.createElement('div');
+    row.className = 'proc-row';
+    row.tabIndex = 0;
+    row.title = `CPU ${cpu}% — RAM ${mem}%`;
+    const mainVal = main === 'cpu' ? cpu : mem;
+    const subVal = main === 'cpu' ? mem : cpu;
+    const icon = iconFor(p.cmd);
+    row.innerHTML = `<span class="proc-icon">${icon}</span><span class="proc-name">${p.cmd}</span><div class="proc-bars"><div class="bar main"><div class="fill ${colorClass(mainVal)}"></div></div><div class="bar sub"><div class="fill"></div></div></div><div class="proc-badges"><span class="badge">CPU ${cpu}%</span><span class="badge">RAM ${mem}%</span></div>`;
+    container.appendChild(row);
+    const fills = row.querySelectorAll('.fill');
+    requestAnimationFrame(() => {
+      fills[0].style.width = mainVal + '%';
+      fills[1].style.width = subVal + '%';
+    });
+  });
+  const footer = document.createElement('div');
+  footer.className = 'proc-footer';
+  footer.textContent = `Total ${main === 'cpu' ? 'CPU' : 'RAM'} des 5 : ${total.toFixed(1)}%`;
+  container.appendChild(footer);
+}
+
+function parseDocker(item){
+  if (typeof item === 'string'){
+    const name = item.split(' (')[0];
+    const info = item.slice(name.length + 2, -1); // inside parentheses
+    let state = 'running';
+    let health = '';
+    let uptime = info;
+    const m = info.match(/\((healthy|unhealthy|starting)\)/i);
+    if (m){
+      health = m[1].toLowerCase();
+      uptime = info.replace(/\((healthy|unhealthy|starting)\)/i,'').trim();
+    }
+    if (/^exited/i.test(info)) { state = 'exited'; health = 'exited'; }
+    if (!health) health = state;
+    return {name, state, health, uptime, cpu:0, mem:0};
+  }
+  return {
+    name: item.name,
+    state: item.state || 'running',
+    health: item.health || item.state || 'running',
+    uptime: item.uptime || '',
+    cpu: Number(item.cpu) || 0,
+    mem: Number(item.mem) || 0,
+    memText: item.mem_text || ''
+  };
+}
+
+function initDockerUI(){
+  if (dockerInit) return;
+  dockerInit = true;
+  const search = document.getElementById('dockerSearch');
+  const sortSel = document.getElementById('dockerSort');
+  const chips = document.querySelectorAll('#dockerFilters .chip');
+  search.addEventListener('input', e => { dockerSearch = e.target.value.toLowerCase(); applyDockerFilters(); });
+  sortSel.addEventListener('change', e => { dockerSort = e.target.value; applyDockerFilters(); });
+  chips.forEach(ch => {
+    ch.addEventListener('click', () => {
+      const f = ch.dataset.filter;
+      if (dockerFilters.has(f)) dockerFilters.delete(f); else dockerFilters.add(f);
+      ch.classList.toggle('active');
+      applyDockerFilters();
+    });
+  });
+}
+
+function applyDockerFilters(){
+  dockerFiltered = dockerData.filter(c => {
+    const status = c.health === 'starting' ? 'running' : (c.health || c.state);
+    return dockerFilters.has(status) && c.name.toLowerCase().includes(dockerSearch);
+  });
+  if (dockerSort === 'cpu') dockerFiltered.sort((a,b)=>b.cpu-a.cpu);
+  else if (dockerSort === 'ram') dockerFiltered.sort((a,b)=>b.mem-a.mem);
+  else dockerFiltered.sort((a,b)=>a.name.localeCompare(b.name));
+  renderDockerList();
+}
+
+function renderDockerList(){
+  const grid = document.getElementById('dockerGrid');
+  grid.innerHTML = '';
+  if (!dockerFiltered.length){
+    document.getElementById('dockerEmpty').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('dockerEmpty').classList.add('hidden');
+  dockerFiltered.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'docker-card';
+    card.tabIndex = 0;
+    card.title = `CPU ${c.cpu}% — RAM ${c.mem}% — Status ${c.health}`;
+    const cpuColor = colorClass(c.cpu);
+    const ramColor = colorClass(c.mem);
+    const icon = iconFor(c.name);
+    card.innerHTML = `<div class="docker-head"><div class="docker-title"><span class="docker-icon">${icon}</span><span class="docker-name">${c.name}</span></div><span class="status-badge status-${c.health}">${c.health}</span></div><div class="docker-uptime">${c.uptime}</div><div class="docker-bars"><div class="bar-outer cpu"><div class="fill ${cpuColor}"></div></div><div class="bar-outer ram"><div class="fill ${ramColor}"></div></div>${c.memText?`<div class="ram-text">${c.memText}</div>`:''}</div>`;
+    grid.appendChild(card);
+    const fills = card.querySelectorAll('.fill');
+    requestAnimationFrame(()=>{
+      fills[0].style.width = c.cpu + '%';
+      fills[1].style.width = c.mem + '%';
+    });
+  });
+}
+
+function renderDocker(list){
+  initDockerUI();
+  dockerData = (list||[]).map(parseDocker);
+  applyDockerFilters();
 }
 
 async function fetchIndex() {
@@ -692,14 +855,9 @@ function renderText(json) {
 
   renderPorts(json.ports);
 
-  const topCpu = json.top_cpu?.slice(1).map(p => `${p.cmd} (PID ${p.pid}) - CPU ${p.cpu}%, RAM ${p.mem}%`) || [];
-  document.getElementById('topCpuText').textContent = topCpu.length ? topCpu.join('\n') : 'Aucun processus';
-
-  const topMem = json.top_mem?.slice(1).map(p => `${p.cmd} (PID ${p.pid}) - RAM ${p.mem}%, CPU ${p.cpu}%`) || [];
-  document.getElementById('topMemText').textContent = topMem.length ? topMem.join('\n') : 'Aucun processus';
-
-  const docker = json.docker?.join('\n') || 'Aucun conteneur';
-  document.getElementById('dockerText').textContent = docker;
+  renderTopProcesses(json.top_cpu, 'topCpu', 'cpu');
+  renderTopProcesses(json.top_mem, 'topMem', 'mem');
+  renderDocker(json.docker);
 }
 
 async function init() {
