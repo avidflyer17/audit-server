@@ -15,7 +15,7 @@ Make sure these commands are available on the machine where you run the script.
 
 ## Generating an audit
 
-Edit the `BASE_DIR` variable near the top of `generate-audit-json.sh` to point to the directory where reports should be stored. Then run:
+The script stores reports under `/home/damswallace/docker/audits-nginx/audits` by default. You can override the location by setting the `BASE_DIR` environment variable before running:
 
 ```bash
 ./generate-audit-json.sh
@@ -43,6 +43,18 @@ Open `http://<container-ip>/` in a browser to view the dashboard. The frontend (
 ├── generate-audit-json.sh # Bash script to create audit_*.json files
 ├── docker-compose.yaml    # Nginx setup for serving the reports
 └── nginx.conf             # Basic Nginx configuration
+```
+
+## Documentation
+
+Additional usage instructions are available in the [docs](docs/USAGE.md) directory.
+
+## Testing
+
+Run the provided test script to generate a sample report and validate its JSON structure:
+
+```bash
+./tests/run.sh
 ```
 
 ## License
