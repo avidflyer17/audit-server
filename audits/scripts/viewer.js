@@ -1,5 +1,6 @@
 let cpuChartInstance = null;
 let memoryChartInstance = null;
+let auditsByDate = {};
 
 async function fetchIndex() {
   const res = await fetch('/archives/index.json');
@@ -220,78 +221,130 @@ function renderText(json) {
   document.getElementById('dockerText').textContent = docker;
 }
 
-function filterAudits(query) {
-  const selector = document.getElementById('auditSelector');
-  const q = query.toLowerCase();
-  Array.from(selector.options).forEach(opt => {
-    opt.style.display = opt.textContent.toLowerCase().includes(q) ? '' : 'none';
+function groupByDate(list) {
+  const map = {};
+  list.forEach(file => {
+    const parts = file.replace('audit_', '').replace('.json', '').split('_');
+    const date = parts[0];
+    const time = parts[1];
+    if (!map[date]) map[date] = [];
+    map[date].push({ file, time: time.replace('-', ':') });
   });
+  Object.values(map).forEach(arr => arr.sort((a, b) => a.time.localeCompare(b.time)));
+  return map;
+}
+
+function populateTimes(date) {
+  const selector = document.getElementById('auditSelector');
+  selector.innerHTML = '';
+  const list = auditsByDate[date];
+  if (!list) return false;
+  list.forEach(item => {
+    const option = document.createElement('option');
+    option.value = item.file;
+    option.textContent = item.time;
+    selector.appendChild(option);
+  });
+  return list.length > 0;
 }
 
 async function init() {
   const list = await fetchIndex();
+  auditsByDate = groupByDate(list);
+
+  const dateInput = document.getElementById('auditDate');
   const selector = document.getElementById('auditSelector');
-  const search = document.getElementById('auditSearch');
+  const datalist = document.getElementById('auditDates');
 
-  list.forEach(file => {
-    const option = document.createElement('option');
-    option.value = file;
-    option.textContent = decodeURIComponent(file.replace('audit_', '').replace('.json', '').replace('_', ' à '));
-    selector.appendChild(option);
+  const availableDates = Object.keys(auditsByDate).sort();
+  datalist.innerHTML = '';
+  availableDates.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    datalist.appendChild(opt);
   });
 
-  // Attach search filtering if the search input exists
-  if (search) {
-    search.addEventListener('input', e => filterAudits(e.target.value));
+  if (availableDates.length > 0) {
+    dateInput.setAttribute('min', availableDates[0]);
+    dateInput.setAttribute('max', availableDates[availableDates.length - 1]);
+    const latest = availableDates[availableDates.length - 1];
+    dateInput.value = latest;
+    populateTimes(latest);
+    const initial = await loadAudit(auditsByDate[latest][0].file);
+    if (initial) {
+      renderCpuChart(initial.cpu.usage);
+      renderText(initial);
+    }
   }
 
-  selector.addEventListener('change', async (e) => {
-    const json = await loadAudit(e.target.value);
-    if (!json) return;
-    renderCpuChart(json.cpu.usage);
-    renderText(json);
-  });
-
-  if (list.length > 0) {
-    selector.value = list[0];
-    const initial = await loadAudit(list[0]);
-    renderCpuChart(initial.cpu.usage);
-    renderText(initial);
-  }
-}
-
-async function refreshAudits() {
-  const list = await fetchIndex();
-  const selector = document.getElementById('auditSelector');
-  const search = document.getElementById('auditSearch');
-
-  selector.innerHTML = '';
-  list.forEach(file => {
-    const option = document.createElement('option');
-    option.value = file;
-    option.textContent = decodeURIComponent(file.replace('audit_', '').replace('.json', '').replace('_', ' à '));
-    selector.appendChild(option);
-  });
-
-  // Reapply current search filter if any
-  if (search) {
-    filterAudits(search.value);
-  }
-
-  if (list.length > 0) {
-    const latest = list[list.length - 1];
-    selector.value = latest;
-    const json = await loadAudit(latest);
+  dateInput.addEventListener('change', async e => {
+    const date = e.target.value;
+    if (!populateTimes(date)) {
+      selector.innerHTML = '';
+      return;
+    }
+    const json = await loadAudit(selector.options[0].value);
     if (json) {
       renderCpuChart(json.cpu.usage);
       renderText(json);
     }
+  });
+
+  selector.addEventListener('change', async e => {
+    const json = await loadAudit(e.target.value);
+    if (json) {
+      renderCpuChart(json.cpu.usage);
+      renderText(json);
+    }
+  });
+
+  setInterval(refreshAudits, 60000);
+}
+
+async function refreshAudits() {
+  const list = await fetchIndex();
+  auditsByDate = groupByDate(list);
+
+  const dateInput = document.getElementById('auditDate');
+  const selector = document.getElementById('auditSelector');
+  const datalist = document.getElementById('auditDates');
+
+  const currentDate = dateInput.value;
+  const currentFile = selector.value;
+
+  const availableDates = Object.keys(auditsByDate).sort();
+  datalist.innerHTML = '';
+  availableDates.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    datalist.appendChild(opt);
+  });
+
+  if (currentDate && auditsByDate[currentDate]) {
+    populateTimes(currentDate);
+    if (auditsByDate[currentDate].some(a => a.file === currentFile)) {
+      selector.value = currentFile;
+    } else if (selector.options.length > 0) {
+      selector.value = selector.options[0].value;
+      const json = await loadAudit(selector.value);
+      if (json) {
+        renderCpuChart(json.cpu.usage);
+        renderText(json);
+      }
+    }
+  } else if (availableDates.length > 0) {
+    const latest = availableDates[availableDates.length - 1];
+    dateInput.value = latest;
+    populateTimes(latest);
+    const json = await loadAudit(auditsByDate[latest][0].file);
+    if (json) {
+      renderCpuChart(json.cpu.usage);
+      renderText(json);
+    }
+  } else {
+    dateInput.value = '';
+    selector.innerHTML = '';
   }
 }
 
-// Ensure initialization runs after the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-  init().then(() => {
-    setInterval(refreshAudits, 60000);
-  });
-});
+document.addEventListener('DOMContentLoaded', init);
