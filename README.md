@@ -10,12 +10,8 @@ The `generate-audit-json.sh` script relies on a few common utilities:
 - `jq` for JSON formatting
 - `sensors` for temperature readings (optional)
 - `curl` to retrieve the public IP address
-- `intel-gpu-tools` or `nvidia-smi` to collect GPU usage (optional)
 
 Make sure these commands are available on the machine where you run the script.
-
-If `intel_gpu_top` or `nvidia-smi` is present, the audit will also report GPU utilisation. Intel GPUs require running the script as
-root with `debugfs` mounted (usually under `/sys/kernel/debug`).
 
 ## Generating an audit
 
