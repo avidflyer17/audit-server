@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="styles.css">
   <script src="/scripts/viewer.js?v=3" defer></script>
 </head>
-<body class="theme-dark">
+  <body data-theme="dark">
   <header id="topBar" class="top-bar">
     <button id="menuToggle" class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
     <div id="themeSwitchWrapper">
@@ -26,8 +26,8 @@
     </div>
   </header>
 
-  <aside id="sidebar" class="sidebar">
-    <div id="reportCard" class="report-card">
+    <aside id="sidebar" class="sidebar">
+    <div id="reportCard" class="report-card card">
       <div class="card-header">
         <h2>Rapports</h2>
         <p class="subtitle">Choisissez un moment</p>
@@ -64,43 +64,43 @@
     <h1>🧠 Audit Serveur DW</h1>
     <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
 
-    <div class="info-grid">
-    <div class="info-card" id="generatedCard" aria-labelledby="generatedTitle">
-      <div class="card-head">
-        <div class="card-title" id="generatedTitle"><i class="fa-solid fa-calendar-day"></i><span>Date de génération</span></div>
+      <div class="info-grid">
+      <div class="info-card card" id="generatedCard" aria-labelledby="generatedTitle">
+        <div class="card-head">
+          <div class="card-title card__title" id="generatedTitle"><i class="fa-solid fa-calendar-day"></i><span>Date de génération</span></div>
         <button id="copyGenerated" class="copy-icon" title="Copier la date" aria-label="Copier la date"><i class="fa-regular fa-copy"></i></button>
       </div>
-      <div id="generatedValue" class="card-main">--</div>
-      <div class="card-meta"><span id="tzBadge" class="badge"></span></div>
+        <div id="generatedValue" class="card-main">--</div>
+        <div class="card-meta card__meta"><span id="tzBadge" class="badge"></span></div>
     </div>
-    <div class="info-card" id="uptimeCard" aria-labelledby="uptimeTitle">
-      <div class="card-head">
-        <div class="card-title" id="uptimeTitle"><i class="fa-solid fa-clock"></i><span>Temps de fonctionnement</span></div>
+      <div class="info-card card" id="uptimeCard" aria-labelledby="uptimeTitle">
+        <div class="card-head">
+          <div class="card-title card__title" id="uptimeTitle"><i class="fa-solid fa-clock"></i><span>Temps de fonctionnement</span></div>
         <span id="uptimeBadge" class="badge"></span>
         <button id="copyUptime" class="copy-icon" title="Copier la durée" aria-label="Copier la durée"><i class="fa-regular fa-copy"></i></button>
       </div>
-      <div id="uptimeValue" class="card-main">--</div>
-      <div id="uptimeSince" class="card-meta"></div>
+        <div id="uptimeValue" class="card-main">--</div>
+        <div id="uptimeSince" class="card-meta card__meta"></div>
     </div>
   </div>
 
-  <div class="info-card network-card" id="networkCard" aria-labelledby="networkTitle">
+    <div class="info-card card network-card" id="networkCard" aria-labelledby="networkTitle">
     <div class="card-head">
-      <div class="card-title" id="networkTitle"><i class="fa-solid fa-network-wired"></i><span>Adressage réseau</span></div>
+      <div class="card-title card__title" id="networkTitle"><i class="fa-solid fa-network-wired"></i><span>Adressage réseau</span></div>
     </div>
     <div class="card-body">
-      <div class="ip-row">
-        <i class="fa-solid fa-computer ip-icon" aria-hidden="true"></i>
-        <span id="ipLocalChip" class="chip ip-chip" title="Adresse IP locale détectée par le host"><span class="chip-label">IP locale</span> <span id="ipLocal" class="chip-value">N/A</span></span>
-        <span id="netBadge" class="badge"></span>
-        <button id="copyIpLocal" class="copy-icon" title="Copier l'IP locale" aria-label="Copier l'IP locale"><i class="fa-regular fa-copy"></i></button>
-      </div>
-      <div class="ip-row">
-        <i class="fa-solid fa-globe ip-icon" aria-hidden="true"></i>
-        <span id="ipPublicChip" class="chip ip-chip" title="Adresse IP externe détectée"><span class="chip-label">IP externe</span> <span id="ipPublic" class="chip-value">N/A</span></span>
-        <span id="ispBadge" class="badge"></span>
-        <button id="copyIpPublic" class="copy-icon" title="Copier l'IP externe" aria-label="Copier l'IP externe"><i class="fa-regular fa-copy"></i></button>
-      </div>
+        <div class="ip-row">
+          <i class="fa-solid fa-computer ip-icon" aria-hidden="true"></i>
+          <span id="ipLocalChip" class="chip ip-chip" title="Adresse IP locale détectée par le host"><span class="chip-label">IP locale</span> <span id="ipLocal" class="chip-value">N/A</span></span>
+          <span id="netBadge" class="badge pill"></span>
+          <button id="copyIpLocal" class="copy-icon" title="Copier l'IP locale" aria-label="Copier l'IP locale"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="ip-row">
+          <i class="fa-solid fa-globe ip-icon" aria-hidden="true"></i>
+          <span id="ipPublicChip" class="chip ip-chip" title="Adresse IP externe détectée"><span class="chip-label">IP externe</span> <span id="ipPublic" class="chip-value">N/A</span></span>
+          <span id="ispBadge" class="badge pill"></span>
+          <button id="copyIpPublic" class="copy-icon" title="Copier l'IP externe" aria-label="Copier l'IP externe"><i class="fa-regular fa-copy"></i></button>
+        </div>
     </div>
   </div>
 
@@ -125,18 +125,22 @@
       </div>
     </div>
     <div class="load-cards">
-      <div id="load5Card" class="mini-card" title="Charge moyenne sur 5 min" tabindex="0">
-        <div class="mini-title">5 min</div>
-        <div id="load5Val" class="mini-value">--</div>
-        <div class="mini-bar"><div id="load5Bar" class="fill"></div></div>
-        <div id="load5Trend" class="mini-trend">--</div>
-      </div>
-      <div id="load15Card" class="mini-card" title="Charge moyenne sur 15 min" tabindex="0">
-        <div class="mini-title">15 min</div>
-        <div id="load15Val" class="mini-value">--</div>
-        <div class="mini-bar"><div id="load15Bar" class="fill"></div></div>
-        <div id="load15Trend" class="mini-trend">--</div>
-      </div>
+        <div id="load5Card" class="mini-card card card--compact" title="Charge moyenne sur 5 min" tabindex="0">
+          <div class="mini-title">5 min</div>
+          <div class="progress progress--thin">
+            <div id="load5Bar" class="progress__bar"></div>
+            <div id="load5Val" class="progress__value">--</div>
+          </div>
+          <div id="load5Trend" class="mini-trend">--</div>
+        </div>
+        <div id="load15Card" class="mini-card card card--compact" title="Charge moyenne sur 15 min" tabindex="0">
+          <div class="mini-title">15 min</div>
+          <div class="progress progress--thin">
+            <div id="load15Bar" class="progress__bar"></div>
+            <div id="load15Val" class="progress__value">--</div>
+          </div>
+          <div id="load15Trend" class="mini-trend">--</div>
+        </div>
     </div>
   </div>
 
@@ -229,12 +233,11 @@
   <script>
     const themeSwitch = document.getElementById("themeToggle");
     const themeIcon = document.getElementById("themeIcon");
-    function applyTheme(t){
-      document.body.classList.toggle("theme-light", t === "light");
-      document.body.classList.toggle("theme-dark", t !== "light");
-      themeSwitch.checked = t === "light";
-      if (themeIcon) themeIcon.className = t === "light" ? "fas fa-sun theme-icon" : "fas fa-moon theme-icon";
-    }
+      function applyTheme(t){
+        document.body.setAttribute("data-theme", t);
+        themeSwitch.checked = t === "light";
+        if (themeIcon) themeIcon.className = t === "light" ? "fas fa-sun theme-icon" : "fas fa-moon theme-icon";
+      }
     themeSwitch.addEventListener("change", () => {
       const next = themeSwitch.checked ? "light" : "dark";
       localStorage.setItem("theme", next);
