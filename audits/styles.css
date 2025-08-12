@@ -1,6 +1,6 @@
 :root {
-  --font-base: system-ui, sans-serif;
-  --font-mono: "Courier New", monospace;
+  --font-base: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
   --success: #4caf50;
   --warning: #ff9800;
   --danger: #f44336;
