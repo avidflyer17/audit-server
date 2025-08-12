@@ -9,7 +9,7 @@
   crossorigin="anonymous"
   referrerpolicy="no-referrer" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="/scripts/viewer.js?v=2"></script>
+  <script src="/scripts/viewer.js?v=3"></script>
   <style>
     :root {
       --bg: #191a24;
@@ -468,85 +468,50 @@
       margin: auto;
       padding: 1rem 0;
     }
-    .port-group {
-      position: relative;
-      margin-bottom: 1rem;
-      padding-left: 1rem;
-      border-left: 3px solid #444;
-    }
-
-    .port-ip {
-      font-weight: bold;
-      color: var(--heading);
-      margin-bottom: 0.2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .port-entry {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 2px 0;
-    }
-
-    .port-entry i {
-      color: #ffb86c;
-    }
-
-    .port-address {
-      font-family: monospace;
-      color: var(--text);
-      word-break: break-word;      /* Permet de casser les longues IPv6 */
-      overflow-wrap: anywhere;     /* Pour forcer le retour à la ligne */
-    }
-    .protocol-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 1.2rem;
-      color: var(--heading);
-      margin-top: 1.5rem;
-      margin-bottom: 0.4rem;
-      border-bottom: 1px solid #444;
-      padding-bottom: 0.3rem;
-    }
-
-
-    .protocol-header i {
-      color: #ffb86c;
-      font-size: 1.3rem;
-    }
-
-    .protocol-header .left {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    .protocol-header .count {
-      background: #444;
-      border-radius: 6px;
-      padding: 2px 8px;
+    .ports-legend {
       font-size: 0.9rem;
-      font-family: monospace;
-      color: #fff;
+      margin-bottom: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
-    .copy-ip-btn {
-      background: #444;
-      border: none;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 0.8rem;
-      color: #fff;
-      cursor: pointer;
-      transition: background 0.3s ease;
+    .ports-legend span {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
     }
-
-    .copy-ip-btn:hover {
-      background: #666;
+    .risk-dot {
+      width: 0.8rem;
+      height: 0.8rem;
+      border-radius: 50%;
+      display: inline-block;
     }
+    .risk-dot.low { background: #2ecc71; }
+    .risk-dot.medium { background: #f39c12; }
+    .risk-dot.high { background: #e74c3c; }
+    .ports-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      align-items: center;
+    }
+    #portSearch { flex: 1; min-width: 180px; }
+    #portSort { background: #333; color: var(--text); border: none; padding: 0.25rem; border-radius: 4px; }
+    .port-accordion { border: 1px solid #444; border-radius: 6px; margin-bottom: 0.5rem; overflow: hidden; }
+    .port-accordion + .port-accordion { margin-top: 0.5rem; }
+    .accordion-header { background: #333; width: 100%; text-align: left; padding: 0.4rem 0.6rem; border: none; color: var(--text); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .accordion-header .count { background:#444; border-radius:6px; padding:2px 8px; font-family:monospace; }
+    .accordion-content { display: none; padding:0.4rem; }
+    .port-accordion.open > .accordion-content { display:block; }
+    .ip-accordion { border:1px solid #444; border-radius:6px; margin:0.3rem 0; overflow:hidden; }
+    .ip-accordion.open > .accordion-content { display:block; }
+    .ip-accordion .accordion-header { background:#222; }
+    .port-line { display:flex; align-items:center; gap:0.5rem; padding:0.2rem 0.3rem; font-size:0.9rem; }
+    .port-line .service-name { flex:1; }
+    .port-line .port-mono { font-family:monospace; }
+    .port-line .badge { margin-left:0.2rem; font-size:0.7rem; padding:0.1rem 0.3rem; }
+    .port-line .actions { margin-left:auto; display:flex; align-items:center; gap:0.3rem; }
 
     .load-container {
       display: flex;
@@ -903,28 +868,26 @@
     </div>
   </div>
 
-  <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts</h2>
-  <div class="block-wrapper">
-    <div id="portsText" class="code-block">
-      <div class="protocol-header">
-        <div class="left">
-          <i class="fas fa-broadcast-tower"></i>
-          <span>UDP</span>
-        </div>
-        <span class="count" id="udpCount">0</span>
-      </div>
-      <div id="udpPorts"></div>
-
-      <div class="protocol-header">
-        <div class="left">
-          <i class="fas fa-network-wired"></i>
-          <span>TCP</span>
-        </div>
-        <span class="count" id="tcpCount">0</span>
-      </div>
-      <div id="tcpPorts"></div>
-    </div>
+  <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts <span id="portsTotal" class="badge">0</span></h2>
+  <p class="subtitle">Interfaces et services détectés</p>
+  <div class="ports-legend">
+    <span><span class="risk-dot low"></span>🟢 faible risque</span>
+    <span><span class="risk-dot medium"></span>🟠 exposé localement</span>
+    <span><span class="risk-dot high"></span>🔴 potentiellement exposé / critique</span>
   </div>
+  <div class="ports-toolbar">
+    <input type="text" id="portSearch" placeholder="Filtrer… ex. 22, ssh, 0.0.0.0" />
+    <div id="portFilters" class="filter-chips"></div>
+    <select id="portSort">
+      <option value="port-asc">Port ↑</option>
+      <option value="port-desc">Port ↓</option>
+      <option value="service">Service A→Z</option>
+      <option value="risk">Risque</option>
+    </select>
+    <button id="copyAllPorts" class="btn">Copier tous</button>
+  </div>
+  <div id="portsContainer" class="block-wrapper"></div>
+  <div id="portsEmpty" class="empty hidden">Aucun port ne correspond. <button id="portsReset" class="btn">Réinitialiser</button></div>
 
   <h2><i class="fa-solid fa-fire heading-icon"></i>Top 5 processus - CPU</h2>
   <div class="block-wrapper">

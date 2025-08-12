@@ -116,6 +116,202 @@ function renderServices(names){
   applyServiceFilters();
 }
 
+const PORT_FILTERS = ['TCP','UDP','Public','Localhost','Docker','System','Unknown'];
+let portsData = [];
+let filteredPorts = [];
+let activePortFilters = new Set(PORT_FILTERS);
+let portSearch = '';
+let portSort = 'port-asc';
+let portsInit = false;
+
+const WELL_KNOWN = {
+  '22':'ssh',
+  '53':'dns',
+  '80':'http',
+  '443':'https',
+  '445':'smb',
+  '139':'smb',
+  '111':'rpcbind',
+  '3306':'mysql',
+  '5432':'postgres',
+  '6379':'redis',
+  '9100':'node-exporter',
+  '123':'ntp'
+};
+
+const SENSITIVE_PORTS = [22,80,443,445,139,3306,5432,6379];
+
+function parseAddr(portStr){
+  const ipv6 = portStr.match(/^\[([^\]]+)]:(\d+)/);
+  if (ipv6) return {ip:ipv6[1].split('%')[0], port:ipv6[2]};
+  const parts = portStr.split(':');
+  const port = parts.pop();
+  const ip = parts.join(':') || '*';
+  return {ip, port};
+}
+
+function getService(port){
+  return WELL_KNOWN[port] || 'Unknown';
+}
+
+function getIcon(service, port, proto, ip){
+  const n = Number(port);
+  if (ip.startsWith('172.17.') || /docker|containerd/i.test(service)) return '🐳';
+  if (service === 'ssh' || n===22) return '🔐';
+  if (service === 'dns' || n===53) return '🌐';
+  if (service === 'http' || n===80 || n===443) return '🌍';
+  if (service === 'smb' || n===445 || n===139) return '🗂️';
+  if (n===111 || n===2049) return '📡';
+  if (service === 'mysql' || n===3306) return '🛢️';
+  if (service === 'postgres' || n===5432) return '🐘';
+  if (service === 'redis' || n===6379) return '⚡';
+  if (service === 'node-exporter' || n===9100) return '📈';
+  if (service === 'ntp' || n===123) return '🕒';
+  return '◻️';
+}
+
+function getBadges(ip, service){
+  const badges = [];
+  if (ip.startsWith('172.17.')) badges.push('Docker');
+  if (/^127\./.test(ip) || ip==='::1') badges.push('Localhost');
+  if (ip==='0.0.0.0' || ip==='*' || ip==='::' || ip==='[::]') badges.push('Public');
+  if (['ssh','dns','http','https','smb','rpcbind','mysql','postgres','redis','node-exporter','ntp'].includes(service)) badges.push('System');
+  if (service === 'Unknown') badges.push('Unknown');
+  return badges;
+}
+
+function getRisk(ip, port, service){
+  const n = Number(port);
+  const sensitive = SENSITIVE_PORTS.includes(n) || (n>=9000 && n<=10000);
+  const isPublic = ip==='0.0.0.0' || ip==='*' || ip==='::' || ip==='[::]';
+  const isLan = /^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[01])\./.test(ip) || ip.startsWith('172.17.');
+  const isLocal = /^127\./.test(ip) || ip==='::1';
+  if (isPublic && sensitive) return 'high';
+  if ((isLan) && sensitive) return 'medium';
+  return 'low';
+}
+
+function initPortsUI(){
+  if (portsInit) return;
+  portsInit = true;
+  const searchInput = document.getElementById('portSearch');
+  const filtersDiv = document.getElementById('portFilters');
+  const sortSelect = document.getElementById('portSort');
+  PORT_FILTERS.forEach(f => {
+    const chip = document.createElement('button');
+    chip.className='filter-chip active';
+    chip.textContent=f;
+    chip.dataset.filter=f;
+    chip.addEventListener('click', ()=>{
+      if (activePortFilters.has(f)) activePortFilters.delete(f); else activePortFilters.add(f);
+      chip.classList.toggle('active');
+      applyPortFilters();
+    });
+    filtersDiv.appendChild(chip);
+  });
+  searchInput.addEventListener('input', e=>{ portSearch = e.target.value.toLowerCase(); applyPortFilters(); });
+  sortSelect.addEventListener('change', e=>{ portSort = e.target.value; applyPortFilters(); });
+  document.getElementById('copyAllPorts').addEventListener('click', ()=>{
+    navigator.clipboard.writeText(filteredPorts.map(p=>`${p.ip}:${p.port}/${p.proto.toLowerCase()}`).join('\n')).then(()=>alert('Copié dans le presse-papiers !'));
+  });
+  document.getElementById('portsReset').addEventListener('click', ()=>{
+    portSearch='';
+    portSort='port-asc';
+    activePortFilters=new Set(PORT_FILTERS);
+    searchInput.value='';
+    sortSelect.value='port-asc';
+    document.querySelectorAll('#portFilters .filter-chip').forEach(c=>c.classList.add('active'));
+    applyPortFilters();
+  });
+}
+
+function applyPortFilters(){
+  filteredPorts = portsData.filter(p=>{
+    if (!activePortFilters.has(p.proto)) return false;
+    if (p.badges.includes('Public') && !activePortFilters.has('Public')) return false;
+    if (p.badges.includes('Localhost') && !activePortFilters.has('Localhost')) return false;
+    if (p.badges.includes('Docker') && !activePortFilters.has('Docker')) return false;
+    if (p.badges.includes('System') && !activePortFilters.has('System')) return false;
+    if (p.badges.includes('Unknown') && !activePortFilters.has('Unknown')) return false;
+    const hay = `${p.ip} ${p.port} ${p.service}`.toLowerCase();
+    return hay.includes(portSearch);
+  });
+  if (portSort==='port-asc') filteredPorts.sort((a,b)=>a.port-b.port);
+  else if (portSort==='port-desc') filteredPorts.sort((a,b)=>b.port-a.port);
+  else if (portSort==='service') filteredPorts.sort((a,b)=>a.service.localeCompare(b.service));
+  else if (portSort==='risk') {
+    const order={high:0,medium:1,low:2};
+    filteredPorts.sort((a,b)=>order[a.risk]-order[b.risk]);
+  }
+  renderPortsList();
+}
+
+function renderPortsList(){
+  const container = document.getElementById('portsContainer');
+  container.innerHTML='';
+  const totalSpan = document.getElementById('portsTotal');
+  totalSpan.textContent = portsData.length;
+  if (filteredPorts.length===0){
+    document.getElementById('portsEmpty').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('portsEmpty').classList.add('hidden');
+  const byProto = {};
+  filteredPorts.forEach(p=>{ if(!byProto[p.proto]) byProto[p.proto]=[]; byProto[p.proto].push(p); });
+  ['TCP','UDP'].forEach(proto=>{
+    const list = byProto[proto] || [];
+    if (!list.length) return;
+    const acc = document.createElement('div');
+    acc.className='port-accordion open';
+    const header=document.createElement('button');
+    header.className='accordion-header';
+    header.innerHTML=`<span>${proto}</span><span class="count">${list.length}</span>`;
+    header.addEventListener('click',()=>acc.classList.toggle('open'));
+    acc.appendChild(header);
+    const body=document.createElement('div');
+    body.className='accordion-content';
+    const byIp={};
+    list.forEach(p=>{ if(!byIp[p.ip]) byIp[p.ip]=[]; byIp[p.ip].push(p); });
+    Object.entries(byIp).forEach(([ip,ports])=>{
+      const ipAcc=document.createElement('div');
+      ipAcc.className='ip-accordion';
+      const ipHead=document.createElement('button');
+      ipHead.className='accordion-header';
+      ipHead.innerHTML=`<span>${ip}</span><span class="count">${ports.length}</span>`;
+      ipHead.addEventListener('click',()=>ipAcc.classList.toggle('open'));
+      ipAcc.appendChild(ipHead);
+      const ipBody=document.createElement('div');
+      ipBody.className='accordion-content';
+      ports.forEach(p=>{
+        const line=document.createElement('div');
+        line.className='port-line';
+        line.title=`${p.ip} • ${p.port} • ${p.service}`;
+        const badgesHtml=p.badges.map(b=>`<span class="badge">${b}</span>`).join('');
+        line.innerHTML=`<span class="service-icon">${p.icon}</span><span class="service-name">${p.service}</span><span class="port-mono">:${p.port}/${p.proto.toLowerCase()}</span><span class="actions"><span class="risk-dot ${p.risk}"></span>${badgesHtml}<button class="copy-btn small" title="Copier">📋</button></span>`;
+        line.querySelector('.copy-btn').addEventListener('click',e=>{e.stopPropagation();navigator.clipboard.writeText(`${p.ip}:${p.port}/${p.proto.toLowerCase()}`);});
+        ipBody.appendChild(line);
+      });
+      ipAcc.appendChild(ipBody);
+      body.appendChild(ipAcc);
+    });
+    acc.appendChild(body);
+    container.appendChild(acc);
+  });
+}
+
+function renderPorts(ports){
+  initPortsUI();
+  portsData = (ports||[]).map(p=>{
+    const {ip,port} = parseAddr(p.port);
+    const service = getService(port);
+    const badges = getBadges(ip, service);
+    const risk = getRisk(ip, port, service);
+    const icon = getIcon(service, port, p.proto, ip);
+    return {proto:p.proto.toUpperCase(), ip, port:Number(port), service, badges, risk, icon};
+  });
+  applyPortFilters();
+}
+
 async function fetchIndex() {
   const res = await fetch('/archives/index.json');
   return await res.json();
@@ -481,64 +677,7 @@ function renderText(json) {
 
   renderServices(json.services);
 
-  // 🧠 Ajout d’une fonction robuste pour extraire les IP
-  function extractIp(portStr) {
-    const ipv6Match = portStr.match(/^\[([^\]]+)]/);
-    if (ipv6Match) return ipv6Match[1].split('%')[0]; // IPv6 avec interface
-    return portStr.split(':')[0]; // IPv4 ou générique
-  }
-
-  setTimeout(() => {
-    const udpPortsDiv = document.getElementById("udpPorts");
-    const tcpPortsDiv = document.getElementById("tcpPorts");
-    const udpCountSpan = document.getElementById("udpCount");
-    const tcpCountSpan = document.getElementById("tcpCount");
-
-    if (!udpPortsDiv || !tcpPortsDiv || !json.ports) return;
-
-    const udpPorts = json.ports.filter(p => p.proto.toLowerCase() === 'udp');
-    const tcpPorts = json.ports.filter(p => p.proto.toLowerCase() === 'tcp');
-
-    udpCountSpan.textContent = udpPorts.length;
-    tcpCountSpan.textContent = tcpPorts.length;
-
-    function groupAndDisplayPorts(ports, container, icon) {
-      const grouped = {};
-      ports.forEach(p => {
-        const ip = extractIp(p.port);
-        if (!grouped[ip]) grouped[ip] = [];
-        grouped[ip].push(p.port);
-      });
-
-      container.innerHTML = "";
-
-      Object.entries(grouped).forEach(([ip, portList]) => {
-        const group = document.createElement("div");
-        group.className = "port-group";
-
-        const ipTitle = document.createElement("div");
-        ipTitle.className = "port-ip";
-        ipTitle.innerHTML = `
-          <span>${ip}</span>
-          <button class="copy-ip-btn" onclick="navigator.clipboard.writeText(\`${portList.join('\n')}\`)">📋</button>
-        `;
-        group.appendChild(ipTitle);
-
-        portList.sort().forEach(port => {
-          const entry = document.createElement("div");
-          entry.className = "port-entry";
-          entry.innerHTML = `<i class="${icon}"></i><span class="port-address">${port}</span>`;
-          group.appendChild(entry);
-        });
-
-        container.appendChild(group);
-      });
-    }
-
-
-    groupAndDisplayPorts(udpPorts, udpPortsDiv, "fas fa-broadcast-tower");
-    groupAndDisplayPorts(tcpPorts, tcpPortsDiv, "fas fa-network-wired");
-  }, 0);
+  renderPorts(json.ports);
 
   const topCpu = json.top_cpu?.slice(1).map(p => `${p.cmd} (PID ${p.pid}) - CPU ${p.cpu}%, RAM ${p.mem}%`) || [];
   document.getElementById('topCpuText').textContent = topCpu.length ? topCpu.join('\n') : 'Aucun processus';
