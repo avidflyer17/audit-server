@@ -756,7 +756,6 @@ function populateDay(day) {
   showStatus('');
   renderTimeline(list);
   const last = list[list.length - 1];
-  setActiveTime(last.file);
   return last.file;
 }
 
@@ -1135,8 +1134,7 @@ async function init() {
     document.getElementById('datePicker').value = day;
     selectedDate = day;
     updateDayButtons();
-    const file = populateDay(day);
-    if (file) selectTime(file);
+    populateDay(day);
   });
 
   document.getElementById('dayYesterday').addEventListener('click', () => {
@@ -1144,8 +1142,7 @@ async function init() {
     document.getElementById('datePicker').value = day;
     selectedDate = day;
     updateDayButtons();
-    const file = populateDay(day);
-    if (file) selectTime(file);
+    populateDay(day);
   });
 
   document.getElementById('dayCalendar').addEventListener('click', () => {
@@ -1157,8 +1154,7 @@ async function init() {
   document.getElementById('datePicker').addEventListener('change', () => {
     selectedDate = document.getElementById('datePicker').value;
     updateDayButtons();
-    const file = populateDay(selectedDate);
-    if (file) selectTime(file);
+    populateDay(selectedDate);
   });
 
 

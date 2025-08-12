@@ -186,17 +186,18 @@ body {
     @media (min-width: 601px) {
       .report-grid {
         display: grid;
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 1fr;
         grid-template-areas:
-          "btn day"
-          "timeline timeline"
-          "status status";
+          "btn"
+          "day"
+          "status"
+          "timeline";
         gap: 0.5rem;
       }
       #btnLatest { grid-area: btn; }
-      .timeline-wrapper { grid-area: timeline; }
+      .day-control { grid-area: day; }
       #selectorStatus { grid-area: status; }
-      .day-control { grid-area: day; justify-self: end; }
+      .timeline-wrapper { grid-area: timeline; }
     }
 
     .day-control {
