@@ -15,7 +15,16 @@
   <script src="/scripts/viewer.js?v=3"></script>
 </head>
 <body class="theme-dark">
-  <button id="menuToggle" class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+  <header id="topBar" class="top-bar">
+    <button id="menuToggle" class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+    <div id="themeSwitchWrapper">
+      <i id="themeIcon" class="fas fa-moon theme-icon"></i>
+      <label class="switch">
+        <input type="checkbox" id="themeToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </header>
 
   <aside id="sidebar" class="sidebar">
     <div id="reportCard" class="report-card">
@@ -52,14 +61,6 @@
   <div id="menuOverlay"></div>
 
   <main>
-    <div id="themeSwitchWrapper">
-      <i id="themeIcon" class="fas fa-moon theme-icon"></i>
-      <label class="switch">
-        <input type="checkbox" id="themeToggle">
-        <span class="slider"></span>
-      </label>
-    </div>
-
     <h1>🧠 Audit Serveur DW</h1>
     <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
 
