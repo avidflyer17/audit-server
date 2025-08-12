@@ -720,6 +720,7 @@ async function selectTime(file) {
     currentFile = file;
     renderText(json);
     setActiveTime(file);
+    if (typeof closeMenu === 'function') closeMenu();
   }
 }
 
@@ -1150,18 +1151,30 @@ async function refreshAudits() {
   }
 }
 
+
+let closeMenu;
+
 document.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('menuOverlay');
   const toggle = document.getElementById('menuToggle');
+  const icon = toggle.querySelector('i');
+
+  closeMenu = () => {
+    sidebar.classList.remove('open');
+    toggle.classList.remove('open');
+    icon.classList.remove('fa-xmark');
+    icon.classList.add('fa-bars');
+  };
 
   toggle.addEventListener('click', () => {
-    sidebar.classList.toggle('open');
+    const isOpen = sidebar.classList.toggle('open');
+    toggle.classList.toggle('open', isOpen);
+    icon.classList.toggle('fa-bars', !isOpen);
+    icon.classList.toggle('fa-xmark', isOpen);
   });
 
-  overlay.addEventListener('click', () => {
-    sidebar.classList.remove('open');
-  });
+  overlay.addEventListener('click', closeMenu);
 });
 
 document.addEventListener('DOMContentLoaded', init);

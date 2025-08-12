@@ -411,6 +411,14 @@ body {
       cursor: pointer;
     }
 
+    .menu-toggle i {
+      transition: transform 0.3s ease;
+    }
+
+    .menu-toggle.open i {
+      transform: rotate(90deg);
+    }
+
     #themeSwitchWrapper {
       display: flex;
       align-items: center;
