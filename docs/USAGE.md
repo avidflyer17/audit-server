@@ -12,6 +12,9 @@ BASE_DIR=/tmp/audits ./generate-audit-json.sh
 
 Each execution creates a timestamped file in `archives/` and refreshes `index.json` with the list of available reports.
 
+If `intel_gpu_top` or `nvidia-smi` is installed, the script also includes GPU usage. Intel GPUs need root access and the `debugfs`
+filesystem mounted.
+
 ## Serving the reports
 
 Use the provided `docker-compose.yaml` file to expose the `audits` directory with Nginx:
