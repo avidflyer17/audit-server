@@ -57,11 +57,61 @@ TOP_MEM=$(ps -eo pid,comm,%mem,%cpu --sort=-%mem | head -n 6 | jq -Rn '[inputs |
 # 🌐 Ports ouverts
 PORTS=$(ss -tuln | awk 'NR>1 {print $1, $5}' | jq -Rn '[inputs | split(" ") | select(length == 2) | {"proto": .[0], "port": .[1]}]')
 
+# 📦 Conversion d'unités en octets
+to_bytes() {
+  local input="$1"
+  local num unit factor
+  num=$(echo "$input" | tr ',' '.' | sed -E 's/([0-9\.]+).*/\1/')
+  unit=$(echo "$input" | tr ',' '.' | sed -E 's/[0-9\.]+(.*)/\1/')
+  case "$unit" in
+    B)   factor=1 ;;
+    KB)  factor=1000 ;;
+    MB)  factor=1000000 ;;
+    GB)  factor=1000000000 ;;
+    KiB) factor=1024 ;;
+    MiB) factor=$((1024*1024)) ;;
+    GiB) factor=$((1024*1024*1024)) ;;
+    *)   factor=1 ;;
+  esac
+  awk -v n="$num" -v f="$factor" 'BEGIN{printf "%.0f", n*f}'
+}
+
 # 🐳 Docker
+DOCKER_CONTAINERS="[]"
 if command -v docker >/dev/null 2>&1; then
-  DOCKER_SERVICES=$(docker ps --format '{{.Names}} ({{.Status}})' | jq -R . | jq -s .)
-else
-  DOCKER_SERVICES="[]"
+  declare -A CPU MEM_PCT MEM_USED MEM_LIMIT
+  while IFS= read -r line; do
+    name=$(echo "$line" | sed -n 's/.*"Name":"\([^"]*\)".*/\1/p')
+    cpu=$(echo "$line" | sed -n 's/.*"CPUPerc":"\([^"]*\)".*/\1/p' | tr -d '% ')
+    memp=$(echo "$line" | sed -n 's/.*"MemPerc":"\([^"]*\)".*/\1/p' | tr -d '% ')
+    usage=$(echo "$line" | sed -n 's/.*"MemUsage":"\([^"]*\)".*/\1/p')
+    used=$(echo "$usage" | awk -F'/' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}')
+    limit=$(echo "$usage" | awk -F'/' '{gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}')
+    used_bytes=$(to_bytes "$used")
+    limit_bytes=$(to_bytes "$limit")
+    CPU["$name"]="$cpu"
+    MEM_PCT["$name"]="$memp"
+    MEM_USED["$name"]="$used_bytes"
+    MEM_LIMIT["$name"]="$limit_bytes"
+  done < <(timeout 5 docker stats --no-stream --no-trunc --format '{{json .}}' 2>/dev/null || true)
+
+  DOCKER_PS_OUTPUT=$(docker ps -a --format '{{json .}}' 2>/dev/null || true)
+  if [[ -n "$DOCKER_PS_OUTPUT" ]]; then
+    while IFS= read -r line; do
+      name=$(echo "$line" | sed -n 's/.*"Names":"\([^"]*\)".*/\1/p')
+      status=$(echo "$line" | sed -n 's/.*"Status":"\([^"]*\)".*/\1/p')
+      running_for=$(echo "$line" | sed -n 's/.*"RunningFor":"\([^"]*\)".*/\1/p')
+      state=$(echo "$status" | awk '{print tolower($1)}')
+      [[ "$state" == "up" ]] && state="running"
+      health=$(echo "$status" | sed -n 's/.*(\([^)]*\)).*/\1/p')
+
+      if [[ -n "${CPU[$name]+x}" ]]; then
+        DOCKER_CONTAINERS=$(echo "$DOCKER_CONTAINERS" | jq --arg name "$name" --arg state "$state" --arg uptime "$running_for" --arg health "$health" --arg cpu "${CPU[$name]}" --arg mempct "${MEM_PCT[$name]}" --arg memused "${MEM_USED[$name]}" --arg memlimit "${MEM_LIMIT[$name]}" '. + [{name:$name,state:$state,health:($health==""?null:$health),uptime:$uptime,has_stats:true,cpu_pct:($cpu|tonumber),mem_pct:($mempct|tonumber),mem_used_bytes:($memused|tonumber),mem_limit_bytes:($memlimit|tonumber)}]')
+      else
+        DOCKER_CONTAINERS=$(echo "$DOCKER_CONTAINERS" | jq --arg name "$name" --arg state "$state" --arg uptime "$running_for" --arg health "$health" '. + [{name:$name,state:$state,health:($health==""?null:$health),uptime:$uptime,has_stats:false,cpu_pct:null,mem_pct:null,mem_used_bytes:null,mem_limit_bytes:null}]')
+      fi
+    done <<< "$DOCKER_PS_OUTPUT"
+  fi
 fi
 
 # 🔧 Création JSON
@@ -85,7 +135,7 @@ jq -n \
   --argjson top_cpu "$TOP_CPU" \
   --argjson top_mem "$TOP_MEM" \
   --argjson ports "$PORTS" \
-  --argjson docker "$DOCKER_SERVICES" \
+  --argjson docker_containers "$DOCKER_CONTAINERS" \
   '{
     generated: $generated,
     hostname: $hostname,
@@ -109,7 +159,7 @@ jq -n \
     top_cpu: $top_cpu,
     top_mem: $top_mem,
     ports: $ports,
-    docker: $docker
+    docker: { containers: $docker_containers }
   }' > "$OUTPUT_FILE"
 
 # 🧹 Nettoyage des anciens fichiers
