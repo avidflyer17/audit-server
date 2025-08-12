@@ -106,9 +106,6 @@ function initServicesUI(){
   });
   searchInput.addEventListener('input', e => { serviceSearch = e.target.value.toLowerCase(); applyServiceFilters(); });
   sortSelect.addEventListener('change', e => { serviceSort = e.target.value; applyServiceFilters(); });
-  document.getElementById('copyServicesBtn').addEventListener('click', () => {
-    navigator.clipboard.writeText(filteredServices.map(s=>s.name).join('\n')).then(()=>alert('Copié dans le presse-papiers !'));
-  });
   document.getElementById('resetFilters').addEventListener('click', () => {
     serviceSearch = '';
     serviceSort = 'az';
@@ -272,9 +269,6 @@ function initPortsUI(){
   });
   searchInput.addEventListener('input', e=>{ portSearch = e.target.value.toLowerCase(); applyPortFilters(); });
   sortSelect.addEventListener('change', e=>{ portSort = e.target.value; applyPortFilters(); });
-  document.getElementById('copyAllPorts').addEventListener('click', ()=>{
-    navigator.clipboard.writeText(filteredPorts.map(p=>`${p.ip}:${p.port}/${p.proto.toLowerCase()}`).join('\n')).then(()=>alert('Copié dans le presse-papiers !'));
-  });
   document.getElementById('portsReset').addEventListener('click', ()=>{
     portSearch='';
     portSort='port-asc';
