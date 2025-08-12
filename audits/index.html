@@ -62,7 +62,7 @@
     body {
       background-color: var(--bg);
       color: var(--text);
-      font-family: "Segoe UI", sans-serif;
+      font-family: var(--font-base);
       padding: 2rem;
       max-width: 900px;
       margin: auto;
@@ -210,6 +210,7 @@
       padding: 0.4rem 0.8rem;
       cursor: pointer;
       white-space: nowrap;
+      font-family: var(--font-mono);
     }
 
     .time-chip:hover { background: #555; }
@@ -253,6 +254,7 @@
       padding: 2px 6px;
       border-radius: 4px;
       font-size: 0.7rem;
+      font-family: var(--font-mono);
     }
 
     .update-badge.show { display: inline-block; }
@@ -311,7 +313,7 @@
       color: var(--text);
       padding: 1rem;
       border-radius: 5px;
-      font-family: monospace;
+      font-family: var(--font-mono);
       white-space: pre-wrap;
       word-wrap: break-word;
       overflow-x: auto;
@@ -419,7 +421,7 @@
 
     .temp-wrapper {
       margin-top: 1rem;
-      font-family: monospace;
+      font-family: var(--font-mono);
       color: var(--text);
     }
     .temp-bar {
@@ -442,7 +444,7 @@
       border-radius: 8px;
       margin-left: 1rem;
       font-weight: bold;
-      font-family: monospace;
+      font-family: var(--font-mono);
       background: var(--chip-bg);
       color: var(--chip-text);
     }
@@ -488,7 +490,7 @@
     .network-card .ip-row { display: flex; align-items: center; gap: 0.5rem; }
     .network-card .ip-row + .ip-row { margin-top: 0.5rem; }
     .network-card .ip-icon { width: 1.25rem; text-align: center; }
-    .network-card .chip { display: flex; gap: 0.25rem; font-family: monospace; cursor: default; }
+    .network-card .chip { display: flex; gap: 0.25rem; font-family: var(--font-mono); cursor: default; }
     .network-card .chip.na { opacity: 0.6; }
     .network-card .ip-row .copy-icon { position: static; }
 
@@ -553,7 +555,7 @@
     .port-accordion { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 0.5rem; box-shadow: var(--card-shadow); overflow: hidden; }
     .port-accordion + .port-accordion { margin-top: 0.5rem; }
     .accordion-header { background: var(--card-bg); width: 100%; text-align: left; padding: 0.4rem 0.6rem; border: none; color: var(--text); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .accordion-header .count { background: var(--chip-bg); border-radius:6px; padding:2px 8px; font-family:monospace; }
+    .accordion-header .count { background: var(--chip-bg); border-radius:6px; padding:2px 8px; font-family:var(--font-mono); }
     .accordion-content { display: none; padding:0.4rem; background: var(--card-bg); }
     .port-accordion.open > .accordion-content { display:block; }
     .ip-accordion { background: var(--card-bg); border:1px solid var(--card-border); border-radius:8px; margin:0.3rem 0; overflow:hidden; }
@@ -561,7 +563,7 @@
     .ip-accordion .accordion-header { background: var(--card-bg); }
     .port-line { display:flex; align-items:center; gap:0.5rem; padding:0.2rem 0.3rem; font-size:0.9rem; }
     .port-line .service-name { flex:1; font-weight:500; }
-    .port-line .port-mono { font-family:monospace; }
+    .port-line .port-mono { font-family:var(--font-mono); }
     .port-line .badges { margin-left:auto; display:flex; gap:0.2rem; }
     .port-line .badge { font-size:0.7rem; padding:0.1rem 0.3rem; }
     .port-line .risk-dot { margin-left:0.3rem; }
@@ -673,6 +675,7 @@
       padding: 0.25rem 0.6rem;
       cursor: pointer;
       font-size: 0.85rem;
+      font-family: var(--font-mono);
     }
     .filter-chip.active {
       background: var(--chip-active-bg);
@@ -716,6 +719,7 @@
       border-radius: 4px;
       font-size: 0.75rem;
       background: #555;
+      font-family: var(--font-mono);
     }
     .service-details {
       display: none;
@@ -834,7 +838,7 @@
     .docker-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
     .docker-toolbar input { flex: 1; }
     .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .chip { background: var(--chip-bg); border: none; border-radius: 9999px; padding: 0.25rem 0.6rem; cursor: pointer; color: var(--chip-text); }
+    .chip { background: var(--chip-bg); border: none; border-radius: 9999px; padding: 0.25rem 0.6rem; cursor: pointer; color: var(--chip-text); font-family: var(--font-mono); }
     .chip.active { background: var(--chip-active-bg); color: var(--bg); }
     .docker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 0.5rem; }
     .docker-card { background: var(--block-bg); padding: 0.75rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s ease; }
@@ -843,7 +847,7 @@
     .docker-head { display: flex; align-items: center; justify-content: space-between; }
     .docker-title { display: flex; align-items: center; gap: 0.5rem; }
     .docker-name { font-weight: bold; }
-    .status-badge { padding: 2px 6px; border-radius: 6px; font-size: 0.75rem; }
+    .status-badge { padding: 2px 6px; border-radius: 6px; font-size: 0.75rem; font-family: var(--font-mono); }
     .status-healthy { background: #4caf50; color: #fff; }
     .status-starting { background: #ff9800; color: #000; }
     .status-unhealthy { background: #f44336; color: #fff; }
