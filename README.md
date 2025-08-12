@@ -43,8 +43,11 @@ Each action updates `archives/index.json` automatically.
 ## Serving the reports
 
 `server.js` serves the `audits` directory and provides the `/api/reports` endpoint used by the UI.
-Start it with the command above and open `http://localhost:8080/` in a browser. The included
-`docker-compose.yaml` can still be used if you prefer an Nginx setup.
+It also exposes a `/healthz` path that returns `{ "ok": true }`, which is convenient for Docker
+health checks or reverse proxies such as Traefik. When containerized, expose port `8080` and point
+Traefik or any other proxy at that port. Start it with the command above and open
+`http://localhost:8080/` in a browser. The included `docker-compose.yaml` can still be used if you
+prefer an Nginx setup.
 
 ## Directory structure
 
