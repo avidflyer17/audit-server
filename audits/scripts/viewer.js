@@ -416,14 +416,33 @@ function parseDocker(item){
     if (!health) health = state;
     return {name, state, health, uptime, cpu:0, mem:0};
   }
+
+  const cpu = item.cpu_pct ?? item.cpu;
+  const mem = item.mem_pct ?? item.mem;
+  let memText = item.mem_text || '';
+
+  if (!memText && item.mem_used_bytes != null){
+    const fmt = b => {
+      const units = ['B','KB','MB','GB','TB'];
+      let i = 0, v = b;
+      while (v >= 1024 && i < units.length - 1){ v /= 1024; i++; }
+      return v.toFixed(v < 10 ? 1 : 0) + units[i];
+    };
+    const used = fmt(item.mem_used_bytes);
+    memText = used;
+    if (item.mem_limit_bytes){
+      memText += ' / ' + fmt(item.mem_limit_bytes);
+    }
+  }
+
   return {
     name: item.name,
     state: item.state || 'running',
     health: item.health || item.state || 'running',
     uptime: item.uptime || '',
-    cpu: Number(item.cpu) || 0,
-    mem: Number(item.mem) || 0,
-    memText: item.mem_text || ''
+    cpu: Number(cpu) || 0,
+    mem: Number(mem) || 0,
+    memText
   };
 }
 
@@ -484,7 +503,8 @@ function renderDockerList(){
 
 function renderDocker(list){
   initDockerUI();
-  dockerData = (list||[]).map(parseDocker);
+  const arr = Array.isArray(list) ? list : (list && Array.isArray(list.containers) ? list.containers : []);
+  dockerData = arr.map(parseDocker);
   applyDockerFilters();
 }
 
