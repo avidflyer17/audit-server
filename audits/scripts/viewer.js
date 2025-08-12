@@ -256,24 +256,32 @@ function renderCpuChart(usages) {
 }
 
 function parseLoadAverage(value) {
-  if (!value) return [null, null, null];
+  if (!value) return null;
   if (typeof value === 'object' && !Array.isArray(value)) {
-    const v1 = Number(value['1min'] ?? value['1m']);
-    const v5 = Number(value['5min'] ?? value['5m']);
-    const v15 = Number(value['15min'] ?? value['15m']);
-    return [v1, v5, v15].map(v => isNaN(v) ? null : Math.round(v));
+    const one = Number(value.one ?? value["1min"] ?? value["1m"]);
+    const five = Number(value.five ?? value["5min"] ?? value["5m"]);
+    const fifteen = Number(value.fifteen ?? value["15min"] ?? value["15m"]);
+    if ([one, five, fifteen].some(v => isNaN(v))) return null;
+    return { one, five, fifteen };
   }
-  const parts = String(value).split(/[ ,]+/).filter(Boolean).slice(0,3);
-  return parts.map(p => {
-    const v = parseFloat(p.replace(',', '.'));
-    return isNaN(v) ? null : Math.round(v);
-  });
+  const parts = String(value).split(/[\s,]+/).filter(Boolean);
+  if (parts.length < 3) return null;
+  const nums = parts.slice(0,3).map(p => parseFloat(p.replace(',', '.')));
+  if (nums.some(v => isNaN(v))) return null;
+  return { one: nums[0], five: nums[1], fifteen: nums[2] };
+}
+
+function loadToPercent(load, cores) {
+  if (load == null || !cores) return { pct: null, rawPct: null };
+  const rawPct = (load / cores) * 100;
+  const pct = Math.max(0, Math.min(100, rawPct));
+  return { pct, rawPct };
 }
 
 function loadColor(v) {
   if (v == null) return '#666';
-  if (v < 50) return '#4caf50';
-  if (v < 80) return '#ff9800';
+  if (v < 70) return '#4caf50';
+  if (v < 100) return '#ff9800';
   return '#f44336';
 }
 
@@ -289,51 +297,72 @@ function trendLabel(d) {
   return 'stable';
 }
 
-function renderMini(label, value, prev) {
+function renderMini(label, value, prev, raw) {
   const card = document.getElementById(`load${label}Card`);
   const valEl = document.getElementById(`load${label}Val`);
   const bar = document.getElementById(`load${label}Bar`);
   const trend = document.getElementById(`load${label}Trend`);
   if (value == null) {
     card.classList.add('na');
-    valEl.textContent = 'N/A';
+    valEl.textContent = '—';
     bar.style.width = '0%';
     trend.textContent = 'donnée manquante';
+    card.removeAttribute('title');
   } else {
     card.classList.remove('na');
-    valEl.textContent = value + '%';
+    valEl.textContent = Math.round(value) + '%';
     const display = Math.max(0, Math.min(100, value));
     bar.style.width = display + '%';
     const color = loadColor(value);
     card.style.setProperty('--load-color', color);
     const diff = prev != null ? value - prev : 0;
     trend.textContent = trendLabel(diff);
+    if (raw != null) card.title = `${raw.toFixed(1)}%`;
   }
 }
 
-function renderLoadAverage(raw) {
-  const [v1, v5, v15] = parseLoadAverage(raw);
+function renderLoadAverage(raw, cores) {
+  const loads = parseLoadAverage(raw);
   const gauge = document.getElementById('loadGauge');
   const path = document.getElementById('loadGaugePath');
   const trendEl = document.getElementById('loadTrend');
-  const color1 = loadColor(v1);
-  gauge.style.setProperty('--load-color', color1);
-  const dashVal = v1 != null ? Math.max(0, Math.min(100, v1)) : 0;
-  path.setAttribute('stroke-dasharray', `${dashVal} 100`);
-  document.getElementById('load1Val').textContent = v1 != null ? v1 + '%' : 'N/A';
-  trendEl.textContent = arrowFromDiff((v1 != null && v5 != null) ? v1 - v5 : 0);
-  trendEl.style.color = color1;
-  renderMini('5', v5, v1);
-  renderMini('15', v15, v5);
-
   const badge = document.getElementById('loadAvgBadge');
+
   badge.classList.remove('green', 'orange', 'red');
-  if (v1 == null) {
+
+  if (!loads || !cores) {
+    document.getElementById('load1Val').textContent = '—';
+    trendEl.textContent = '→';
+    trendEl.style.color = '#666';
+    path.setAttribute('stroke-dasharray', '0 100');
+    renderMini('5', null, null);
+    renderMini('15', null, null);
     badge.textContent = '';
-  } else if (v1 <= 50) {
+    return;
+  }
+
+  const one = loadToPercent(loads.one, cores);
+  const five = loadToPercent(loads.five, cores);
+  const fifteen = loadToPercent(loads.fifteen, cores);
+
+  const color1 = loadColor(one.pct);
+  gauge.style.setProperty('--load-color', color1);
+  const dashVal = one.pct != null ? Math.max(0, Math.min(100, one.pct)) : 0;
+  path.setAttribute('stroke-dasharray', `${dashVal} 100`);
+  document.getElementById('load1Val').textContent = one.pct != null ? Math.round(one.pct) + '%' : '—';
+  gauge.title = one.rawPct != null ? `${one.rawPct.toFixed(1)}%` : '';
+  const diff = (one.pct != null && five.pct != null) ? one.pct - five.pct : 0;
+  trendEl.textContent = arrowFromDiff(diff);
+  trendEl.style.color = color1;
+  renderMini('5', five.pct, one.pct, five.rawPct);
+  renderMini('15', fifteen.pct, five.pct, fifteen.rawPct);
+
+  if (one.rawPct == null) {
+    badge.textContent = '';
+  } else if (one.rawPct < 70) {
     badge.textContent = '🟢 Système OK';
     badge.classList.add('green');
-  } else if (v1 <= 80) {
+  } else if (one.rawPct < 100) {
     badge.textContent = '🟠 Système chargé';
     badge.classList.add('orange');
   } else {
@@ -348,7 +377,7 @@ function renderText(json) {
   document.getElementById('ipLocal').textContent = json.ip_local || '--';
   document.getElementById('ipPublic').textContent = json.ip_pub || '--';
   document.getElementById('uptime').textContent = json.uptime || '--';
-  renderLoadAverage(json.load_average);
+  renderLoadAverage(json.load_average, json.cpu?.cores);
 
   const mem = json.memory?.ram;
   if (mem) {
