@@ -73,25 +73,6 @@
       color: #000;
     }
 
-    #selectorContainer {
-      display: flex;
-      gap: 1rem;
-      align-items: flex-end;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-    }
-
-    #selectorContainer > div {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .actions {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
     .btn {
       background: #444;
       color: #fff;
@@ -101,26 +82,151 @@
       cursor: pointer;
     }
 
-    .btn:hover {
-      background: #666;
+    .btn:hover { background: #666; }
+
+    .btn.primary {
+      background: var(--heading);
+      color: var(--bg);
     }
+
+    .btn.primary:hover { filter: brightness(1.1); }
+
+    .report-card {
+      background: var(--block-bg);
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .report-card.compact .time-chip { padding: 0.2rem 0.5rem; }
+    .report-card.compact .time-list-item { padding: 0.1rem 0; }
+
+    .priority-bar {
+      display: flex;
+      gap: 1rem;
+      align-items: stretch;
+      flex-wrap: wrap;
+    }
+
+    .priority-bar .btn.primary {
+      flex: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 1rem;
+    }
+
+    .priority-bar .btn.primary i { margin-right: 0.5rem; }
+    .priority-bar .btn.primary .label { font-weight: bold; }
+    .priority-bar .btn.primary .subinfo {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .day-control {
+      display: flex;
+      border: 1px solid #555;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .day-control .seg {
+      background: transparent;
+      color: var(--text);
+      padding: 0.5rem 0.8rem;
+      border: none;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .day-control .seg.active {
+      background: var(--heading);
+      color: var(--bg);
+    }
+
+    .timeline-tools { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .timeline-wrapper { overflow-x: auto; padding-bottom: 0.5rem; }
+    .timeline { display: flex; gap: 0.5rem; }
+
+    .time-chip {
+      background: #444;
+      border-radius: 20px;
+      padding: 0.4rem 0.8rem;
+      border: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .time-chip.active {
+      background: var(--heading);
+      color: var(--bg);
+      border-color: var(--heading);
+    }
+
+    .time-chip .badge {
+      margin-left: 0.3rem;
+      font-size: 0.7rem;
+      background: var(--subheading);
+      color: var(--bg);
+      padding: 0 0.3rem;
+      border-radius: 4px;
+    }
+
+    .tools { display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center; }
+    .tools input { flex: 1; }
+
+    .accordion { margin-top: 1rem; }
+    .accordion-header {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      padding: 0.5rem 0;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .accordion-content { display: none; max-height: 200px; overflow-y: auto; }
+    .accordion.open .accordion-content { display: block; }
+
+    .time-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0; }
+    .time-list-item .info { display: flex; flex-direction: column; }
+    .time-list-item .info small { opacity: 0.7; }
 
     .refresh-dot {
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       border-radius: 50%;
       background: var(--subheading);
-      opacity: 0.3;
+      opacity: 0.5;
+      position: absolute;
+      top: 10px;
+      right: 10px;
     }
 
-    .refresh-dot.active {
-      animation: blink 1s ease-in-out infinite;
-    }
+    .refresh-dot.active { animation: blink 1s ease-in-out infinite; }
 
     @keyframes blink {
       0%, 100% { opacity: 0.3; }
       50% { opacity: 1; }
     }
+
+    .update-badge {
+      display: none;
+      position: absolute;
+      top: 10px;
+      right: 30px;
+      background: var(--heading);
+      color: var(--bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    .update-badge.show { display: inline-block; }
 
     .sr-only {
       position: absolute;
@@ -279,10 +385,8 @@
       .switch input:checked + .slider:before {
         transform: translateX(20px);
       }
-      #selectorContainer {
-        flex-direction: column;
-        align-items: stretch;
-      }
+      .priority-bar { flex-direction: column; }
+      .tools { flex-direction: column; align-items: stretch; }
     }
 
     .temp-wrapper {
@@ -468,33 +572,45 @@
   <h1>🧠 Audit Serveur DW</h1>
   <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
 
-  <div id="selectorContainer" role="group" aria-labelledby="reportsTitle">
-    <h2 id="reportsTitle" class="sr-only">Sélection des rapports</h2>
-
-    <div>
-      <label for="datePicker">Jour</label>
-      <input id="datePicker" type="date" />
+  <div id="reportCard" class="report-card">
+    <div class="card-header">
+      <h2>Rapports</h2>
+      <p class="subtitle">Choisissez un moment</p>
     </div>
 
-    <div>
-      <label for="timeFilter">Filtrer</label>
-      <input id="timeFilter" type="text" placeholder="Rechercher une heure…" aria-describedby="timeHelp">
-      <small id="timeHelp" class="visually-muted">Ex. 06 ou 06:30</small>
+    <div class="priority-bar">
+      <button id="btnLatest" class="btn primary">
+        <span><i class="fa-solid fa-bolt"></i></span>
+        <span class="label">Voir le dernier rapport</span>
+        <small id="latestInfo" class="subinfo"></small>
+      </button>
+      <div class="day-control" role="group" aria-label="Choisir un jour">
+        <button id="dayToday" class="seg">Aujourd'hui</button>
+        <button id="dayYesterday" class="seg">Hier</button>
+        <button id="dayCalendar" class="seg">Calendrier…</button>
+        <input type="date" id="datePicker" class="sr-only" />
+      </div>
     </div>
 
-    <div>
-      <label for="timeSelect">Heures disponibles</label>
-      <select id="timeSelect" size="6" aria-live="polite"></select>
+    <div class="timeline-tools">
+      <div class="timeline-wrapper">
+        <div id="timeTimeline" class="timeline" aria-live="polite"></div>
+      </div>
+      <div class="tools">
+        <input id="timeFilter" type="text" placeholder="Filtrer une heure… Ex. 06 ou 06:30">
+        <button id="densityToggle" class="btn density" title="Changer la densité"><i class="fa-solid fa-bars"></i></button>
+      </div>
     </div>
 
-    <div class="actions">
-      <button id="btnLatest" class="btn">Dernier rapport</button>
-      <span id="refreshDot" class="refresh-dot" aria-label="Actualisation automatique" title="Actualisation automatique"></span>
+    <div id="listAccordion" class="accordion">
+      <button id="listToggle" class="accordion-header">Liste des heures</button>
+      <div id="timeList" class="accordion-content"></div>
     </div>
+
+    <span id="refreshDot" class="refresh-dot" aria-label="Actualisation automatique" title="Actualisation automatique"></span>
+    <span id="updateBadge" class="update-badge">Mis à jour</span>
+    <div id="selectorStatus" aria-live="polite"></div>
   </div>
-
-  <!-- État de chargement / erreurs -->
-  <div id="selectorStatus" aria-live="polite"></div>
 
   <h2><i class="fa-solid fa-calendar-day heading-icon"></i>Date de génération</h2>
   <p id="generated">--</p>

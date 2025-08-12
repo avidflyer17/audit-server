@@ -5,6 +5,7 @@ let auditsIndex = [];
 let auditsMap = {};
 let latestEntry = null;
 let currentFile = null;
+let selectedDate = null;
 
 async function fetchIndex() {
   const res = await fetch('/archives/index.json');
@@ -14,10 +15,10 @@ async function fetchIndex() {
 async function loadAudit(file) {
   try {
     const res = await fetch('/archives/' + file);
-    if (!res.ok) throw new Error("Fichier inaccessible");
+    if (!res.ok) throw new Error('Fichier inaccessible');
     return await res.json();
   } catch (err) {
-    console.error("Erreur chargement :", err);
+    console.error('Erreur chargement :', err);
     alert("Erreur lors du chargement de l'audit !");
     return null;
   }
@@ -42,47 +43,11 @@ function parseIndex(list) {
   return auditsMap;
 }
 
-function setDateToLatest() {
-  if (latestEntry) {
-    document.getElementById('datePicker').value = latestEntry.date;
-  }
-}
-
 function formatRelative(date) {
   const diffMs = Date.now() - date.getTime();
   const minutes = Math.round(diffMs / 60000);
   const rtf = new Intl.RelativeTimeFormat(navigator.language, { numeric: 'auto' });
   return rtf.format(-minutes, 'minute');
-}
-
-function populateTimesForDay(day) {
-  const select = document.getElementById('timeSelect');
-  select.innerHTML = '';
-  const list = auditsMap[day] || [];
-  if (list.length === 0) {
-    showStatus('Aucun rapport pour ce jour', 'empty');
-    return null;
-  }
-  showStatus('');
-  list.forEach(item => {
-    const option = document.createElement('option');
-    const locale = item.iso.toLocaleTimeString(navigator.language, { hour: '2-digit', minute: '2-digit' });
-    option.textContent = `${locale} — ${formatRelative(item.iso)}`;
-    option.value = item.file;
-    option.dataset.iso = item.iso.toISOString();
-    select.appendChild(option);
-  });
-  const last = list[list.length - 1];
-  select.value = last.file;
-  return last.file;
-}
-
-function applyTimeFilter(query) {
-  const q = query.toLowerCase();
-  const select = document.getElementById('timeSelect');
-  Array.from(select.options).forEach(opt => {
-    opt.hidden = !opt.textContent.toLowerCase().includes(q);
-  });
 }
 
 function showStatus(message, type) {
@@ -93,9 +58,96 @@ function showStatus(message, type) {
   } else if (type === 'error') {
     div.innerHTML = `${message} <button id="retryBtn" class="btn">Réessayer</button>`;
     document.getElementById('retryBtn').addEventListener('click', init);
+  } else if (type === 'empty') {
+    div.innerHTML = `${message} <button id="changeDayBtn" class="btn">Changer de jour</button>`;
+    document.getElementById('changeDayBtn').addEventListener('click', () => document.getElementById('dayCalendar').click());
   } else {
     div.textContent = message || '';
   }
+}
+
+function renderTimeline(list) {
+  const timeline = document.getElementById('timeTimeline');
+  timeline.innerHTML = '';
+  list.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'time-chip';
+    btn.textContent = item.time;
+    btn.dataset.file = item.file;
+    btn.dataset.iso = item.iso.toISOString();
+    btn.title = `${item.time} — ${formatRelative(item.iso)}`;
+    btn.addEventListener('click', () => selectTime(item.file));
+    timeline.appendChild(btn);
+  });
+}
+
+function renderList(list) {
+  const container = document.getElementById('timeList');
+  container.innerHTML = '';
+  list.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'time-list-item';
+    row.dataset.file = item.file;
+    row.innerHTML = `<div class="info"><span>${item.time}</span><small>${formatRelative(item.iso)}</small></div><button class="btn open">Ouvrir</button>`;
+    row.querySelector('button').addEventListener('click', () => selectTime(item.file));
+    container.appendChild(row);
+  });
+}
+
+function populateDay(day) {
+  const list = auditsMap[day] || [];
+  if (list.length === 0) {
+    showStatus('Aucun rapport ce jour', 'empty');
+    renderTimeline([]);
+    renderList([]);
+    return null;
+  }
+  showStatus('');
+  renderTimeline(list);
+  renderList(list);
+  const last = list[list.length - 1];
+  setActiveTime(last.file);
+  return last.file;
+}
+
+function setActiveTime(file) {
+  document.querySelectorAll('.time-chip').forEach(b => b.classList.toggle('active', b.dataset.file === file));
+  document.querySelectorAll('.time-list-item').forEach(li => li.classList.toggle('active', li.dataset.file === file));
+}
+
+async function selectTime(file) {
+  const json = await loadAudit(file);
+  if (json) {
+    currentFile = file;
+    renderCpuChart(json.cpu.usage);
+    renderText(json);
+    setActiveTime(file);
+  }
+}
+
+function applyTimeFilter(q) {
+  const query = q.toLowerCase();
+  document.querySelectorAll('.time-chip').forEach(btn => {
+    btn.hidden = !btn.textContent.toLowerCase().includes(query);
+  });
+  document.querySelectorAll('.time-list-item').forEach(item => {
+    const timeText = item.querySelector('.info span').textContent.toLowerCase();
+    item.hidden = !timeText.includes(query);
+  });
+}
+
+function updateDayButtons() {
+  const today = new Date().toISOString().slice(0,10);
+  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  document.getElementById('dayToday').classList.toggle('active', selectedDate === today);
+  document.getElementById('dayYesterday').classList.toggle('active', selectedDate === yesterday);
+  document.getElementById('dayCalendar').classList.toggle('active', selectedDate !== today && selectedDate !== yesterday);
+}
+
+function showUpdateBadge() {
+  const badge = document.getElementById('updateBadge');
+  badge.classList.add('show');
+  setTimeout(() => badge.classList.remove('show'), 1000);
 }
 
 function renderCpuChart(usages) {
@@ -323,78 +375,69 @@ async function init() {
       showStatus('Aucun rapport', 'empty');
       return;
     }
-    setDateToLatest();
-    const file = populateTimesForDay(document.getElementById('datePicker').value);
-    if (file) {
-      const json = await loadAudit(file);
-      if (json) {
-        currentFile = file;
-        renderCpuChart(json.cpu.usage);
-        renderText(json);
-      }
-    }
+    selectedDate = latestEntry.date;
+    document.getElementById('datePicker').value = selectedDate;
+    updateDayButtons();
+    const file = populateDay(selectedDate);
+    if (file) await selectTime(file);
+    document.getElementById('latestInfo').textContent = `${latestEntry.time} — ${formatRelative(latestEntry.iso)}`;
     showStatus('');
   } catch (err) {
     console.error(err);
-    showStatus('Erreur de chargement — Réessayer', 'error');
+    showStatus('Impossible de charger les rapports', 'error');
     return;
   }
 
-  const datePicker = document.getElementById('datePicker');
   const timeFilter = document.getElementById('timeFilter');
-  const timeSelect = document.getElementById('timeSelect');
-  const btnLatest = document.getElementById('btnLatest');
-
-  datePicker.addEventListener('change', async function () {
-    const file = populateTimesForDay(this.value);
-    timeFilter.value = '';
-    applyTimeFilter('');
-    if (file) {
-      const json = await loadAudit(timeSelect.value);
-      if (json) {
-        currentFile = timeSelect.value;
-        renderCpuChart(json.cpu.usage);
-        renderText(json);
-      }
-    }
-  });
-
   timeFilter.addEventListener('input', e => applyTimeFilter(e.target.value));
 
-  timeSelect.addEventListener('change', async function () {
-    const json = await loadAudit(this.value);
-    if (json) {
-      currentFile = this.value;
-      renderCpuChart(json.cpu.usage);
-      renderText(json);
-    }
-  });
-
-  timeSelect.addEventListener('keydown', async function (e) {
-    if (e.key === 'Enter') {
-      const json = await loadAudit(this.value);
-      if (json) {
-        currentFile = this.value;
-        renderCpuChart(json.cpu.usage);
-        renderText(json);
-      }
-    }
-  });
-
-  btnLatest.addEventListener('click', async () => {
+  document.getElementById('btnLatest').addEventListener('click', async () => {
     if (!latestEntry) return;
-    document.getElementById('datePicker').value = latestEntry.date;
-    populateTimesForDay(latestEntry.date);
-    timeFilter.value = '';
-    applyTimeFilter('');
-    document.getElementById('timeSelect').value = latestEntry.file;
-    const json = await loadAudit(latestEntry.file);
-    if (json) {
-      currentFile = latestEntry.file;
-      renderCpuChart(json.cpu.usage);
-      renderText(json);
-    }
+    selectedDate = latestEntry.date;
+    document.getElementById('datePicker').value = selectedDate;
+    updateDayButtons();
+    populateDay(selectedDate);
+    await selectTime(latestEntry.file);
   });
+
+  document.getElementById('dayToday').addEventListener('click', () => {
+    const day = new Date().toISOString().slice(0,10);
+    document.getElementById('datePicker').value = day;
+    selectedDate = day;
+    updateDayButtons();
+    const file = populateDay(day);
+    if (file) selectTime(file);
+  });
+
+  document.getElementById('dayYesterday').addEventListener('click', () => {
+    const day = new Date(Date.now()-86400000).toISOString().slice(0,10);
+    document.getElementById('datePicker').value = day;
+    selectedDate = day;
+    updateDayButtons();
+    const file = populateDay(day);
+    if (file) selectTime(file);
+  });
+
+  document.getElementById('dayCalendar').addEventListener('click', () => {
+    const picker = document.getElementById('datePicker');
+    picker.showPicker?.();
+    picker.focus();
+  });
+
+  document.getElementById('datePicker').addEventListener('change', () => {
+    selectedDate = document.getElementById('datePicker').value;
+    updateDayButtons();
+    const file = populateDay(selectedDate);
+    if (file) selectTime(file);
+  });
+
+  document.getElementById('densityToggle').addEventListener('click', () => {
+    document.getElementById('reportCard').classList.toggle('compact');
+  });
+
+  const listAccordion = document.getElementById('listAccordion');
+  document.getElementById('listToggle').addEventListener('click', () => listAccordion.classList.toggle('open'));
+  if (window.matchMedia('(min-width:768px)').matches) listAccordion.classList.add('open');
 
   setInterval(refreshAudits, 60000);
 }
@@ -402,31 +445,31 @@ async function init() {
 async function refreshAudits() {
   const dot = document.getElementById('refreshDot');
   dot.classList.add('active');
-  const selectedDate = document.getElementById('datePicker').value;
-  const previousCount = (auditsMap[selectedDate] || []).length;
+  const oldList = auditsMap[selectedDate] ? auditsMap[selectedDate].map(e => e.file) : [];
   const wasOnLatest = currentFile && latestEntry && currentFile === latestEntry.file;
   try {
     const list = await fetchIndex();
     parseIndex(list);
-    const newCount = (auditsMap[selectedDate] || []).length;
-    if (newCount > previousCount) {
-      const previousFile = document.getElementById('timeSelect').value;
-      populateTimesForDay(selectedDate);
-      const select = document.getElementById('timeSelect');
-      if (Array.from(select.options).some(o => o.value === previousFile)) {
-        select.value = previousFile;
-      }
+    if (latestEntry) {
+      document.getElementById('latestInfo').textContent = `${latestEntry.time} — ${formatRelative(latestEntry.iso)}`;
+    }
+    const newList = auditsMap[selectedDate] ? auditsMap[selectedDate].map(e => e.file) : [];
+    const added = newList.filter(f => !oldList.includes(f));
+    if (added.length || newList.length !== oldList.length) {
+      populateDay(selectedDate);
+      if (currentFile && newList.includes(currentFile)) setActiveTime(currentFile);
+      added.forEach(f => {
+        const chip = document.querySelector(`.time-chip[data-file="${f}"]`);
+        if (chip) chip.insertAdjacentHTML('beforeend', '<span class="badge">Nouveau</span>');
+      });
+      if (added.length) showUpdateBadge();
     }
     if (wasOnLatest && latestEntry && latestEntry.file !== currentFile) {
-      document.getElementById('datePicker').value = latestEntry.date;
-      populateTimesForDay(latestEntry.date);
-      document.getElementById('timeSelect').value = latestEntry.file;
-      const json = await loadAudit(latestEntry.file);
-      if (json) {
-        currentFile = latestEntry.file;
-        renderCpuChart(json.cpu.usage);
-        renderText(json);
-      }
+      selectedDate = latestEntry.date;
+      document.getElementById('datePicker').value = selectedDate;
+      updateDayButtons();
+      populateDay(selectedDate);
+      await selectTime(latestEntry.file);
     }
   } catch (err) {
     console.error('refresh error', err);
