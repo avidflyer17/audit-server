@@ -45,6 +45,11 @@
       margin-top: 2rem;
     }
 
+    .heading-icon {
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+
     .subtitle {
       font-style: italic;
       margin-bottom: 1.5rem;
@@ -388,41 +393,41 @@
     </div>
   </div>
 
-  <h2>Date de génération</h2>
+  <h2><i class="fa-solid fa-calendar-day heading-icon"></i>Date de génération</h2>
   <p id="generated">--</p>
 
-  <h2>Temps de fonctionnement</h2>
+  <h2><i class="fa-solid fa-clock heading-icon"></i>Temps de fonctionnement</h2>
   <p id="uptime">--</p>
-  <h2>Charge moyenne</h2>
+  <h2><i class="fa-solid fa-gauge-high heading-icon"></i>Charge moyenne</h2>
   <p id="loadAvg">--</p>
 
-  <h2>Adressage réseau</h2>
+  <h2><i class="fa-solid fa-network-wired heading-icon"></i>Adressage réseau</h2>
   <div id="ipInfo" class="ip-container">
     <div><span class="ip-icon">📡</span> IP Locale : <span id="ipLocal">--</span></div>
     <div><span class="ip-icon">🌐</span> IP Externe : <span id="ipPublic">--</span></div>
   </div>
 
-  <h2>Utilisation CPU par cœur <span id="cpuLoadBadge" class="badge">--</span></h2>
+  <h2><i class="fa-solid fa-microchip heading-icon"></i>Utilisation CPU par cœur <span id="cpuLoadBadge" class="badge">--</span></h2>
   <canvas id="cpuChart"></canvas>
 
-  <h2>Températures CPU</h2>
+  <h2><i class="fa-solid fa-temperature-three-quarters heading-icon"></i>Températures CPU</h2>
   <div id="tempsContainer"></div>
 
-  <h2>Mémoire RAM</h2>
+  <h2><i class="fa-solid fa-memory heading-icon"></i>Mémoire RAM</h2>
   <div class="memory-container">
     <canvas id="memoryChart"></canvas>
   </div>
 
-  <h2>Disques</h2>
+  <h2><i class="fa-solid fa-hard-drive heading-icon"></i>Disques</h2>
   <div id="disksContainer" class="disk-bar-container"></div>
 
-  <h2>Services actifs</h2>
+  <h2><i class="fa-solid fa-list-check heading-icon"></i>Services actifs</h2>
   <div class="block-wrapper">
     <button class="copy-btn" onclick="copyToClipboard('servicesText')">📋</button>
     <pre id="servicesText" class="code-block"></pre>
   </div>
 
-  <h2>Ports ouverts</h2>
+  <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts</h2>
   <div class="block-wrapper">
     <div id="portsText" class="code-block">
       <div class="protocol-header">
@@ -445,19 +450,19 @@
     </div>
   </div>
 
-  <h2>Top 5 processus - CPU</h2>
+  <h2><i class="fa-solid fa-fire heading-icon"></i>Top 5 processus - CPU</h2>
   <div class="block-wrapper">
     <button class="copy-btn" onclick="copyToClipboard('topCpuText')">📋</button>
     <pre id="topCpuText" class="code-block"></pre>
   </div>
 
-  <h2>Top 5 processus - RAM</h2>
+  <h2><i class="fa-solid fa-memory heading-icon"></i>Top 5 processus - RAM</h2>
   <div class="block-wrapper">
     <button class="copy-btn" onclick="copyToClipboard('topMemText')">📋</button>
     <pre id="topMemText" class="code-block"></pre>
   </div>
 
-  <h2>Conteneurs Docker</h2>
+  <h2><i class="fa-brands fa-docker heading-icon"></i>Conteneurs Docker</h2>
   <div class="block-wrapper">
     <button class="copy-btn" onclick="copyToClipboard('dockerText')">📋</button>
     <pre id="dockerText" class="code-block"></pre>
