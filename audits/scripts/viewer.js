@@ -43,12 +43,26 @@ function renderCpuChart(usages) {
   });
 }
 
+function formatLoadAverage(value) {
+  if (!value) return '--';
+  const parts = value.split(',');
+  if (parts.length >= 6) {
+    const formatted = [];
+    for (let i = 0; i < 6; i += 2) {
+      formatted.push(parts[i] + ',' + parts[i + 1]);
+    }
+    return `1 min: ${formatted[0]} | 5 min: ${formatted[1]} | 15 min: ${formatted[2]}`;
+  }
+  return value;
+}
+
 function renderText(json) {
   document.getElementById('generated').textContent = json.generated;
   document.getElementById('hostname').textContent = json.hostname;
-  document.getElementById('ipInfo').textContent = `${json.ip_local || 'N/A'} / ${json.ip_pub || 'N/A'}`;
+  document.getElementById('ipLocal').textContent = json.ip_local || '--';
+  document.getElementById('ipPublic').textContent = json.ip_pub || '--';
   document.getElementById('uptime').textContent = json.uptime || '--';
-  document.getElementById('loadAvg').textContent = json.load_average || '--';
+  document.getElementById('loadAvg').textContent = formatLoadAverage(json.load_average);
 
   const mem = json.memory?.ram;
   if (mem) {
