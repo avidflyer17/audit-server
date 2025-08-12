@@ -770,6 +770,8 @@ async function selectTime(file) {
     renderText(json);
     setActiveTime(file);
     if (typeof closeMenu === 'function') closeMenu();
+    const del = document.getElementById('btnDelete');
+    if (del) del.disabled = false;
   }
 }
 
@@ -1221,6 +1223,43 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   overlay.addEventListener('click', closeMenu);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const gen = document.getElementById('btnGenerate');
+  const del = document.getElementById('btnDelete');
+  if (gen) {
+    gen.addEventListener('click', async () => {
+      showStatus('Génération…', 'loading');
+      try {
+        const res = await fetch('/api/reports', {method: 'POST'});
+        if (!res.ok) throw new Error('fail');
+        await refreshAudits();
+      } catch (err) {
+        alert('Échec de la génération');
+      } finally {
+        showStatus('');
+      }
+    });
+  }
+  if (del) {
+    del.addEventListener('click', async () => {
+      if (!currentFile) return;
+      if (!confirm('Supprimer ce rapport ?')) return;
+      showStatus('Suppression…', 'loading');
+      try {
+        const res = await fetch(`/api/reports/${currentFile}`, {method: 'DELETE'});
+        if (!res.ok) throw new Error('fail');
+        currentFile = null;
+        del.disabled = true;
+        await refreshAudits();
+      } catch (err) {
+        alert('Échec de la suppression');
+      } finally {
+        showStatus('');
+      }
+    });
+  }
 });
 
 document.addEventListener('DOMContentLoaded', init);
