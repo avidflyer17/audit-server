@@ -85,6 +85,43 @@ function colorClassDisk(v){
   return 'red';
 }
 
+function parseSizeToBytes(val){
+  if (val == null) return null;
+  if (typeof val === 'number' && !isNaN(val)) return val;
+  const str = String(val).trim();
+  const m = str.match(/^(\d+(?:\.\d+)?)\s*([KMGT]?i?B)?$/i);
+  if (!m) return null;
+  let num = parseFloat(m[1]);
+  const unit = (m[2] || 'B').toUpperCase();
+  const map = {
+    B: 1,
+    KB: 1e3,
+    MB: 1e6,
+    GB: 1e9,
+    TB: 1e12,
+    KIB: 1024,
+    MIB: 1024**2,
+    GIB: 1024**3,
+    TIB: 1024**4
+  };
+  const mul = map[unit];
+  if (!mul) return null;
+  return num * mul;
+}
+
+function formatBytes(bytes){
+  if (bytes == null || isNaN(bytes)) return 'N/A';
+  const units = ['B','KB','MB','GB','TB'];
+  let i = 0;
+  let val = bytes;
+  while (val >= 1024 && i < units.length - 1){
+    val /= 1024;
+    i++;
+  }
+  const dec = val < 10 && i > 0 ? 1 : 0;
+  return val.toFixed(dec) + units[i];
+}
+
 let dockerData = [];
 let dockerFiltered = [];
 let dockerFilters = new Set(['healthy','unhealthy','running','exited']);
@@ -728,22 +765,29 @@ function renderCpuTemps(temps){
 function renderMemory(mem){
   const container = document.getElementById('memoryContainer');
   container.classList.add('memory-container');
-  if(!mem){
-    container.innerHTML = '<div class="empty">N/A</div>';
+  container.innerHTML = '';
+  const usedBytes = parseSizeToBytes(mem?.used_bytes ?? mem?.used);
+  const totalBytes = parseSizeToBytes(mem?.total_bytes ?? mem?.total);
+  const freeBytes = (usedBytes != null && totalBytes != null) ? totalBytes - usedBytes : parseSizeToBytes(mem?.free_bytes ?? mem?.free);
+  if (usedBytes == null || totalBytes == null || totalBytes === 0){
+    container.innerHTML = `
+      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+        <span class="value">N/A</span>
+      </div>
+      <div class="ram-text">Données indisponibles</div>`;
     return;
   }
-  const total = Number(mem.total);
-  const used = Number(mem.used);
-  const free = Number(mem.free);
-  const pct = total ? (used/total)*100 : 0;
+  const pct = (usedBytes / totalBytes) * 100;
+  const pctStr = pct < 10 ? pct.toFixed(1) : Math.round(pct);
+  const usedStr = formatBytes(usedBytes);
+  const totalStr = formatBytes(totalBytes);
+  const freeStr = formatBytes(freeBytes);
   container.innerHTML = `
-    <div id="memoryBar" class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct.toFixed(1)}" style="--bar-bg:#4caf50">
-      <span class="fill orange" style="width:0"></span>
-      <span class="value">${pct.toFixed(1)}%</span>
+    <div id="memoryBar" class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctStr}">
+      <span class="fill green" style="width:0"></span>
+      <span class="value">${pctStr}%</span>
     </div>
-    <div id="memoryText" class="ram-text">Utilisée : ${used} / ${total}</div>
-    <div class="chips"><span class="chip used">Utilisée</span><span class="chip free">Libre</span></div>`;
-  const bar = container.querySelector('.bar');
+    <div class="ram-text">Utilisée : ${usedStr} / ${totalStr} • Libre : ${freeStr}</div>`;
   const fill = container.querySelector('.bar .fill');
   const valueEl = container.querySelector('.bar .value');
   requestAnimationFrame(()=>{
@@ -759,29 +803,46 @@ function renderDisks(disks){
     container.innerHTML = '<div class="empty">Aucun disque détecté.</div>';
     return;
   }
-  const sorted = [...disks].sort((a,b)=>parseInt(b.used_percent)-parseInt(a.used_percent));
+  const sorted = [...disks].sort((a,b)=>{
+    const aPct = parseFloat(a.used_percent) || 0;
+    const bPct = parseFloat(b.used_percent) || 0;
+    return bPct - aPct;
+  });
   sorted.forEach(disk => {
-    const usedPercent = Number(disk.used_percent);
+    const totalBytes = parseSizeToBytes(disk.total_bytes ?? disk.size);
+    const usedBytes = parseSizeToBytes(disk.used_bytes ?? disk.used);
+    const freeBytes = (totalBytes != null && usedBytes != null) ? totalBytes - usedBytes : parseSizeToBytes(disk.free_bytes ?? disk.available);
+    let pct = (totalBytes && usedBytes != null) ? (usedBytes / totalBytes) * 100 : null;
+    const pctStr = pct != null ? (pct < 10 ? pct.toFixed(1) : Math.round(pct)) : 'N/A';
+    const totalStr = formatBytes(totalBytes);
+    const usedStr = formatBytes(usedBytes);
+    const freeStr = formatBytes(freeBytes);
     const card = document.createElement('div');
     card.className = 'disk-card';
+    const barHtml = pct != null ? `
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctStr}">
+            <span class="fill ${colorClassDisk(pct)}" style="width:0"></span>
+            <span class="value">${pctStr}%</span>
+          </div>` : `
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+            <span class="value">N/A</span>
+          </div>`;
+    const info = pct != null ? `${usedStr} utilisé / ${totalStr} (${freeStr} libre)` : 'Données incomplètes';
     card.innerHTML = `
       <div class="proc-row">
-        <span class="proc-name">${disk.mountpoint} <span class="badge-total">${disk.size}</span></span>
-        <div class="proc-bars">
-          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${usedPercent}">
-            <span class="fill ${colorClassDisk(usedPercent)}" style="width:0"></span>
-            <span class="value">${usedPercent}%</span>
-          </div>
-        </div>
+        <span class="proc-name">${disk.mountpoint} <span class="badge-total">${totalStr}</span></span>
+        <div class="proc-bars">${barHtml}</div>
       </div>
-      <div class="ram-text">${disk.used} utilisé / ${disk.size} (${disk.available} libre)</div>`;
+      <div class="ram-text">${info}</div>`;
     container.appendChild(card);
-    const fill = card.querySelector('.bar .fill');
-    const valueEl = card.querySelector('.bar .value');
-    requestAnimationFrame(()=>{
-      fill.style.width = usedPercent + '%';
-      adjustBarValue(valueEl, fill, usedPercent);
-    });
+    if (pct != null){
+      const fill = card.querySelector('.bar .fill');
+      const valueEl = card.querySelector('.bar .value');
+      requestAnimationFrame(()=>{
+        fill.style.width = pct + '%';
+        adjustBarValue(valueEl, fill, pct);
+      });
+    }
   });
 }
 
