@@ -554,6 +554,7 @@ body {
 .badge.warning, .pill.warning { background:var(--warn); color:#000; }
 .badge.danger,  .pill.danger  { background:var(--crit); color:#fff; }
 
+.network-card { margin-top: var(--gap-4); }
 .network-card .ip-row { display:flex; align-items:center; gap:var(--gap-2); }
 .network-card .ip-row + .ip-row { margin-top:var(--gap-2); }
 .network-card .ip-icon { width:1.25rem; text-align:center; }
@@ -677,7 +678,7 @@ body {
  .mini-card.na { opacity:0.5; }
 
 .progress { position:relative; background:var(--bg-muted); border-radius:var(--radius); height:14px; overflow:hidden; }
-.progress--thin { height:8px; }
+.progress--thin { height:16px; }
 .progress__bar { background:var(--accent); height:100%; border-radius:inherit; width:0%; }
 .progress__value { position:absolute; inset:0; display:grid; place-items:center; font-size:var(--font-sm); font-weight:600; color:var(--text); }
 
