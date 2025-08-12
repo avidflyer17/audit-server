@@ -59,8 +59,7 @@ function showStatus(message, type) {
     div.innerHTML = `${message} <button id="retryBtn" class="btn">Réessayer</button>`;
     document.getElementById('retryBtn').addEventListener('click', init);
   } else if (type === 'empty') {
-    div.innerHTML = `${message} <button id="changeDayBtn" class="btn">Changer de jour</button>`;
-    document.getElementById('changeDayBtn').addEventListener('click', () => document.getElementById('dayCalendar').click());
+    div.textContent = message;
   } else {
     div.textContent = message || '';
   }
@@ -81,30 +80,15 @@ function renderTimeline(list) {
   });
 }
 
-function renderList(list) {
-  const container = document.getElementById('timeList');
-  container.innerHTML = '';
-  list.forEach(item => {
-    const row = document.createElement('div');
-    row.className = 'time-list-item';
-    row.dataset.file = item.file;
-    row.innerHTML = `<div class="info"><span>${item.time}</span><small>${formatRelative(item.iso)}</small></div><button class="btn open">Ouvrir</button>`;
-    row.querySelector('button').addEventListener('click', () => selectTime(item.file));
-    container.appendChild(row);
-  });
-}
-
 function populateDay(day) {
   const list = auditsMap[day] || [];
   if (list.length === 0) {
-    showStatus('Aucun rapport ce jour', 'empty');
     renderTimeline([]);
-    renderList([]);
+    showStatus('Aucune heure disponible', 'empty');
     return null;
   }
   showStatus('');
   renderTimeline(list);
-  renderList(list);
   const last = list[list.length - 1];
   setActiveTime(last.file);
   return last.file;
@@ -112,7 +96,6 @@ function populateDay(day) {
 
 function setActiveTime(file) {
   document.querySelectorAll('.time-chip').forEach(b => b.classList.toggle('active', b.dataset.file === file));
-  document.querySelectorAll('.time-list-item').forEach(li => li.classList.toggle('active', li.dataset.file === file));
 }
 
 async function selectTime(file) {
@@ -123,17 +106,6 @@ async function selectTime(file) {
     renderText(json);
     setActiveTime(file);
   }
-}
-
-function applyTimeFilter(q) {
-  const query = q.toLowerCase();
-  document.querySelectorAll('.time-chip').forEach(btn => {
-    btn.hidden = !btn.textContent.toLowerCase().includes(query);
-  });
-  document.querySelectorAll('.time-list-item').forEach(item => {
-    const timeText = item.querySelector('.info span').textContent.toLowerCase();
-    item.hidden = !timeText.includes(query);
-  });
 }
 
 function updateDayButtons() {
@@ -388,8 +360,6 @@ async function init() {
     return;
   }
 
-  const timeFilter = document.getElementById('timeFilter');
-  timeFilter.addEventListener('input', e => applyTimeFilter(e.target.value));
 
   document.getElementById('btnLatest').addEventListener('click', async () => {
     if (!latestEntry) return;
@@ -431,13 +401,6 @@ async function init() {
     if (file) selectTime(file);
   });
 
-  document.getElementById('densityToggle').addEventListener('click', () => {
-    document.getElementById('reportCard').classList.toggle('compact');
-  });
-
-  const listAccordion = document.getElementById('listAccordion');
-  document.getElementById('listToggle').addEventListener('click', () => listAccordion.classList.toggle('open'));
-  if (window.matchMedia('(min-width:768px)').matches) listAccordion.classList.add('open');
 
   setInterval(refreshAudits, 60000);
 }
