@@ -85,20 +85,6 @@ function colorClassDisk(v){
   return 'color-danger';
 }
 
-function colorClassGpu(v){
-  const val = Number(v);
-  if (val < 40) return 'color-success';
-  if (val < 70) return 'color-warning';
-  return 'color-danger';
-}
-
-function colorClassGpuMem(v){
-  const val = Number(v);
-  if (val < 40) return 'color-info';
-  if (val < 70) return 'color-warning';
-  return 'color-danger';
-}
-
 function parseSizeToBytes(val){
   if (val == null) return null;
   if (typeof val === 'number' && !isNaN(val)) return val;
@@ -862,49 +848,6 @@ function renderCpuTemps(temps){
   });
 }
 
-function renderGpu(gpu){
-  const container = document.getElementById('gpuContainer');
-  container.innerHTML = '';
-  if(!gpu){
-    container.innerHTML = '<div class="empty">Aucune donnée GPU</div>';
-    return;
-  }
-  const usage = Number(gpu.usage_pct);
-  const memUsedBytes = parseSizeToBytes(gpu.mem_used_bytes ?? gpu.mem_used);
-  const memTotalBytes = parseSizeToBytes(gpu.mem_total_bytes ?? gpu.mem_total);
-  const memPct = (memUsedBytes != null && memTotalBytes) ? (memUsedBytes / memTotalBytes) * 100 : null;
-  const memPctStr = memPct != null ? (memPct < 10 ? memPct.toFixed(1) : Math.round(memPct)) : 'N/A';
-  const memText = memPct != null ? `${formatBytes(memUsedBytes)} / ${formatBytes(memTotalBytes)}` : 'Données mémoire indisponibles';
-  const vendor = gpu.vendor ? ` (${gpu.vendor})` : '';
-  const card = document.createElement('div');
-  card.className = 'disk-card';
-  card.innerHTML = `
-    <div class="proc-row">
-      <span class="proc-name">GPU${vendor}</span>
-      <div class="proc-bars">
-        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${usage}">
-          <span class="fill ${colorClassGpu(usage)}" style="width:0"></span>
-          <span class="value">${usage}%</span>
-        </div>
-        ${memPct != null ? `<div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${memPctStr}"><span class="fill ${colorClassGpuMem(memPct)}" style="width:0"></span><span class="value">${memPctStr}%</span></div>` : ''}
-      </div>
-    </div>
-    <div class="ram-text">Mémoire : ${memText}</div>`;
-  container.appendChild(card);
-  const fills = card.querySelectorAll('.bar .fill');
-  const values = card.querySelectorAll('.bar .value');
-  requestAnimationFrame(()=>{
-    if(fills[0]){
-      fills[0].style.width = usage + '%';
-      adjustBarValue(values[0], fills[0], usage);
-    }
-    if(memPct != null && fills[1]){
-      fills[1].style.width = memPct + '%';
-      adjustBarValue(values[1], fills[1], memPct);
-    }
-  });
-}
-
 function renderMemory(mem){
   const container = document.getElementById('memoryContainer');
   container.innerHTML = '';
@@ -1143,10 +1086,9 @@ function renderText(json) {
 
   renderLoadAverage(json.load_average, json.cpu?.cores);
   renderCpuCores(json.cpu?.usage);
-  renderCpuTemps(json.cpu?.temperatures);
-  renderGpu(json.gpu);
   renderMemory(json.memory?.ram);
   renderDisks(json.disks);
+  renderCpuTemps(json.cpu?.temperatures);
 
   renderServices(json.services);
   renderPorts(json.ports);

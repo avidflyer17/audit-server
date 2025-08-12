@@ -47,26 +47,6 @@ cpu_color="green"
 if (( $(echo "$cpu_total_usage > 60" | bc -l) )); then cpu_color="orange"; fi
 if (( $(echo "$cpu_total_usage > 85" | bc -l) )); then cpu_color="red"; fi
 
-# 🎮 GPU (Intel/Nvidia)
-GPU_DATA="null"
-if command -v intel_gpu_top >/dev/null 2>&1; then
-  GPU_JSON=$(timeout 5 intel_gpu_top -J 2>/dev/null || true)
-  if [[ -n "$GPU_JSON" ]]; then
-    GPU_USAGE=$(echo "$GPU_JSON" | jq '[.engines[].busy] | add / length' 2>/dev/null)
-    GPU_DATA=$(jq -n --arg vendor "intel" --argjson usage "${GPU_USAGE:-0}" '{vendor:$vendor,usage_pct:$usage,mem_total_bytes:null,mem_used_bytes:null}')
-  fi
-elif command -v nvidia-smi >/dev/null 2>&1; then
-  line=$(nvidia-smi --query-gpu=utilization.gpu,memory.total,memory.used --format=csv,noheader,nounits 2>/dev/null | head -n 1)
-  if [[ -n "$line" ]]; then
-    util=$(echo "$line" | cut -d',' -f1 | tr -d ' ')
-    mem_total=$(echo "$line" | cut -d',' -f2 | tr -d ' ')
-    mem_used=$(echo "$line" | cut -d',' -f3 | tr -d ' ')
-    mem_total_bytes=$((mem_total*1024*1024))
-    mem_used_bytes=$((mem_used*1024*1024))
-    GPU_DATA=$(jq -n --arg vendor "nvidia" --argjson usage "$util" --argjson mem_total "$mem_total_bytes" --argjson mem_used "$mem_used_bytes" '{vendor:$vendor,usage_pct:$usage,mem_total_bytes:$mem_total,mem_used_bytes:$mem_used}')
-  fi
-fi
-
 # 🛠 Services actifs
 SERVICES=$(systemctl list-units --type=service --state=running --no-pager --no-legend | awk '{print $1}' | jq -R . | jq -s .)
 
@@ -152,7 +132,6 @@ jq -n \
   --argjson cpu_cores "$CPU_CORES" \
   --argjson cpu_usage "$cpu_data" \
   --arg cpu_color "$cpu_color" \
-  --argjson gpu "$GPU_DATA" \
   --argjson services "$SERVICES" \
   --argjson top_cpu "$TOP_CPU" \
   --argjson top_mem "$TOP_MEM" \
@@ -176,7 +155,6 @@ jq -n \
       usage: $cpu_usage,
       temperatures: $temp_cores
     },
-    gpu: $gpu,
     cpu_load_color: $cpu_color,
     services: $services,
     top_cpu: $top_cpu,
