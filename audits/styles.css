@@ -462,6 +462,7 @@ h1 {
       align-items: center;
       background: var(--block-bg);
       padding: 0.5rem 1rem;
+      padding-right: calc(1rem + var(--gap-2));
       z-index: 1100;
     }
 
@@ -518,7 +519,6 @@ h1 {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      margin-right: var(--gap-2);
     }
 
     .theme-icon {
@@ -569,6 +569,7 @@ h1 {
   @media screen and (max-width: 600px) {
     .top-bar {
       padding: 10px;
+      padding-right: calc(10px + var(--gap-2));
     }
     #themeSwitchWrapper { gap: 0.5rem; }
     .switch { width: 40px; height: 20px; }
