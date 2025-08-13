@@ -1,42 +1,31 @@
 services:
   audit-server:
-    build: .                # utilise ton Dockerfile dans /home/damswallace/docker/audits-nginx
+    image: nginx:alpine
     container_name: audit-server
-    working_dir: /app
-    environment:
-      - PORT=8080
-      - TZ=Europe/Paris
-      # Optionnel: override du dossier d'archives si tu veux
-      # - BASE_DIR=/app/audits
     volumes:
-      # 1) Persistance des rapports
-      - /home/damswallace/docker/audits-nginx/audits:/app/audits
-      # 2) Accès Docker pour `docker ps`/`docker stats` dans le script
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      # 3) (Optionnel) Tentative d'accès à systemd du host pour `systemctl list-units`
-      #    ⚠️ Voir note en bas : décommente au besoin
-      - /run/systemd:/run/systemd:ro
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /home/damswallace/docker/audits-nginx/audits:/usr/share/nginx/html:ro
+      - /home/damswallace/docker/audits-nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     expose:
-      - "8080"  # Traefik accède en interne
+      - "80"  # Pas de publication sur le host
     restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       br-dams:
         ipv4_address: 172.18.0.133
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=br-dams"
-      # Router
+      # ROUTEUR
       - "traefik.http.routers.audit-server.rule=Host(`audit.damswallace.fr`)"
       - "traefik.http.routers.audit-server.entrypoints=websecure"
       - "traefik.http.routers.audit-server.tls=true"
-      - "traefik.http.routers.audit-server.service=audit-server"
-      # Service (port interne Node)
-      - "traefik.http.services.audit-server.loadbalancer.server.port=8080"
-      - "traefik.http.services.audit-server.loadbalancer.server.scheme=http"
-      # Middlewares optionnels
+      # SERVICE
+      - "traefik.http.services.audit-server.loadbalancer.server.port=80"
+      # (OPTIONNEL) MIDDLEWARE IP WHITELIST uniquement pour HA
       - "traefik.http.routers.audit-server.middlewares=geoblock@file"
-
 networks:
-  br-dams:
-    external: true
+   br-dams:
+     external: true
