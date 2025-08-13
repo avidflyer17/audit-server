@@ -126,10 +126,15 @@ h1 {
   margin-bottom: var(--gap-5);
 }
 
+
 .intro-header {
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   gap: var(--gap-3);
+  width: 100%;
 }
 
 .intro-icon {
@@ -141,6 +146,7 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: var(--gap-1);
+  align-items: center;
 }
 
 .intro-title { margin: 0; }
@@ -149,6 +155,14 @@ h1 {
   margin: 0;
   color: var(--muted);
   font-style: normal;
+}
+
+@media (min-width: 768px) {
+  .intro-header { flex-direction: row; }
+  .intro-text {
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 
     select,
@@ -598,7 +612,11 @@ h1 {
     .color-danger  { background-color: var(--danger); color: white; }
 
 /* General info & network cards */
-.info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:var(--gap-4); }
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--gap-4);
+}
 .info-card { position:relative; display:flex; flex-direction:column; gap:var(--gap-2); }
 .info-card .card-head { display:flex; align-items:center; gap:var(--gap-2); }
 .info-card .card-title { display:flex; align-items:center; gap:var(--gap-2); font-weight:bold; }
@@ -610,8 +628,8 @@ h1 {
 .badge.warning, .pill.warning { background:var(--warn); color:#000; }
 .badge.danger,  .pill.danger  { background:var(--crit); color:#fff; }
 
-@media (max-width: 600px) {
-  .info-grid { grid-template-columns:1fr; }
+@media (min-width: 768px) {
+  .info-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .network-card { margin-top: var(--gap-4); }
