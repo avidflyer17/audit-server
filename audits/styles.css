@@ -491,6 +491,24 @@ h1 {
       opacity: 0.7;
     }
 
+    .brand-meta {
+      display: flex;
+      gap: var(--gap-3);
+      justify-content: center;
+      flex-wrap: wrap;
+      font-size: var(--font-sm);
+    }
+
+    .brand-meta .meta-item {
+      display: flex;
+      gap: var(--gap-1);
+      align-items: center;
+    }
+
+    .brand-meta .meta-label {
+      font-weight: 600;
+    }
+
     .menu-toggle {
       background: none;
       border: none;

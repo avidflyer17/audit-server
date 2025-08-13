@@ -1255,16 +1255,9 @@ function renderText(json) {
   const tz = json.timezone || json.tz;
   const tzBadge = document.getElementById('tzBadge');
   if (tz) { tzBadge.textContent = tz; tzBadge.style.display='inline-block'; } else { tzBadge.style.display='none'; }
-  setupCopy('copyGenerated', () => genEl.textContent);
-
   const upInfo = parseUptime(json.uptime);
   const upEl = document.getElementById('uptimeValue');
   upEl.textContent = upInfo.text;
-  setupCopy('copyUptime', () => upEl.textContent);
-  const upBadge = document.getElementById('uptimeBadge');
-  if (upBadge) {
-    upBadge.style.display = 'none';
-  }
   const bootTs = json.boot_ts || json.boot_time || null;
   const sinceEl = document.getElementById('uptimeSince');
   if (bootTs) {
