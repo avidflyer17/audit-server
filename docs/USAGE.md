@@ -18,35 +18,27 @@ This document provides extra details on how to use the audit script and serve th
    sudo apt-get install -y bc jq curl lm-sensors sysstat
    ```
 
-   Node.js is required to run `server.js`.
-
 ## 📊 Generating reports
 
-The `generate-audit-json.sh` script collects system information and writes it as JSON files. By
-default, reports are stored under `/home/damswallace/docker/audits-nginx/audits`. You can override
-this location by setting the `BASE_DIR` environment variable:
+The `generate-audit-json.sh` script collects system information and writes it as JSON files. By default, reports
+are stored under `/home/damswallace/docker/audits-nginx/audits`. You can override this location by setting the
+`BASE_DIR` environment variable:
 
 ```bash
-BASE_DIR=/tmp/audits ./generate-audit-json.sh
+BASE_DIR=./audits ./generate-audit-json.sh
 ```
 
-Each execution creates a timestamped file in `archives/` and refreshes `index.json` with the list of
-available reports.
+Each execution creates a timestamped file in `archives/` and refreshes `index.json` with the list of available
+reports.
 
-## 📂 Managing reports
+## 📂 Serving reports
 
-Start the Node server to browse audits from the web interface:
+Use the provided Docker and Nginx setup to serve the `audits` directory. Adjust paths or Traefik labels in
+`docker-compose.yaml` to match your environment:
 
 ```bash
-node server.js
+docker compose up -d
 ```
-
-The dashboard lists existing reports from `archives/index.json`.
-
-## 🌐 Serving the reports
-
-`server.js` serves the static files under `audits` and exposes the `/api/reports` endpoint. After
-starting it, open the reported address in a browser to view the dashboard.
 
 ## 🧪 Running tests
 
