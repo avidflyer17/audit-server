@@ -61,28 +61,35 @@
   <div id="menuOverlay"></div>
 
   <main>
-    <h1>🧠 Audit Serveur DW</h1>
-    <p class="subtitle">Machine : <strong id="hostname">-</strong></p>
+    <section class="intro">
+      <div class="intro-header">
+        <i class="fa-solid fa-brain intro-icon" aria-hidden="true"></i>
+        <div class="intro-text">
+          <h1 class="intro-title">Audit Serveur DW</h1>
+          <p class="intro-subtitle">Machine : <strong id="hostname">-</strong></p>
+        </div>
+      </div>
 
       <div class="info-grid">
-      <div class="info-card card" id="generatedCard" aria-labelledby="generatedTitle">
-        <div class="card-head">
-          <div class="card-title card__title" id="generatedTitle"><i class="fa-solid fa-calendar-day"></i><span>Date de génération</span></div>
-        <button id="copyGenerated" class="copy-icon" title="Copier la date" aria-label="Copier la date"><i class="fa-regular fa-copy"></i></button>
+        <div class="info-card card" id="generatedCard" aria-labelledby="generatedTitle">
+          <div class="card-head">
+            <div class="card-title card__title" id="generatedTitle"><i class="fa-solid fa-calendar-day"></i><span>Date de génération</span></div>
+            <button id="copyGenerated" class="copy-icon" title="Copier la date" aria-label="Copier la date"><i class="fa-regular fa-copy"></i></button>
+          </div>
+          <div id="generatedValue" class="card-main">--</div>
+          <div class="card-meta card__meta"><span id="tzBadge" class="badge"></span></div>
+        </div>
+        <div class="info-card card" id="uptimeCard" aria-labelledby="uptimeTitle">
+          <div class="card-head">
+            <div class="card-title card__title" id="uptimeTitle"><i class="fa-solid fa-clock"></i><span>Temps de fonctionnement</span></div>
+            <span id="uptimeBadge" class="badge"></span>
+            <button id="copyUptime" class="copy-icon" title="Copier la durée" aria-label="Copier la durée"><i class="fa-regular fa-copy"></i></button>
+          </div>
+          <div id="uptimeValue" class="card-main">--</div>
+          <div id="uptimeSince" class="card-meta card__meta"></div>
+        </div>
       </div>
-        <div id="generatedValue" class="card-main">--</div>
-        <div class="card-meta card__meta"><span id="tzBadge" class="badge"></span></div>
-    </div>
-      <div class="info-card card" id="uptimeCard" aria-labelledby="uptimeTitle">
-        <div class="card-head">
-          <div class="card-title card__title" id="uptimeTitle"><i class="fa-solid fa-clock"></i><span>Temps de fonctionnement</span></div>
-        <span id="uptimeBadge" class="badge"></span>
-        <button id="copyUptime" class="copy-icon" title="Copier la durée" aria-label="Copier la durée"><i class="fa-regular fa-copy"></i></button>
-      </div>
-        <div id="uptimeValue" class="card-main">--</div>
-        <div id="uptimeSince" class="card-meta card__meta"></div>
-    </div>
-  </div>
+    </section>
 
     <div class="info-card card network-card" id="networkCard" aria-labelledby="networkTitle">
     <div class="card-head">
