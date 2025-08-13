@@ -957,42 +957,66 @@ function renderMemory(model){
       {cls:'seg-free', label:'Libre', val:info.freeBytes, pct:info.seg.freePct}
     ];
     segs.forEach(seg => {
-      if (seg.val == null) return;
+      if (seg.val == null || seg.val <= 0) return;
       const pct = seg.pct;
       const pctStr = Math.round(pct);
       const segEl = document.createElement('div');
       segEl.className = `seg ${seg.cls}`;
       segEl.style.width = pct + '%';
       segEl.dataset.tip = `${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
+      const label = document.createElement('span');
+      label.className = 'label';
+      label.textContent = `${formatGi(seg.val)} (${pctStr}%)`;
+      segEl.appendChild(label);
       bar.appendChild(segEl);
-      const item = document.createElement('span');
-      item.className = `legend-item ${seg.cls}`;
-      item.innerHTML = `<span class="dot"></span>${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
-      legend.appendChild(item);
+      if (pct < 12){
+        label.classList.add('hidden');
+        const item = document.createElement('span');
+        item.className = `legend-item ${seg.cls}`;
+        item.innerHTML = `<span class="dot"></span>${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
+        legend.appendChild(item);
+      } else {
+        requestAnimationFrame(()=>adjustBarValue(label, segEl, pct));
+      }
     });
-    if (info.usedEffectiveBytes > 0){
-      const pctStr = Math.round(info.seg.usedPct);
-      const center = document.createElement('div');
-      center.className = 'bar-label';
-      center.textContent = `Utilisée réelle : ${formatGi(info.usedEffectiveBytes)} (${pctStr} %)`;
-      bar.appendChild(center);
-    }
     legend.classList.toggle('hidden', !legend.childElementCount);
 
-    const badgeData = [
-      {icon:'fa-microchip', label:'Utilisée (totale)', val:formatGi(info.usedTotalBytes), cls:pctClass(info.pct)},
-      {icon:'fa-circle-check', label:'Utilisée réelle', val:formatGi(info.usedEffectiveBytes)},
-      {icon:'fa-check', label:'Disponible', val:formatGi(model.badges.availableBytes)},
-      {icon:'fa-share-nodes', label:'Partagée', val:formatGi(model.badges.sharedBytes)},
-      {icon:'fa-layer-group', label:'Cache/buffers', val:formatGi(info.cacheBytes)},
-      {icon:'fa-circle', label:'Libre', val:formatGi(info.freeBytes)}
+    const badgeGroups = [
+      {
+        title: 'Utilisation',
+        items: [
+          {icon:'fa-microchip', label:'Utilisée (totale)', val:info.usedTotalBytes, cls:pctClass(info.pct)},
+          {icon:'fa-layer-group', label:'Cache/buffers', val:info.cacheBytes},
+          {icon:'fa-circle', label:'Libre', val:info.freeBytes}
+        ]
+      },
+      {
+        title: 'Infos système',
+        items: [
+          {icon:'fa-check', label:'Disponible', val:model.badges.availableBytes},
+          {icon:'fa-share-nodes', label:'Partagée', val:model.badges.sharedBytes}
+        ]
+      }
     ];
-    badgeData.forEach(b => {
-      if (b.val === 'N/A') return;
-      const el = document.createElement('div');
-      el.className = `badge${b.cls ? ' '+b.cls : ''}`;
-      el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${b.val}</span>`;
-      badges.appendChild(el);
+    badgeGroups.forEach(group => {
+      const visible = group.items.filter(b => b.val != null && b.val > 0);
+      if (!visible.length) return;
+      const gEl = document.createElement('div');
+      gEl.className = 'badge-group';
+      const tEl = document.createElement('div');
+      tEl.className = 'group-title';
+      tEl.textContent = group.title;
+      gEl.appendChild(tEl);
+      const itemsEl = document.createElement('div');
+      itemsEl.className = 'group-items';
+      visible.forEach(b => {
+        const el = document.createElement('div');
+        el.className = `badge${b.cls ? ' '+b.cls : ''}`;
+        el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${formatGi(b.val)}</span>`;
+        itemsEl.appendChild(el);
+      });
+      gEl.appendChild(itemsEl);
+      badges.appendChild(gEl);
     });
     container.appendChild(card);
   }
@@ -1018,7 +1042,7 @@ function renderMemory(model){
       {cls:'seg-free', label:'Libre', val:info.freeBytes, pct: info.totalBytes ? (info.freeBytes / info.totalBytes * 100) : 0}
     ];
     segs.forEach(seg => {
-      if (seg.val == null) return;
+      if (seg.val == null || seg.val <= 0) return;
       const pct = seg.pct;
       const pctStr = Math.round(pct);
       const segEl = document.createElement('div');
@@ -1054,14 +1078,14 @@ function renderMemory(model){
     }
 
     const badgeData = [
-      {icon:'fa-microchip', label:'Utilisée', val:formatGi(info.usedBytes), cls:pctClass(info.pct)},
-      {icon:'fa-circle', label:'Libre', val:formatGi(info.freeBytes)}
+      {icon:'fa-microchip', label:'Utilisée', val:info.usedBytes, cls:pctClass(info.pct)},
+      {icon:'fa-circle', label:'Libre', val:info.freeBytes}
     ];
     badgeData.forEach(b => {
-      if (b.val === 'N/A') return;
+      if (b.val == null || b.val <= 0) return;
       const el = document.createElement('div');
       el.className = `badge${b.cls ? ' '+b.cls : ''}`;
-      el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${b.val}</span>`;
+      el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${formatGi(b.val)}</span>`;
       badges.appendChild(el);
     });
     container.appendChild(card);
