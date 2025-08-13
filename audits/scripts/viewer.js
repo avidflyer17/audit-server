@@ -815,10 +815,18 @@ function updateDayButtons() {
   document.getElementById('dayCalendar').classList.toggle('active', selectedDate !== today && selectedDate !== yesterday);
 }
 
+let updateTimer;
+
 function showUpdateBadge() {
   const badge = document.getElementById('updateBadge');
   badge.classList.add('show');
-  setTimeout(() => badge.classList.remove('show'), 3000);
+  clearTimeout(updateTimer);
+  const hide = () => {
+    badge.classList.remove('show');
+    badge.removeEventListener('click', hide);
+  };
+  badge.addEventListener('click', hide);
+  updateTimer = setTimeout(hide, 30000);
 }
 
 function renderCpuCores(usages){

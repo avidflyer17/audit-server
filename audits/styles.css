@@ -348,14 +348,15 @@ h1 {
     .update-badge {
       display: none;
       position: fixed;
-      top: 10px;
+      bottom: 10px;
       right: 10px;
       background: var(--heading);
       color: var(--bg);
-      padding: 2px 6px;
+      padding: 4px 8px;
       border-radius: 4px;
-      font-size: 0.7rem;
+      font-size: 0.8rem;
       font-family: var(--font-mono);
+      cursor: pointer;
       z-index: 1100;
     }
 
