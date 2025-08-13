@@ -654,7 +654,7 @@ h1 {
 }
 
 .network-card {
-  margin-top: var(--gap-5);
+  margin-top: 0;
 }
 .network-card .card-title {
   color: var(--subheading);
