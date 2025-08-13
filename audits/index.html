@@ -17,6 +17,13 @@
   <body data-theme="dark">
   <header id="topBar" class="top-bar">
     <button id="menuToggle" class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+    <div class="top-brand">
+      <div class="brand-line">
+        <i class="fa-solid fa-brain" aria-hidden="true"></i>
+        <span class="brand-title">Audit Serveur DW</span>
+      </div>
+      <p id="hostname" class="brand-host">-</p>
+    </div>
     <div id="themeSwitchWrapper">
       <i id="themeIcon" class="fas fa-moon theme-icon"></i>
       <label class="switch">
@@ -61,20 +68,12 @@
   <div id="menuOverlay"></div>
 
   <main>
-    <section class="intro">
-      <div class="intro-header">
-        <i class="fa-solid fa-brain intro-icon" aria-hidden="true"></i>
-        <div class="intro-text">
-          <h1 class="intro-title">Audit Serveur DW</h1>
-          <p id="hostname" class="intro-subtitle">-</p>
-        </div>
-      </div>
-
-      <div class="info-grid">
+    <section class="section-wrap">
+      <div class="cards">
         <div class="info-card card" id="generatedCard" aria-labelledby="generatedTitle">
           <div class="card-head">
             <div class="card-title card__title" id="generatedTitle"><i class="fa-solid fa-calendar-day"></i><span>Date de génération</span></div>
-            <button id="copyGenerated" class="copy-icon" title="Copier la date" aria-label="Copier la date"><i class="fa-regular fa-copy"></i></button>
+            <button id="copyGenerated" class="copy-btn" title="Copier la date" aria-label="Copier la date"><i class="fa-regular fa-copy"></i></button>
           </div>
           <div id="generatedValue" class="card-main">--</div>
           <div class="card-meta card__meta"><span id="tzBadge" class="badge"></span></div>
@@ -83,15 +82,14 @@
           <div class="card-head">
             <div class="card-title card__title" id="uptimeTitle"><i class="fa-solid fa-clock"></i><span>Temps de fonctionnement</span></div>
             <span id="uptimeBadge" class="badge"></span>
-            <button id="copyUptime" class="copy-icon" title="Copier la durée" aria-label="Copier la durée"><i class="fa-regular fa-copy"></i></button>
+            <button id="copyUptime" class="copy-btn" title="Copier la durée" aria-label="Copier la durée"><i class="fa-regular fa-copy"></i></button>
           </div>
           <div id="uptimeValue" class="card-main">--</div>
           <div id="uptimeSince" class="card-meta card__meta"></div>
         </div>
       </div>
-    </section>
 
-    <div class="info-card card network-card" id="networkCard" aria-labelledby="networkTitle">
+      <div class="info-card card network-card" id="networkCard" aria-labelledby="networkTitle">
     <div class="card-head">
       <div class="card-title card__title" id="networkTitle"><i class="fa-solid fa-network-wired"></i><span>Adressage réseau</span></div>
     </div>
@@ -103,7 +101,7 @@
             <span id="ipLocal" class="ip-value">N/A</span>
           </span>
           <span id="netBadge" class="badge pill"></span>
-          <button id="copyIpLocal" class="copy-icon" title="Copier l'IP locale" aria-label="Copier l'IP locale"><i class="fa-regular fa-copy"></i></button>
+          <button id="copyIpLocal" class="copy-btn" title="Copier l'IP locale" aria-label="Copier l'IP locale"><i class="fa-regular fa-copy"></i></button>
         </div>
         <div class="ip-row ip-public">
           <i class="fa-solid fa-globe ip-icon" aria-hidden="true"></i>
@@ -112,10 +110,11 @@
             <span id="ipPublic" class="ip-value">N/A</span>
           </span>
           <span id="ispBadge" class="badge pill"></span>
-          <button id="copyIpPublic" class="copy-icon" title="Copier l'IP externe" aria-label="Copier l'IP externe"><i class="fa-regular fa-copy"></i></button>
+          <button id="copyIpPublic" class="copy-btn" title="Copier l'IP externe" aria-label="Copier l'IP externe"><i class="fa-regular fa-copy"></i></button>
         </div>
     </div>
-  </div>
+      </div>
+    </section>
 
   <h2><i class="fa-solid fa-gauge-high heading-icon"></i>Charge moyenne</h2>
   <div id="loadAvg" class="load-container">
