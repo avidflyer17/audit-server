@@ -692,13 +692,23 @@ body {
     .mem .legend-item.seg-cache .dot { background: var(--chip-bg); }
     .mem .legend-item.seg-free .dot { background: var(--bar-bg); border: 1px solid var(--card-border); }
     .mem .badges {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      display: flex;
+      flex-direction: column;
       gap: var(--gap-2);
       margin-top: var(--gap-2);
     }
-    @media (min-width: 1024px) {
-      .mem .badges { display: flex; flex-wrap: wrap; }
+    .mem .badge-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .mem .badge-group .group-title {
+      font-weight: 600;
+    }
+    .mem .badge-group .group-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--gap-2);
     }
     .mem .badge {
       display: flex;
