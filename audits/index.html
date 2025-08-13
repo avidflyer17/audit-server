@@ -89,15 +89,21 @@
       <div class="card-title card__title" id="networkTitle"><i class="fa-solid fa-network-wired"></i><span>Adressage réseau</span></div>
     </div>
     <div class="card-body">
-        <div class="ip-row">
+        <div class="ip-row ip-local">
           <i class="fa-solid fa-computer ip-icon" aria-hidden="true"></i>
-          <span id="ipLocalChip" class="chip ip-chip" title="Adresse IP locale détectée par le host"><span class="chip-label">IP locale</span> <span id="ipLocal" class="chip-value">N/A</span></span>
+          <span id="ipLocalChip" class="ip-chip" title="Adresse IP locale détectée par le host">
+            <span class="ip-label">IP locale</span>
+            <span id="ipLocal" class="ip-value">N/A</span>
+          </span>
           <span id="netBadge" class="badge pill"></span>
           <button id="copyIpLocal" class="copy-icon" title="Copier l'IP locale" aria-label="Copier l'IP locale"><i class="fa-regular fa-copy"></i></button>
         </div>
-        <div class="ip-row">
+        <div class="ip-row ip-public">
           <i class="fa-solid fa-globe ip-icon" aria-hidden="true"></i>
-          <span id="ipPublicChip" class="chip ip-chip" title="Adresse IP externe détectée"><span class="chip-label">IP externe</span> <span id="ipPublic" class="chip-value">N/A</span></span>
+          <span id="ipPublicChip" class="ip-chip" title="Adresse IP externe détectée">
+            <span class="ip-label">IP externe</span>
+            <span id="ipPublic" class="ip-value">N/A</span>
+          </span>
           <span id="ispBadge" class="badge pill"></span>
           <button id="copyIpPublic" class="copy-icon" title="Copier l'IP externe" aria-label="Copier l'IP externe"><i class="fa-regular fa-copy"></i></button>
         </div>

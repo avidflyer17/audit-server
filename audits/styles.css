@@ -573,12 +573,47 @@ body {
 .badge.danger,  .pill.danger  { background:var(--crit); color:#fff; }
 
 .network-card { margin-top: var(--gap-4); }
-.network-card .ip-row { display:flex; align-items:center; gap:var(--gap-2); }
-.network-card .ip-row + .ip-row { margin-top:var(--gap-2); }
-.network-card .ip-icon { width:1.25rem; text-align:center; }
-.network-card .chip { display:flex; gap:0.25rem; font-family:var(--font-mono); cursor:default; }
-.network-card .chip.na { opacity:0.6; }
-.network-card .ip-row .copy-icon { position:static; }
+.network-card .ip-row {
+  --ip-color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-2);
+  padding: var(--gap-2);
+  background: var(--bg-muted);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-left: 4px solid var(--ip-color);
+  flex-wrap: wrap;
+}
+.network-card .ip-row + .ip-row { margin-top: var(--gap-2); }
+.network-card .ip-row.ip-public { --ip-color: var(--accent); }
+.network-card .ip-icon { width: 1.25rem; text-align: center; color: var(--ip-color); }
+.network-card .ip-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-1);
+  font-family: var(--font-mono);
+  flex: 1;
+  min-width: 0;
+  cursor: default;
+}
+.network-card .ip-chip.na { opacity: 0.6; }
+.network-card .ip-label { font-size: var(--font-sm); color: var(--text-muted); }
+.network-card .ip-value { font-weight: 600; color: var(--ip-color); }
+.network-card .badge { margin-left: auto; flex-shrink: 0; }
+.network-card .ip-row .copy-icon {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  border-radius: 8px;
+  padding: 4px;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.network-card .ip-row .copy-icon:hover {
+  background: var(--ip-color);
+  color: var(--bg);
+}
 
     .disk-bar-container {
       width: 100%;
