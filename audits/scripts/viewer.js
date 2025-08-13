@@ -88,7 +88,7 @@ function colorClassDisk(v){
 function parseSizeToBytes(val){
   if (val == null) return null;
   if (typeof val === 'number' && !isNaN(val)) return val;
-  const str = String(val).trim();
+  const str = String(val).trim().replace(',', '.');
   // Allow units like "98G", "3.5Gi", "25GB", "25GiB" or plain bytes
   const m = str.match(/^(\d+(?:\.\d+)?)\s*([KMGT]?)(i?)B?$/i);
   if (!m) return null;
@@ -770,8 +770,6 @@ async function selectTime(file) {
     renderText(json);
     setActiveTime(file);
     if (typeof closeMenu === 'function') closeMenu();
-    const del = document.getElementById('btnDelete');
-    if (del) del.disabled = false;
   }
 }
 
@@ -853,42 +851,65 @@ function renderCpuTemps(temps){
 function renderMemory(mem){
   const container = document.getElementById('memoryContainer');
   container.innerHTML = '';
-  const usedBytes = parseSizeToBytes(mem?.used_bytes ?? mem?.used);
-  const totalBytes = parseSizeToBytes(mem?.total_bytes ?? mem?.total);
-  const freeBytes = (usedBytes != null && totalBytes != null) ? totalBytes - usedBytes : parseSizeToBytes(mem?.free_bytes ?? mem?.free);
-  if (usedBytes == null || totalBytes == null || totalBytes === 0){
-    container.innerHTML = `
-      <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-        <span class="value">N/A</span>
-      </div>
-      <div class="ram-text">Données indisponibles</div>`;
+  if (!mem || (!mem.ram && !mem.swap)) {
+    container.innerHTML = '<div class="empty">Aucune donnée mémoire</div>';
     return;
   }
-  const pct = (usedBytes / totalBytes) * 100;
-  const pctStr = pct < 10 ? pct.toFixed(1) : Math.round(pct);
-  const usedStr = formatBytes(usedBytes);
-  const totalStr = formatBytes(totalBytes);
-  const freeStr = formatBytes(freeBytes);
-  const card = document.createElement('div');
-  card.className = 'disk-card';
-  card.innerHTML = `
-    <div class="proc-row">
-      <span class="proc-name">RAM <span class="badge-total">${totalStr}</span></span>
-      <div class="proc-bars">
-        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctStr}">
-          <span class="fill ${colorClassRam(pct)}" style="width:0"></span>
-          <span class="value">${pctStr}%</span>
+
+  const renderCard = (label, info) => {
+    const usedBytes = parseSizeToBytes(info?.used_bytes ?? info?.used);
+    const totalBytes = parseSizeToBytes(info?.total_bytes ?? info?.total);
+    const freeBytes = (usedBytes != null && totalBytes != null)
+      ? totalBytes - usedBytes
+      : parseSizeToBytes(info?.free_bytes ?? info?.free);
+    if (usedBytes == null || totalBytes == null || totalBytes === 0) {
+      const card = document.createElement('div');
+      card.className = 'disk-card';
+      card.innerHTML = `
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <span class="value">N/A</span>
+        </div>
+        <div class="ram-text">Données ${label.toLowerCase()} indisponibles</div>`;
+      container.appendChild(card);
+      return;
+    }
+    const pct = (usedBytes / totalBytes) * 100;
+    const pctStr = pct < 10 ? pct.toFixed(1) : Math.round(pct);
+    const usedStr = formatBytes(usedBytes);
+    const totalStr = formatBytes(totalBytes);
+    const freeStr = formatBytes(freeBytes);
+    const extras = [];
+    const shared = parseSizeToBytes(info.shared);
+    if (shared != null) extras.push(`Partagée : ${formatBytes(shared)}`);
+    const buff = parseSizeToBytes(info.buff_cache);
+    if (buff != null) extras.push(`Caches/buffers : ${formatBytes(buff)}`);
+    const avail = parseSizeToBytes(info.available);
+    if (avail != null) extras.push(`Disponible : ${formatBytes(avail)}`);
+    const extraStr = extras.length ? ' • ' + extras.join(' • ') : '';
+    const card = document.createElement('div');
+    card.className = 'disk-card';
+    card.innerHTML = `
+      <div class="proc-row">
+        <span class="proc-name">${label} <span class="badge-total">${totalStr}</span></span>
+        <div class="proc-bars">
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctStr}">
+            <span class="fill ${colorClassRam(pct)}" style="width:0"></span>
+            <span class="value">${pctStr}%</span>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="ram-text">Utilisée : ${usedStr} / ${totalStr} • Libre : ${freeStr}</div>`;
-  container.appendChild(card);
-  const fill = card.querySelector('.bar .fill');
-  const valueEl = card.querySelector('.bar .value');
-  requestAnimationFrame(()=>{
-    fill.style.width = pct + '%';
-    adjustBarValue(valueEl, fill, pct);
-  });
+      <div class="ram-text">Utilisée : ${usedStr} • Libre : ${freeStr}${extraStr}</div>`;
+    container.appendChild(card);
+    const fill = card.querySelector('.bar .fill');
+    const valueEl = card.querySelector('.bar .value');
+    requestAnimationFrame(() => {
+      fill.style.width = pct + '%';
+      adjustBarValue(valueEl, fill, pct);
+    });
+  };
+
+  if (mem.ram) renderCard('RAM', mem.ram);
+  if (mem.swap) renderCard('Swap', mem.swap);
 }
 
 function renderDisks(disks){
@@ -1088,7 +1109,7 @@ function renderText(json) {
 
   renderLoadAverage(json.load_average, json.cpu?.cores);
   renderCpuCores(json.cpu?.usage);
-  renderMemory(json.memory?.ram);
+  renderMemory(json.memory);
   renderDisks(json.disks);
   renderCpuTemps(json.cpu?.temperatures);
 
@@ -1223,43 +1244,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   overlay.addEventListener('click', closeMenu);
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const gen = document.getElementById('btnGenerate');
-  const del = document.getElementById('btnDelete');
-  if (gen) {
-    gen.addEventListener('click', async () => {
-      showStatus('Génération…', 'loading');
-      try {
-        const res = await fetch('/api/reports', {method: 'POST'});
-        if (!res.ok) throw new Error('fail');
-        await refreshAudits();
-      } catch (err) {
-        alert('Échec de la génération');
-      } finally {
-        showStatus('');
-      }
-    });
-  }
-  if (del) {
-    del.addEventListener('click', async () => {
-      if (!currentFile) return;
-      if (!confirm('Supprimer ce rapport ?')) return;
-      showStatus('Suppression…', 'loading');
-      try {
-        const res = await fetch(`/api/reports/${currentFile}`, {method: 'DELETE'});
-        if (!res.ok) throw new Error('fail');
-        currentFile = null;
-        del.disabled = true;
-        await refreshAudits();
-      } catch (err) {
-        alert('Échec de la suppression');
-      } finally {
-        showStatus('');
-      }
-    });
-  }
 });
 
 document.addEventListener('DOMContentLoaded', init);

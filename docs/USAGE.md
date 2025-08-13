@@ -35,14 +35,13 @@ available reports.
 
 ## 📂 Managing reports
 
-Start the Node server to manage audits directly from the web interface:
+Start the Node server to browse audits from the web interface:
 
 ```bash
 node server.js
 ```
 
-The dashboard offers buttons to generate a new report or delete the current one. All updates are
-reflected in `archives/index.json`.
+The dashboard lists existing reports from `archives/index.json`.
 
 ## 🌐 Serving the reports
 
