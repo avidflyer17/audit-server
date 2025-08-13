@@ -55,14 +55,13 @@ snapshots at regular intervals.
 
 ## 📂 Managing reports
 
-Run the lightweight Node server and use the web interface to create or remove audits:
+Run the lightweight Node server and use the web interface to browse existing audits:
 
 ```bash
 node server.js
 ```
 
-The dashboard exposes buttons to generate a fresh report or delete the currently selected one.
-Each action updates `archives/index.json` automatically.
+The dashboard lists reports from `archives/index.json` for easy review.
 
 ## 🌐 Serving the reports
 
