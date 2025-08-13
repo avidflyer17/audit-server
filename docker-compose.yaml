@@ -1,35 +1,40 @@
 services:
   audit-server:
-    image: node:20-alpine
+    build: .                # utilise ton Dockerfile dans /home/damswallace/docker/audits-nginx
     container_name: audit-server
     working_dir: /app
-    command: ["node", "server.js"]
     environment:
       - PORT=8080
       - TZ=Europe/Paris
+      # Optionnel: override du dossier d'archives si tu veux
+      # - BASE_DIR=/app/audits
     volumes:
-      # Monte tout le projet (server.js, audits/, scripts, etc.)
-      - /home/damswallace/docker/audits-nginx:/app
+      # 1) Persistance des rapports
+      - /home/damswallace/docker/audits-nginx/audits:/app/audits
+      # 2) Accès Docker pour `docker ps`/`docker stats` dans le script
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # 3) (Optionnel) Tentative d'accès à systemd du host pour `systemctl list-units`
+      #    ⚠️ Voir note en bas : décommente au besoin
+      - /run/systemd:/run/systemd:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
     expose:
-      - "8080"   # pas de publication sur le host, Traefik s'y connecte en interne
+      - "8080"  # Traefik accède en interne
     restart: unless-stopped
-    logging:
-      driver: json-file
-      options:
-        max-size: "10m"
-        max-file: "3"
     networks:
       br-dams:
         ipv4_address: 172.18.0.133
     labels:
       - "traefik.enable=true"
-      # ROUTEUR
+      - "traefik.docker.network=br-dams"
+      # Router
       - "traefik.http.routers.audit-server.rule=Host(`audit.damswallace.fr`)"
       - "traefik.http.routers.audit-server.entrypoints=websecure"
       - "traefik.http.routers.audit-server.tls=true"
-      # SERVICE -> port interne du Node server
+      - "traefik.http.routers.audit-server.service=audit-server"
+      # Service (port interne Node)
       - "traefik.http.services.audit-server.loadbalancer.server.port=8080"
-      # (optionnel) middleware
+      - "traefik.http.services.audit-server.loadbalancer.server.scheme=http"
+      # Middlewares optionnels
       - "traefik.http.routers.audit-server.middlewares=geoblock@file"
 
 networks:
