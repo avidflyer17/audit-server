@@ -115,6 +115,35 @@ function formatBytes(bytes){
   return val.toFixed(dec) + units[i];
 }
 
+function formatGi(bytes){
+  if (bytes == null || isNaN(bytes)) return 'N/A';
+  return (bytes / (1024 ** 3)).toFixed(1) + 'Go';
+}
+
+function pctClass(pct){
+  if (pct >= 75) return 'crit';
+  if (pct >= 50) return 'warn';
+  return 'ok';
+}
+
+function renderSparkline(arr){
+  if (!Array.isArray(arr) || arr.length < 2) return null;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('class','spark');
+  svg.setAttribute('viewBox','0 0 60 20');
+  const max = Math.max(100, ...arr);
+  const step = 60 / (arr.length - 1);
+  const points = arr.map((v,i)=>`${i*step},${20 - (v / max) * 20}`).join(' ');
+  const line = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+  line.setAttribute('points', points);
+  line.setAttribute('fill','none');
+  line.setAttribute('stroke','var(--accent-color)');
+  line.setAttribute('stroke-width','2');
+  line.setAttribute('vector-effect','non-scaling-stroke');
+  svg.appendChild(line);
+  return svg;
+}
+
 function parseUptime(str){
   if(!str) return {text:'--', days:0};
   const parts = {days:0, hours:0, minutes:0};
@@ -849,67 +878,170 @@ function renderCpuTemps(temps){
 }
 
 function renderMemory(mem){
-  const container = document.getElementById('memoryContainer');
+  const container = document.getElementById('memorySection');
   container.innerHTML = '';
   if (!mem || (!mem.ram && !mem.swap)) {
     container.innerHTML = '<div class="empty">Aucune donnée mémoire</div>';
     return;
   }
 
-  const renderCard = (label, info) => {
-    const usedBytes = parseSizeToBytes(info?.used_bytes ?? info?.used);
-    const totalBytes = parseSizeToBytes(info?.total_bytes ?? info?.total);
-    const freeBytes = (usedBytes != null && totalBytes != null)
-      ? totalBytes - usedBytes
-      : parseSizeToBytes(info?.free_bytes ?? info?.free);
-    if (usedBytes == null || totalBytes == null || totalBytes === 0) {
-      const card = document.createElement('div');
-      card.className = 'disk-card';
-      card.innerHTML = `
-        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-          <span class="value">N/A</span>
-        </div>
-        <div class="ram-text">Données ${label.toLowerCase()} indisponibles</div>`;
-      container.appendChild(card);
-      return;
-    }
-    const pct = (usedBytes / totalBytes) * 100;
-    const pctStr = pct < 10 ? pct.toFixed(1) : Math.round(pct);
-    const usedStr = formatBytes(usedBytes);
-    const totalStr = formatBytes(totalBytes);
-    const freeStr = formatBytes(freeBytes);
-    const extras = [];
+  const renderRam = (info) => {
+    const total = parseSizeToBytes(info.total_bytes ?? info.total);
+    const used = parseSizeToBytes(info.used_bytes ?? info.used);
+    const cache = parseSizeToBytes(info.buff_cache);
     const shared = parseSizeToBytes(info.shared);
-    if (shared != null) extras.push(`Partagée : ${formatBytes(shared)}`);
-    const buff = parseSizeToBytes(info.buff_cache);
-    if (buff != null) extras.push(`Caches/buffers : ${formatBytes(buff)}`);
-    const avail = parseSizeToBytes(info.available);
-    if (avail != null) extras.push(`Disponible : ${formatBytes(avail)}`);
-    const extraStr = extras.length ? ' • ' + extras.join(' • ') : '';
-    const card = document.createElement('div');
-    card.className = 'disk-card';
+    const free = parseSizeToBytes(info.free_bytes ?? info.free);
+    let usedEff = (used != null && cache != null) ? used - cache : used;
+    let tipAdjust = '';
+    if (usedEff != null && usedEff < 0) {
+      usedEff = 0;
+      tipAdjust = 'Cache/buffers supérieur à utilisé, valeur ajustée';
+    }
+    const availBytes = parseSizeToBytes(info.available);
+    const avail = availBytes != null ? availBytes : (total != null && usedEff != null ? total - usedEff : null);
+    const pct = (usedEff != null && total) ? (usedEff / total) * 100 : 0;
+    const pctRound = Math.round(pct);
+    const card = document.createElement('article');
+    card.className = 'card ram';
     card.innerHTML = `
-      <div class="proc-row">
-        <span class="proc-name">${label} <span class="badge-total">${totalStr}</span></span>
-        <div class="proc-bars">
-          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctStr}">
-            <span class="fill ${colorClassRam(pct)}" style="width:0"></span>
-            <span class="value">${pctStr}%</span>
-          </div>
-        </div>
+      <div class="card-head">
+        <div class="title">RAM <span class="badge total">${formatGi(total)}</span></div>
+        <div class="percent ${pctClass(pct)}">${pctRound}%</div>
       </div>
-      <div class="ram-text">Utilisée : ${usedStr} • Libre : ${freeStr}${extraStr}</div>`;
-    container.appendChild(card);
-    const fill = card.querySelector('.bar .fill');
-    const valueEl = card.querySelector('.bar .value');
-    requestAnimationFrame(() => {
-      fill.style.width = pct + '%';
-      adjustBarValue(valueEl, fill, pct);
+      <div class="bar" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctRound}"></div>
+      <div class="bar-legend"></div>
+      <div class="badges"></div>`;
+    const bar = card.querySelector('.bar');
+    const legend = card.querySelector('.bar-legend');
+    const badges = card.querySelector('.badges');
+
+    const segments = [];
+    if (usedEff != null) segments.push({cls:`seg-used ${pctClass(pct)}`, label:'Utilisée réelle', val:usedEff, pct:pct, tip:`Utilisée réelle : ${formatGi(usedEff)} (${pctRound}%)${tipAdjust ? ' - ' + tipAdjust : ''}`});
+    if (cache != null) segments.push({cls:'seg-cache', label:'Cache/buffers', val:cache, pct: total ? (cache / total) * 100 : 0, tip:`Cache/buffers : ${formatGi(cache)} (${Math.round((cache/total)*100)}%)`});
+    if (avail != null) segments.push({cls:'seg-free', label:'Disponible', val:avail, pct: total ? (avail / total) * 100 : 0, tip:`Disponible : ${formatGi(avail)} (${Math.round((avail/total)*100)}%)`});
+
+    segments.forEach(seg => {
+      const pct = seg.pct;
+      const pctStr = Math.round(pct);
+      const segEl = document.createElement('div');
+      segEl.className = `seg ${seg.cls}`;
+      segEl.style.width = pct + '%';
+      segEl.dataset.tip = seg.tip;
+      const label = document.createElement('span');
+      label.className = 'label';
+      label.textContent = formatGi(seg.val);
+      segEl.appendChild(label);
+      bar.appendChild(segEl);
+      if (pct < 12) {
+        label.classList.add('hidden');
+        const item = document.createElement('span');
+        item.className = `legend-item ${seg.cls}`;
+        item.innerHTML = `<span class="dot"></span>${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
+        legend.appendChild(item);
+      } else {
+        requestAnimationFrame(()=>adjustBarValue(label, segEl, pct));
+      }
     });
+    if (!legend.childElementCount) legend.classList.add('hidden');
+
+    const badgeData = [
+      {icon:'fa-microchip', label:'Utilisée', val:formatGi(used), cls:pctClass(pct)},
+      {icon:'fa-check', label:'Disponible', val:formatGi(avail)},
+      {icon:'fa-share-nodes', label:'Partagée', val:formatGi(shared)},
+      {icon:'fa-layer-group', label:'Cache/buffers', val:formatGi(cache)},
+      {icon:'fa-circle', label:'Libre', val:formatGi(free)}
+    ];
+    badgeData.forEach(b => {
+      if (b.val === 'N/A') return;
+      const el = document.createElement('div');
+      el.className = `badge${b.cls ? ' '+b.cls : ''}`;
+      el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${b.val}</span>`;
+      badges.appendChild(el);
+    });
+
+    if (Array.isArray(info.history_percent)){
+      const spark = renderSparkline(info.history_percent);
+      if (spark) card.querySelector('.card-head').appendChild(spark);
+    }
+    return card;
   };
 
-  if (mem.ram) renderCard('RAM', mem.ram);
-  if (mem.swap) renderCard('Swap', mem.swap);
+  const renderSwap = (info) => {
+    const total = parseSizeToBytes(info.total_bytes ?? info.total);
+    const used = parseSizeToBytes(info.used_bytes ?? info.used);
+    const free = parseSizeToBytes(info.free_bytes ?? info.free) ?? (total != null && used != null ? total - used : null);
+    const pct = (used != null && total) ? (used / total) * 100 : 0;
+    const pctRound = Math.round(pct);
+    const card = document.createElement('article');
+    card.className = 'card swap';
+    card.innerHTML = `
+      <div class="card-head">
+        <div class="title">Swap <span class="badge total">${formatGi(total)}</span></div>
+        <div class="percent ${pctClass(pct)}">${pctRound}%</div>
+      </div>
+      <div class="bar" role="progressbar" aria-label="Utilisation Swap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctRound}"></div>
+      <div class="bar-legend"></div>
+      <div class="badges"></div>`;
+    const bar = card.querySelector('.bar');
+    const legend = card.querySelector('.bar-legend');
+    const badges = card.querySelector('.badges');
+
+    const segs = [
+      {cls:`seg-used ${pctClass(pct)}`, label:'Utilisée', val:used, pct:pct, tip:`Utilisée : ${formatGi(used)} (${pctRound}%)`},
+      {cls:'seg-free', label:'Libre', val:free, pct: total ? (free / total) * 100 : 0, tip:`Libre : ${formatGi(free)} (${Math.round((free/total)*100)}%)`}
+    ];
+    segs.forEach(seg => {
+      const pct = seg.pct;
+      const pctStr = Math.round(pct);
+      const segEl = document.createElement('div');
+      segEl.className = `seg ${seg.cls}`;
+      segEl.style.width = pct + '%';
+      segEl.dataset.tip = seg.tip;
+      const label = document.createElement('span');
+      label.className = 'label';
+      label.textContent = formatGi(seg.val);
+      segEl.appendChild(label);
+      bar.appendChild(segEl);
+      if (pct < 12) {
+        label.classList.add('hidden');
+        const item = document.createElement('span');
+        item.className = `legend-item ${seg.cls}`;
+        item.innerHTML = `<span class="dot"></span>${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
+        legend.appendChild(item);
+      } else {
+        requestAnimationFrame(()=>adjustBarValue(label, segEl, pct));
+      }
+    });
+    if (!legend.childElementCount) legend.classList.add('hidden');
+
+    if (used > 0){
+      const warn = document.createElement('div');
+      warn.className = 'badge warn';
+      warn.innerHTML = '<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span>Swap en usage</span>';
+      badges.appendChild(warn);
+    }
+
+    const badgeData = [
+      {icon:'fa-microchip', label:'Utilisée', val:formatGi(used), cls:pctClass(pct)},
+      {icon:'fa-circle', label:'Libre', val:formatGi(free)}
+    ];
+    badgeData.forEach(b => {
+      if (b.val === 'N/A') return;
+      const el = document.createElement('div');
+      el.className = `badge${b.cls ? ' '+b.cls : ''}`;
+      el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${b.val}</span>`;
+      badges.appendChild(el);
+    });
+
+    if (Array.isArray(info.history_percent)){
+      const spark = renderSparkline(info.history_percent);
+      if (spark) card.querySelector('.card-head').appendChild(spark);
+    }
+    return card;
+  };
+
+  if (mem.ram) container.appendChild(renderRam(mem.ram));
+  if (mem.swap) container.appendChild(renderSwap(mem.swap));
 }
 
 function renderDisks(disks){
