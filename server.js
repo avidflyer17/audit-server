@@ -116,9 +116,22 @@ function handleApi(req, res) {
         stdio: 'ignore',
         detached: true
       });
-      child.on('error', () => send(res, 500, { error: 'script spawn error' }, corsHeaders));
-      child.unref();
-      return send(res, 202, { status: 'accepted' }, corsHeaders);
+
+      const respond = (status, body) => {
+        if (!res.writableEnded) send(res, status, body, corsHeaders);
+      };
+
+      child.once('error', err => {
+        console.error('Report generation failed:', err);
+        respond(500, { error: 'script spawn error' });
+      });
+
+      child.once('spawn', () => {
+        child.unref();
+        respond(202, { status: 'accepted' });
+      });
+
+      return;
     } catch {
       return send(res, 500, { error: 'script spawn error' }, corsHeaders);
     }
