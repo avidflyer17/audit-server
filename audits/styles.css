@@ -1294,7 +1294,7 @@ h1 {
 
   main {
     max-width: 900px;
-    margin: var(--gap-5) auto 0;
+    margin: calc(var(--gap-5) + var(--gap-3)) auto 0;
   }
 
   @media (min-width: 1024px) {
