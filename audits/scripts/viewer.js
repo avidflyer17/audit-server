@@ -89,12 +89,19 @@ function parseSizeToBytes(val){
   if (val == null) return null;
   if (typeof val === 'number' && !isNaN(val)) return val;
   const str = String(val).trim().replace(/,/g, '.');
-  const m = str.match(/^(\d+(?:\.\d+)?)(?:\s*(B|[KMGT]iB?|[KMGT]i))?$/i);
+  // Accept units like "98G", "98GB", "98GiB", etc.
+  const m = str.match(/^(\d+(?:\.\d+)?)(?:\s*(B|[KMGT](?:iB?|i|B)?))?$/i);
   if (!m) return null;
   const num = parseFloat(m[1]);
   if (isNaN(num)) return null;
   const unit = (m[2] || 'B').toUpperCase();
-  const map = { B:1, KI:1024, KIB:1024, MI:1024**2, MIB:1024**2, GI:1024**3, GIB:1024**3, TI:1024**4, TIB:1024**4 };
+  const map = {
+    B:1,
+    K:1024, KB:1024, KI:1024, KIB:1024,
+    M:1024**2, MB:1024**2, MI:1024**2, MIB:1024**2,
+    G:1024**3, GB:1024**3, GI:1024**3, GIB:1024**3,
+    T:1024**4, TB:1024**4, TI:1024**4, TIB:1024**4
+  };
   const mul = map[unit];
   if (!mul) return null;
   return num * mul;
