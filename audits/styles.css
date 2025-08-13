@@ -643,6 +643,7 @@ body {
     .mem .percent.warn { color: var(--warn); }
     .mem .percent.crit { color: var(--crit); }
     .mem .bar {
+      position: relative;
       display: flex;
       height: 1.5rem;
       background: var(--bar-bg);
@@ -663,6 +664,18 @@ body {
     .mem .seg-cache { background: var(--chip-bg); }
     .mem .seg-free { background: var(--bar-bg); }
     .mem .seg .label.hidden { display: none; }
+    .mem .bar-label {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-sm);
+      font-weight: 600;
+      color: var(--text);
+      text-shadow: 0 0 2px var(--bg);
+      pointer-events: none;
+    }
     .mem .bar-legend {
       display: flex;
       flex-wrap: wrap;

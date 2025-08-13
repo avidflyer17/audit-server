@@ -88,7 +88,7 @@ function colorClassDisk(v){
 function parseSizeToBytes(val){
   if (val == null) return null;
   if (typeof val === 'number' && !isNaN(val)) return val;
-  const str = String(val).trim().replace(',', '.');
+  const str = String(val).trim().replace(/,/g, '.');
   const m = str.match(/^(\d+(?:\.\d+)?)(?:\s*(B|[KMGT]iB?|[KMGT]i))?$/i);
   if (!m) return null;
   const num = parseFloat(m[1]);
@@ -964,21 +964,19 @@ function renderMemory(model){
       segEl.className = `seg ${seg.cls}`;
       segEl.style.width = pct + '%';
       segEl.dataset.tip = `${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
-      const label = document.createElement('span');
-      label.className = 'label';
-      label.textContent = `${formatGi(seg.val)} (${pctStr}%)`;
-      segEl.appendChild(label);
       bar.appendChild(segEl);
-      if (pct < 12){
-        label.classList.add('hidden');
-        const item = document.createElement('span');
-        item.className = `legend-item ${seg.cls}`;
-        item.innerHTML = `<span class="dot"></span>${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
-        legend.appendChild(item);
-      } else {
-        requestAnimationFrame(()=>adjustBarValue(label, segEl, pct));
-      }
+      const item = document.createElement('span');
+      item.className = `legend-item ${seg.cls}`;
+      item.innerHTML = `<span class="dot"></span>${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
+      legend.appendChild(item);
     });
+    if (info.usedEffectiveBytes > 0){
+      const pctStr = Math.round(info.seg.usedPct);
+      const center = document.createElement('div');
+      center.className = 'bar-label';
+      center.textContent = `Utilisée réelle : ${formatGi(info.usedEffectiveBytes)} (${pctStr} %)`;
+      bar.appendChild(center);
+    }
     legend.classList.toggle('hidden', !legend.childElementCount);
 
     const badgeData = [
@@ -1029,7 +1027,11 @@ function renderMemory(model){
       segEl.dataset.tip = `${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
       const label = document.createElement('span');
       label.className = 'label';
-      label.textContent = `${formatGi(seg.val)} (${pctStr}%)`;
+      if (info.usedBytes === 0 && seg.label === 'Libre') {
+        label.textContent = `Libre : ${formatGi(seg.val)} (100 %)`;
+      } else {
+        label.textContent = `${formatGi(seg.val)} (${pctStr}%)`;
+      }
       segEl.appendChild(label);
       bar.appendChild(segEl);
       if (pct < 12){
