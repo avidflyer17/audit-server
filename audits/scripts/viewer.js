@@ -89,15 +89,13 @@ function parseSizeToBytes(val){
   if (val == null) return null;
   if (typeof val === 'number' && !isNaN(val)) return val;
   const str = String(val).trim().replace(',', '.');
-  // Allow units like "98G", "3.5Gi", "25GB", "25GiB" or plain bytes
-  const m = str.match(/^(\d+(?:\.\d+)?)\s*([KMGT]?)(i?)B?$/i);
+  const m = str.match(/^(\d+(?:\.\d+)?)(?:\s*(B|[KMGT]iB?|[KMGT]i))?$/i);
   if (!m) return null;
   const num = parseFloat(m[1]);
-  const prefix = m[2].toUpperCase();
-  const isBinary = m[3].toLowerCase() === 'i';
-  const decMap = { '': 1, K: 1e3, M: 1e6, G: 1e9, T: 1e12 };
-  const binMap = { '': 1, K: 1024, M: 1024**2, G: 1024**3, T: 1024**4 };
-  const mul = (isBinary ? binMap : decMap)[prefix];
+  if (isNaN(num)) return null;
+  const unit = (m[2] || 'B').toUpperCase();
+  const map = { B:1, KI:1024, KIB:1024, MI:1024**2, MIB:1024**2, GI:1024**3, GIB:1024**3, TI:1024**4, TIB:1024**4 };
+  const mul = map[unit];
   if (!mul) return null;
   return num * mul;
 }
@@ -877,62 +875,101 @@ function renderCpuTemps(temps){
   });
 }
 
-function renderMemory(mem){
+function computeMemoryModel(memory){
+  if (!memory) return null;
+  const ram = memory.ram || {};
+  const swap = memory.swap || {};
+
+  const total = parseSizeToBytes(ram.total);
+  let used = parseSizeToBytes(ram.used);
+  let free = parseSizeToBytes(ram.free);
+  let cache = parseSizeToBytes(ram.buff_cache);
+  const shared = parseSizeToBytes(ram.shared);
+  const available = parseSizeToBytes(ram.available);
+
+  if ([used, free, cache, total].every(v => typeof v === 'number')){
+    const sum = used + free + cache;
+    if (total && Math.abs(sum - total) / total > 0.02){
+      const k = total / sum;
+      used *= k;
+      free *= k;
+      cache *= k;
+    }
+  }
+
+  const usedEff = (used != null && cache != null) ? Math.max(0, used - cache) : null;
+  const pctEff = (usedEff != null && total) ? Math.round((usedEff / total) * 100) : 0;
+
+  const segUsed = (usedEff != null && total) ? (usedEff / total) * 100 : 0;
+  const segCache = (cache != null && total) ? (cache / total) * 100 : 0;
+  const segFree = (free != null && total) ? (free / total) * 100 : 0;
+
+  const swapTotal = parseSizeToBytes(swap.total);
+  const swapUsed = parseSizeToBytes(swap.used);
+  let swapFree = parseSizeToBytes(swap.free);
+  if (swapFree == null && swapTotal != null && swapUsed != null){
+    swapFree = Math.max(0, swapTotal - swapUsed);
+  }
+  const swapPct = (swapUsed != null && swapTotal) ? Math.round((swapUsed / swapTotal) * 100) : 0;
+
+  return {
+    ram: {
+      totalBytes: total,
+      usedTotalBytes: used,
+      usedEffectiveBytes: usedEff,
+      cacheBytes: cache,
+      freeBytes: free,
+      pct: pctEff,
+      seg: { usedPct: segUsed, cachePct: segCache, freePct: segFree }
+    },
+    badges: { availableBytes: available, sharedBytes: shared },
+    swap: { totalBytes: swapTotal, usedBytes: swapUsed, freeBytes: swapFree, pct: swapPct }
+  };
+}
+
+function renderMemory(model){
   const container = document.getElementById('memorySection');
   container.innerHTML = '';
-  if (!mem || (!mem.ram && !mem.swap)) {
+  if (!model || (!model.ram && !model.swap)){
     container.innerHTML = '<div class="empty">Aucune donnée mémoire</div>';
     return;
   }
 
-  const renderRam = (info) => {
-    const total = parseSizeToBytes(info.total_bytes ?? info.total);
-    const used = parseSizeToBytes(info.used_bytes ?? info.used);
-    const cache = parseSizeToBytes(info.buff_cache);
-    const shared = parseSizeToBytes(info.shared);
-    const free = parseSizeToBytes(info.free_bytes ?? info.free);
-    let usedEff = (used != null && cache != null) ? used - cache : used;
-    let tipAdjust = '';
-    if (usedEff != null && usedEff < 0) {
-      usedEff = 0;
-      tipAdjust = 'Cache/buffers supérieur à utilisé, valeur ajustée';
-    }
-    const availBytes = parseSizeToBytes(info.available);
-    const avail = availBytes != null ? availBytes : (total != null && usedEff != null ? total - usedEff : null);
-    const pct = (usedEff != null && total) ? (usedEff / total) * 100 : 0;
-    const pctRound = Math.round(pct);
+  if (model.ram && model.ram.totalBytes != null){
+    const info = model.ram;
     const card = document.createElement('article');
     card.className = 'card ram';
     card.innerHTML = `
       <div class="card-head">
-        <div class="title">RAM <span class="badge total">${formatGi(total)}</span></div>
-        <div class="percent ${pctClass(pct)}">${pctRound}%</div>
+        <div class="title">RAM <span class="badge total">${formatGi(info.totalBytes)}</span></div>
+        <div class="percent ${pctClass(info.pct)}">${info.pct}%</div>
       </div>
-      <div class="bar" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctRound}"></div>
-      <div class="bar-legend"></div>
+      <div class="bar" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.pct}"></div>
+      <div class="bar-legend hidden"></div>
       <div class="badges"></div>`;
     const bar = card.querySelector('.bar');
     const legend = card.querySelector('.bar-legend');
     const badges = card.querySelector('.badges');
 
-    const segments = [];
-    if (usedEff != null) segments.push({cls:`seg-used ${pctClass(pct)}`, label:'Utilisée réelle', val:usedEff, pct:pct, tip:`Utilisée réelle : ${formatGi(usedEff)} (${pctRound}%)${tipAdjust ? ' - ' + tipAdjust : ''}`});
-    if (cache != null) segments.push({cls:'seg-cache', label:'Cache/buffers', val:cache, pct: total ? (cache / total) * 100 : 0, tip:`Cache/buffers : ${formatGi(cache)} (${Math.round((cache/total)*100)}%)`});
-    if (avail != null) segments.push({cls:'seg-free', label:'Disponible', val:avail, pct: total ? (avail / total) * 100 : 0, tip:`Disponible : ${formatGi(avail)} (${Math.round((avail/total)*100)}%)`});
-
-    segments.forEach(seg => {
+    const segs = [
+      {cls:`seg-used ${pctClass(info.pct)}`, label:'Utilisée réelle', val:info.usedEffectiveBytes, pct:info.seg.usedPct},
+      {cls:'seg-cache', label:'Cache/buffers', val:info.cacheBytes, pct:info.seg.cachePct},
+      {cls:'seg-free', label:'Libre', val:info.freeBytes, pct:info.seg.freePct}
+    ];
+    segs.forEach(seg => {
+      if (seg.val == null) return;
       const pct = seg.pct;
       const pctStr = Math.round(pct);
       const segEl = document.createElement('div');
       segEl.className = `seg ${seg.cls}`;
       segEl.style.width = pct + '%';
-      segEl.dataset.tip = seg.tip;
+      segEl.dataset.tip = `${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
       const label = document.createElement('span');
       label.className = 'label';
-      label.textContent = formatGi(seg.val);
+      label.textContent = `${formatGi(seg.val)} (${pctStr}%)`;
       segEl.appendChild(label);
       bar.appendChild(segEl);
-      if (pct < 12) {
+      if (pct < 12){
         label.classList.add('hidden');
         const item = document.createElement('span');
         item.className = `legend-item ${seg.cls}`;
@@ -942,14 +979,15 @@ function renderMemory(mem){
         requestAnimationFrame(()=>adjustBarValue(label, segEl, pct));
       }
     });
-    if (!legend.childElementCount) legend.classList.add('hidden');
+    legend.classList.toggle('hidden', !legend.childElementCount);
 
     const badgeData = [
-      {icon:'fa-microchip', label:'Utilisée', val:formatGi(used), cls:pctClass(pct)},
-      {icon:'fa-check', label:'Disponible', val:formatGi(avail)},
-      {icon:'fa-share-nodes', label:'Partagée', val:formatGi(shared)},
-      {icon:'fa-layer-group', label:'Cache/buffers', val:formatGi(cache)},
-      {icon:'fa-circle', label:'Libre', val:formatGi(free)}
+      {icon:'fa-microchip', label:'Utilisée (totale)', val:formatGi(info.usedTotalBytes), cls:pctClass(info.pct)},
+      {icon:'fa-circle-check', label:'Utilisée réelle', val:formatGi(info.usedEffectiveBytes)},
+      {icon:'fa-check', label:'Disponible', val:formatGi(model.badges.availableBytes)},
+      {icon:'fa-share-nodes', label:'Partagée', val:formatGi(model.badges.sharedBytes)},
+      {icon:'fa-layer-group', label:'Cache/buffers', val:formatGi(info.cacheBytes)},
+      {icon:'fa-circle', label:'Libre', val:formatGi(info.freeBytes)}
     ];
     badgeData.forEach(b => {
       if (b.val === 'N/A') return;
@@ -958,51 +996,43 @@ function renderMemory(mem){
       el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${b.val}</span>`;
       badges.appendChild(el);
     });
+    container.appendChild(card);
+  }
 
-    if (Array.isArray(info.history_percent)){
-      const spark = renderSparkline(info.history_percent);
-      if (spark) card.querySelector('.card-head').appendChild(spark);
-    }
-    return card;
-  };
-
-  const renderSwap = (info) => {
-    const total = parseSizeToBytes(info.total_bytes ?? info.total);
-    const used = parseSizeToBytes(info.used_bytes ?? info.used);
-    const free = parseSizeToBytes(info.free_bytes ?? info.free) ?? (total != null && used != null ? total - used : null);
-    const pct = (used != null && total) ? (used / total) * 100 : 0;
-    const pctRound = Math.round(pct);
+  if (model.swap && model.swap.totalBytes != null){
+    const info = model.swap;
     const card = document.createElement('article');
     card.className = 'card swap';
     card.innerHTML = `
       <div class="card-head">
-        <div class="title">Swap <span class="badge total">${formatGi(total)}</span></div>
-        <div class="percent ${pctClass(pct)}">${pctRound}%</div>
+        <div class="title">Swap <span class="badge total">${formatGi(info.totalBytes)}</span></div>
+        <div class="percent ${pctClass(info.pct)}">${info.pct}%</div>
       </div>
-      <div class="bar" role="progressbar" aria-label="Utilisation Swap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctRound}"></div>
-      <div class="bar-legend"></div>
+      <div class="bar" role="progressbar" aria-label="Utilisation Swap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.pct}"></div>
+      <div class="bar-legend hidden"></div>
       <div class="badges"></div>`;
     const bar = card.querySelector('.bar');
     const legend = card.querySelector('.bar-legend');
     const badges = card.querySelector('.badges');
 
     const segs = [
-      {cls:`seg-used ${pctClass(pct)}`, label:'Utilisée', val:used, pct:pct, tip:`Utilisée : ${formatGi(used)} (${pctRound}%)`},
-      {cls:'seg-free', label:'Libre', val:free, pct: total ? (free / total) * 100 : 0, tip:`Libre : ${formatGi(free)} (${Math.round((free/total)*100)}%)`}
+      {cls:`seg-used ${pctClass(info.pct)}`, label:'Utilisée', val:info.usedBytes, pct: info.totalBytes ? (info.usedBytes / info.totalBytes * 100) : 0},
+      {cls:'seg-free', label:'Libre', val:info.freeBytes, pct: info.totalBytes ? (info.freeBytes / info.totalBytes * 100) : 0}
     ];
     segs.forEach(seg => {
+      if (seg.val == null) return;
       const pct = seg.pct;
       const pctStr = Math.round(pct);
       const segEl = document.createElement('div');
       segEl.className = `seg ${seg.cls}`;
       segEl.style.width = pct + '%';
-      segEl.dataset.tip = seg.tip;
+      segEl.dataset.tip = `${seg.label} : ${formatGi(seg.val)} (${pctStr}%)`;
       const label = document.createElement('span');
       label.className = 'label';
-      label.textContent = formatGi(seg.val);
+      label.textContent = `${formatGi(seg.val)} (${pctStr}%)`;
       segEl.appendChild(label);
       bar.appendChild(segEl);
-      if (pct < 12) {
+      if (pct < 12){
         label.classList.add('hidden');
         const item = document.createElement('span');
         item.className = `legend-item ${seg.cls}`;
@@ -1012,9 +1042,9 @@ function renderMemory(mem){
         requestAnimationFrame(()=>adjustBarValue(label, segEl, pct));
       }
     });
-    if (!legend.childElementCount) legend.classList.add('hidden');
+    legend.classList.toggle('hidden', !legend.childElementCount);
 
-    if (used > 0){
+    if (info.usedBytes > 0){
       const warn = document.createElement('div');
       warn.className = 'badge warn';
       warn.innerHTML = '<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span>Swap en usage</span>';
@@ -1022,8 +1052,8 @@ function renderMemory(mem){
     }
 
     const badgeData = [
-      {icon:'fa-microchip', label:'Utilisée', val:formatGi(used), cls:pctClass(pct)},
-      {icon:'fa-circle', label:'Libre', val:formatGi(free)}
+      {icon:'fa-microchip', label:'Utilisée', val:formatGi(info.usedBytes), cls:pctClass(info.pct)},
+      {icon:'fa-circle', label:'Libre', val:formatGi(info.freeBytes)}
     ];
     badgeData.forEach(b => {
       if (b.val === 'N/A') return;
@@ -1032,16 +1062,8 @@ function renderMemory(mem){
       el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${b.val}</span>`;
       badges.appendChild(el);
     });
-
-    if (Array.isArray(info.history_percent)){
-      const spark = renderSparkline(info.history_percent);
-      if (spark) card.querySelector('.card-head').appendChild(spark);
-    }
-    return card;
-  };
-
-  if (mem.ram) container.appendChild(renderRam(mem.ram));
-  if (mem.swap) container.appendChild(renderSwap(mem.swap));
+    container.appendChild(card);
+  }
 }
 
 function renderDisks(disks){
@@ -1241,7 +1263,7 @@ function renderText(json) {
 
   renderLoadAverage(json.load_average, json.cpu?.cores);
   renderCpuCores(json.cpu?.usage);
-  renderMemory(json.memory);
+  renderMemory(computeMemoryModel(json.memory));
   renderDisks(json.disks);
   renderCpuTemps(json.cpu?.temperatures);
 
