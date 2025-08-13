@@ -598,10 +598,126 @@ body {
       color: #fff;
     }
 
-    .memory-container {
+    .mem.grid {
+      display: grid;
+      gap: var(--gap-3);
       width: 100%;
-      padding: 1rem 0;
     }
+    @media (min-width: 1024px) {
+      .mem.grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .mem .card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-2);
+      padding: var(--gap-3);
+      background: var(--bg-card);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+    }
+    .mem .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--gap-2);
+    }
+    .mem .title {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-2);
+      font-weight: bold;
+    }
+    .mem .badge.total {
+      background: var(--chip-bg);
+      color: var(--chip-text);
+      border-radius: 999px;
+      padding: 0 0.5rem;
+      font-size: var(--font-sm);
+    }
+    .mem .percent {
+      font-size: var(--font-2xl);
+      font-weight: bold;
+    }
+    .mem .percent.ok { color: var(--ok); }
+    .mem .percent.warn { color: var(--warn); }
+    .mem .percent.crit { color: var(--crit); }
+    .mem .bar {
+      display: flex;
+      height: 1.5rem;
+      background: var(--bar-bg);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .mem .seg {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-sm);
+      white-space: nowrap;
+    }
+    .mem .seg-used.ok { background: var(--ok); color: #fff; }
+    .mem .seg-used.warn { background: var(--warn); color: #000; }
+    .mem .seg-used.crit { background: var(--crit); color: #fff; }
+    .mem .seg-cache { background: var(--chip-bg); }
+    .mem .seg-free { background: var(--bar-bg); }
+    .mem .seg .label.hidden { display: none; }
+    .mem .bar-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--gap-2);
+      margin-top: 0.25rem;
+      font-size: var(--font-sm);
+    }
+    .mem .bar-legend.hidden { display: none; }
+    .mem .legend-item { display: flex; align-items: center; gap: 0.25rem; }
+    .mem .legend-item .dot { width: 0.75rem; height: 0.75rem; border-radius: 2px; }
+    .mem .legend-item.seg-used.ok .dot { background: var(--ok); }
+    .mem .legend-item.seg-used.warn .dot { background: var(--warn); }
+    .mem .legend-item.seg-used.crit .dot { background: var(--crit); }
+    .mem .legend-item.seg-cache .dot { background: var(--chip-bg); }
+    .mem .legend-item.seg-free .dot { background: var(--bar-bg); border: 1px solid var(--card-border); }
+    .mem .badges {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--gap-2);
+      margin-top: var(--gap-2);
+    }
+    @media (min-width: 1024px) {
+      .mem .badges { display: flex; flex-wrap: wrap; }
+    }
+    .mem .badge {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: var(--chip-bg);
+      color: var(--chip-text);
+      padding: 0.25rem 0.5rem;
+      border-radius: 999px;
+      font-size: var(--font-sm);
+    }
+    .mem .badge.ok { background: var(--ok); color: #fff; }
+    .mem .badge.warn { background: var(--warn); color: #000; }
+    .mem .badge.crit { background: var(--crit); color: #fff; }
+    .mem .seg[data-tip]:hover::after,
+    .mem .badge[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+      font-size: var(--font-sm);
+      z-index: 10;
+    }
+    .mem .badge[data-tip] { position: relative; }
+    .mem .spark { width: 60px; height: 20px; }
     .ports-legend {
       font-size: 0.9rem;
       margin: 0.5rem 0;
