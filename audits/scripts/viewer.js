@@ -818,7 +818,7 @@ function updateDayButtons() {
 function showUpdateBadge() {
   const badge = document.getElementById('updateBadge');
   badge.classList.add('show');
-  setTimeout(() => badge.classList.remove('show'), 1000);
+  setTimeout(() => badge.classList.remove('show'), 3000);
 }
 
 function renderCpuCores(usages){
