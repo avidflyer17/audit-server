@@ -23,6 +23,18 @@
         <span class="brand-title">Audit Serveur DW</span>
       </div>
       <p id="hostname" class="brand-host">-</p>
+      <div class="brand-meta">
+        <div class="meta-item">
+          <span class="meta-label">Généré</span>
+          <span id="generatedValue">--</span>
+          <span id="tzBadge" class="badge"></span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Uptime</span>
+          <span id="uptimeValue">--</span>
+          <span id="uptimeSince"></span>
+        </div>
+      </div>
     </div>
     <div id="themeSwitchWrapper">
       <i id="themeIcon" class="fas fa-moon theme-icon"></i>
@@ -68,28 +80,8 @@
   <div id="menuOverlay"></div>
 
   <main>
-    <section class="section-wrap">
-      <div class="cards">
-        <div class="info-card card" id="generatedCard" aria-labelledby="generatedTitle">
-          <div class="card-head">
-            <div class="card-title card__title" id="generatedTitle"><i class="fa-solid fa-calendar-day"></i><span>Date de génération</span></div>
-            <button id="copyGenerated" class="copy-btn" title="Copier la date" aria-label="Copier la date"><i class="fa-regular fa-copy"></i></button>
-          </div>
-          <div id="generatedValue" class="card-main">--</div>
-          <div class="card-meta card__meta"><span id="tzBadge" class="badge"></span></div>
-        </div>
-        <div class="info-card card" id="uptimeCard" aria-labelledby="uptimeTitle">
-          <div class="card-head">
-            <div class="card-title card__title" id="uptimeTitle"><i class="fa-solid fa-clock"></i><span>Temps de fonctionnement</span></div>
-            <span id="uptimeBadge" class="badge"></span>
-            <button id="copyUptime" class="copy-btn" title="Copier la durée" aria-label="Copier la durée"><i class="fa-regular fa-copy"></i></button>
-          </div>
-          <div id="uptimeValue" class="card-main">--</div>
-          <div id="uptimeSince" class="card-meta card__meta"></div>
-        </div>
-      </div>
-
-      <h2 id="networkTitle"><i class="fa-solid fa-network-wired heading-icon"></i>Adressage réseau</h2>
+      <section class="section-wrap">
+        <h2 id="networkTitle"><i class="fa-solid fa-network-wired heading-icon"></i>Adressage réseau</h2>
       <div class="info-card card network-card" id="networkCard" aria-labelledby="networkTitle">
     <div class="card-body">
         <div class="ip-row ip-local">
