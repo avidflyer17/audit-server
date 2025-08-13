@@ -1,9 +1,9 @@
 # Audit Server
 
-This project provides a lightweight way to collect and view system audit reports. A Bash script
-gathers metrics such as CPU usage, memory consumption, open ports and running services, then
-writes the results to JSON files. A small web frontend served by Nginx lets you browse these
-reports over time.
+This project provides a lightweight way to collect and view system audit reports. A Bash script gathers
+metrics such as CPU usage, memory consumption, open ports, running services, and Docker container stats,
+then writes the results to JSON files. Static files under `audits` display the reports through a simple web
+interface that can be served by Nginx.
 
 ## 🚀 Installation
 
@@ -21,72 +21,41 @@ reports over time.
    sudo apt-get install -y bc jq curl lm-sensors sysstat
    ```
 
-   You will also need [Node.js](https://nodejs.org/) if you plan to run the bundled server.
-
 3. ▶️ Generate your first audit
 
    ```bash
    ./generate-audit-json.sh
    ```
 
-## 🛠️ Requirements
-
-The `generate-audit-json.sh` script relies on a few common utilities:
-
-- ⚙️ `mpstat` and `bc` for CPU statistics
-- 📦 `jq` for JSON formatting
-- 🌡️ `sensors` for temperature readings (optional)
-- 🌐 `curl` to retrieve the public IP address
-
-Make sure these commands are available on the machine where you run the script.
-
-## 🧾 Generating an audit
-
-The script stores reports under `/home/damswallace/docker/audits-nginx/audits` by default. You can
-override the location by setting the `BASE_DIR` environment variable before running:
+The script writes reports to `/home/damswallace/docker/audits-nginx/audits/archives` by default. Override the
+location by setting the `BASE_DIR` environment variable:
 
 ```bash
-./generate-audit-json.sh
+BASE_DIR=./audits ./generate-audit-json.sh
 ```
-
-Each execution creates an `audit_YYYY-MM-DD_HH-MM.json` file inside `archives/` and updates
-`index.json` with the list of available reports. You can schedule the script via cron to capture
-snapshots at regular intervals.
-
-## 📂 Managing reports
-
-Run the lightweight Node server and use the web interface to browse existing audits:
-
-```bash
-node server.js
-```
-
-The dashboard lists reports from `archives/index.json` for easy review.
 
 ## 🌐 Serving the reports
 
-`server.js` serves the `audits` directory and provides the `/api/reports` endpoint used by the UI.
-It also exposes a `/healthz` path that returns `{ "ok": true }`, which is convenient for Docker
-health checks or reverse proxies such as Traefik. When containerized, expose port `8080` and point
-Traefik or any other proxy at that port. Start it with the command above and open
-`http://localhost:8080/` in a browser. The included `docker-compose.yaml` can still be used if you
-prefer an Nginx setup.
+Use the provided `docker-compose.yaml` and `nginx.conf` to serve the `audits` directory through Nginx and expose
+it behind Traefik. Adjust volume paths or labels as needed for your environment. Run:
+
+```bash
+docker compose up -d
+```
 
 ## 🗂️ Directory structure
 
 ```
-├── audits
-│   ├── index.html         # Web interface
-│   ├── scripts/viewer.js  # Frontend logic
-│   └── favicon.ico
-├── generate-audit-json.sh # Bash script to create audit_*.json files
-├── docker-compose.yaml    # Nginx setup for serving the reports
-└── nginx.conf             # Basic Nginx configuration
+├── audits               # Web interface and generated reports
+├── generate-audit-json.sh
+├── docker-compose.yaml
+└── nginx.conf
 ```
 
 ## 📚 Documentation
 
-Additional usage instructions are available in the [docs](docs/USAGE.md) directory.
+Additional usage instructions are available in the [docs](docs/USAGE.md) directory. Deployment options are
+covered in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## 🧪 Testing
 

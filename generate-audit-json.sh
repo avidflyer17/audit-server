@@ -82,10 +82,10 @@ DOCKER_CONTAINERS="[]"
 if command -v docker >/dev/null 2>&1; then
   declare -A CPU MEM_PCT MEM_USED MEM_LIMIT
   while IFS= read -r line; do
-    name=$(echo "$line" | sed -n 's/.*"Name":"\([^"]*\)".*/\1/p')
-    cpu=$(echo "$line" | sed -n 's/.*"CPUPerc":"\([^"]*\)".*/\1/p' | tr -d '% ')
-    memp=$(echo "$line" | sed -n 's/.*"MemPerc":"\([^"]*\)".*/\1/p' | tr -d '% ')
-    usage=$(echo "$line" | sed -n 's/.*"MemUsage":"\([^"]*\)".*/\1/p')
+    name=$(echo "$line" | sed -n 's/.*"Name":"\([^\"]*\)".*/\1/p')
+    cpu=$(echo "$line" | sed -n 's/.*"CPUPerc":"\([^\"]*\)".*/\1/p' | tr -d '% ')
+    memp=$(echo "$line" | sed -n 's/.*"MemPerc":"\([^\"]*\)".*/\1/p' | tr -d '% ')
+    usage=$(echo "$line" | sed -n 's/.*"MemUsage":"\([^\"]*\)".*/\1/p')
     used=$(echo "$usage" | awk -F'/' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}')
     limit=$(echo "$usage" | awk -F'/' '{gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}')
     used_bytes=$(to_bytes "$used")
@@ -99,9 +99,9 @@ if command -v docker >/dev/null 2>&1; then
   DOCKER_PS_OUTPUT=$(docker ps -a --format '{{json .}}' 2>/dev/null || true)
   if [[ -n "$DOCKER_PS_OUTPUT" ]]; then
     while IFS= read -r line; do
-      name=$(echo "$line" | sed -n 's/.*"Names":"\([^"]*\)".*/\1/p')
-      status=$(echo "$line" | sed -n 's/.*"Status":"\([^"]*\)".*/\1/p')
-      running_for=$(echo "$line" | sed -n 's/.*"RunningFor":"\([^"]*\)".*/\1/p')
+      name=$(echo "$line" | sed -n 's/.*"Names":"\([^\"]*\)".*/\1/p')
+      status=$(echo "$line" | sed -n 's/.*"Status":"\([^\"]*\)".*/\1/p')
+      running_for=$(echo "$line" | sed -n 's/.*"RunningFor":"\([^\"]*\)".*/\1/p')
       state=$(echo "$status" | awk '{print tolower($1)}')
       [[ "$state" == "up" ]] && state="running"
       health=$(echo "$status" | sed -n 's/.*(\([^)]*\)).*/\1/p')
