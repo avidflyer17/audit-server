@@ -875,6 +875,7 @@ h1 {
     .mem .badge.ok { background: var(--ok); color: #fff; }
     .mem .badge.warn { background: var(--warn); color: #000; }
     .mem .badge.crit { background: var(--crit); color: #fff; }
+    .mem .no-swap { text-align: center; padding: var(--gap-2) 0; color: var(--muted); }
     .mem .seg[data-tip]:hover::after,
     .mem .badge[data-tip]:hover::after {
       content: attr(data-tip);
