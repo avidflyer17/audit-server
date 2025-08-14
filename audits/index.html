@@ -111,40 +111,42 @@
       </div>
     </section>
 
-  <h2><i class="fa-solid fa-gauge-high heading-icon"></i>Charge moyenne</h2>
-  <div id="loadAvg" class="load-container">
-    <div class="load-main">
-      <div id="loadGauge" class="gauge" title="Charge CPU moyenne sur 1 min" tabindex="0">
-        <svg viewBox="0 0 36 36">
-          <path class="bg" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32"/>
-          <path id="loadGaugePath" class="progress" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32" stroke-dasharray="0 100"/>
-        </svg>
-        <div class="gauge-value"><span id="load1Val">--</span><span id="loadTrend" class="trend">→</span></div>
+  <h2 id="loadTitle"><i class="fa-solid fa-gauge-high heading-icon"></i>Charge moyenne</h2>
+  <div id="loadCard" class="card" aria-labelledby="loadTitle">
+    <div id="loadAvg" class="load-container">
+      <div class="load-main">
+        <div id="loadGauge" class="gauge" tabindex="0" role="img">
+          <svg viewBox="0 0 36 36">
+            <path class="bg" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32"/>
+            <path id="loadGaugePath" class="progress" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32" stroke-dasharray="0 100"/>
+          </svg>
+          <div class="gauge-value"><span id="load1Val">--</span><i id="loadTrend" class="trend fa-solid fa-chevron-right"></i></div>
+        </div>
+        <div class="gauge-label">sur 1 min</div>
       </div>
-      <div class="gauge-label">charge sur 1 min</div>
-      <div class="load-legend">
-        <span class="legend-item"><span class="dot color-success"></span> Faible</span>
-        <span class="legend-item"><span class="dot color-warning"></span> Élevée</span>
-        <span class="legend-item"><span class="dot color-danger"></span> Critique</span>
+      <div class="load-cards">
+          <div id="load5Card" class="mini-card card card--compact" tabindex="0">
+            <div class="mini-title">5 min</div>
+            <div class="progress progress--thin" role="img">
+              <div id="load5Bar" class="progress__bar"></div>
+              <div id="load5Val" class="progress__value">--</div>
+            </div>
+            <div id="load5Trend" class="mini-trend">--</div>
+          </div>
+          <div id="load15Card" class="mini-card card card--compact" tabindex="0">
+            <div class="mini-title">15 min</div>
+            <div class="progress progress--thin" role="img">
+              <div id="load15Bar" class="progress__bar"></div>
+              <div id="load15Val" class="progress__value">--</div>
+            </div>
+            <div id="load15Trend" class="mini-trend">--</div>
+          </div>
       </div>
     </div>
-    <div class="load-cards">
-        <div id="load5Card" class="mini-card card card--compact" title="Charge moyenne sur 5 min" tabindex="0">
-          <div class="mini-title">5 min</div>
-          <div class="progress progress--thin">
-            <div id="load5Bar" class="progress__bar"></div>
-            <div id="load5Val" class="progress__value">--</div>
-          </div>
-          <div id="load5Trend" class="mini-trend">--</div>
-        </div>
-        <div id="load15Card" class="mini-card card card--compact" title="Charge moyenne sur 15 min" tabindex="0">
-          <div class="mini-title">15 min</div>
-          <div class="progress progress--thin">
-            <div id="load15Bar" class="progress__bar"></div>
-            <div id="load15Val" class="progress__value">--</div>
-          </div>
-          <div id="load15Trend" class="mini-trend">--</div>
-        </div>
+    <div class="load-legend">
+      <span class="badge success">Faible</span>
+      <span class="badge warning">Élevée</span>
+      <span class="badge danger">Critique</span>
     </div>
   </div>
 

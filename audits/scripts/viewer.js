@@ -1287,103 +1287,108 @@ function renderDisks(disks){
   });
 }
 
-function parseLoadAverage(value) {
-  if (!value) return null;
-  if (typeof value === 'object' && !Array.isArray(value)) {
-    const one = Number(value.one ?? value["1min"] ?? value["1m"]);
-    const five = Number(value.five ?? value["5min"] ?? value["5m"]);
-    const fifteen = Number(value.fifteen ?? value["15min"] ?? value["15m"]);
-    if ([one, five, fifteen].some(v => isNaN(v))) return null;
-    return { one, five, fifteen };
-  }
-  const parts = String(value).split(/[\s,]+/).filter(Boolean);
-  if (parts.length < 3) return null;
-  const nums = parts.slice(0,3).map(p => parseFloat(p.replace(',', '.')));
-  if (nums.some(v => isNaN(v))) return null;
-  return { one: nums[0], five: nums[1], fifteen: nums[2] };
+function parseLoadAvgFR(str) {
+  // Parse "0,21,0,22,0,21" into [0.21, 0.22, 0.21]
+  if (typeof str !== 'string') return null;
+  const matches = str.match(/\d+(?:,\d+)?/g);
+  if (!matches || matches.length < 3) return null;
+  return matches.slice(0, 3).map(v => parseFloat(v.replace(',', '.')));
 }
 
-function loadToPercent(load, cores) {
-  if (load == null || !cores) return { pct: null, rawPct: null };
-  const rawPct = (load / cores) * 100;
-  const pct = Math.max(0, Math.min(100, rawPct));
-  return { pct, rawPct };
+function normaliseByCores(load, cores) {
+  // Normalise load by core count and cap at 100%
+  if (load == null || !cores) return null;
+  return Math.min((load / cores) * 100, 100);
 }
 
-function loadColor(v) {
-  if (v == null) return '#666';
-  if (v < 70) return 'var(--success)';
-  if (v < 100) return 'var(--warning)';
-  return 'var(--danger)';
+function statusFromRatio(ratio) {
+  // Thresholds: <0.7 low, <1 elevated, otherwise critical
+  if (ratio < 0.7) return { label: 'Faible', cls: 'success', color: 'var(--success)' };
+  if (ratio < 1.0) return { label: 'Élevée', cls: 'warning', color: 'var(--warning)' };
+  return { label: 'Critique', cls: 'danger', color: 'var(--danger)' };
 }
 
-function arrowFromDiff(d) {
-  if (d > 5) return '↑';
-  if (d < -5) return '↓';
-  return '→';
+function trendFrom(l1, l5) {
+  // Compare 1 min vs 5 min load to detect trend
+  if (l1 > l5) return { icon: 'fa-chevron-up', label: 'en hausse' };
+  if (l1 < l5) return { icon: 'fa-chevron-down', label: 'en baisse' };
+  return { icon: 'fa-chevron-right', label: 'stable' };
 }
 
-function trendLabel(d) {
-  if (d > 5) return 'en hausse';
-  if (d < -5) return 'en baisse';
-  return 'stable';
-}
-
-function renderMini(label, value, prev, raw) {
+function renderMini(label, load, prevLoad, cores) {
   const card = document.getElementById(`load${label}Card`);
   const valEl = document.getElementById(`load${label}Val`);
   const bar = document.getElementById(`load${label}Bar`);
   const trend = document.getElementById(`load${label}Trend`);
-  if (value == null) {
+  if (load == null) {
     card.classList.add('na');
     valEl.textContent = '—';
     bar.style.width = '0%';
     trend.textContent = 'donnée manquante';
     card.removeAttribute('title');
+    card.removeAttribute('aria-label');
+    bar.removeAttribute('aria-label');
+    bar.removeAttribute('role');
   } else {
     card.classList.remove('na');
-    valEl.textContent = Math.round(value) + '%';
-    const display = Math.max(0, Math.min(100, value));
-    bar.style.width = display + '%';
-    const color = loadColor(value);
-    card.style.setProperty('--load-color', color);
-    const diff = prev != null ? value - prev : 0;
-    trend.textContent = trendLabel(diff);
-    if (raw != null) card.title = `${raw.toFixed(1)}%`;
+    const pct = normaliseByCores(load, cores);
+    valEl.textContent = pct.toFixed(0) + '%';
+    bar.style.width = Math.min(100, pct) + '%';
+    const status = statusFromRatio(load / cores);
+    bar.style.background = status.color;
+    const t = trendFrom(load, prevLoad);
+    trend.textContent = t.label;
+    const rawStr = load.toLocaleString('fr-FR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    const tip = `${label} min : ${rawStr} / ${cores} cœurs`;
+    card.title = tip;
+    card.setAttribute('aria-label', tip);
+    bar.setAttribute('aria-label', tip);
+    bar.setAttribute('role', 'img');
   }
 }
 
 function renderLoadAverage(raw, cores) {
-  const loads = parseLoadAverage(raw);
   const gauge = document.getElementById('loadGauge');
   const path = document.getElementById('loadGaugePath');
   const trendEl = document.getElementById('loadTrend');
+  const loads = parseLoadAvgFR(raw);
 
   if (!loads || !cores) {
     document.getElementById('load1Val').textContent = '—';
-    trendEl.textContent = '→';
-    trendEl.style.color = '#666';
+    trendEl.className = 'trend fa-solid fa-chevron-right';
+    trendEl.setAttribute('aria-label', 'stable');
+    trendEl.style.color = 'var(--text-muted)';
     path.setAttribute('stroke-dasharray', '0 100');
-    renderMini('5', null, null);
-    renderMini('15', null, null);
+    gauge.removeAttribute('title');
+    gauge.removeAttribute('aria-label');
+    renderMini('5', null, null, cores);
+    renderMini('15', null, null, cores);
     return;
   }
 
-  const one = loadToPercent(loads.one, cores);
-  const five = loadToPercent(loads.five, cores);
-  const fifteen = loadToPercent(loads.fifteen, cores);
-
-  const color1 = loadColor(one.pct);
-  gauge.style.setProperty('--load-color', color1);
-  const dashVal = one.pct != null ? Math.max(0, Math.min(100, one.pct)) : 0;
-  path.setAttribute('stroke-dasharray', `${dashVal} 100`);
-  document.getElementById('load1Val').textContent = one.pct != null ? Math.round(one.pct) + '%' : '—';
-  gauge.title = one.rawPct != null ? `${one.rawPct.toFixed(1)}%` : '';
-  const diff = (one.pct != null && five.pct != null) ? one.pct - five.pct : 0;
-  trendEl.textContent = arrowFromDiff(diff);
-  trendEl.style.color = color1;
-  renderMini('5', five.pct, one.pct, five.rawPct);
-  renderMini('15', fifteen.pct, five.pct, fifteen.rawPct);
+  const [l1, l5, l15] = loads;
+  const pct1 = normaliseByCores(l1, cores);
+  const status = statusFromRatio(l1 / cores);
+  gauge.style.setProperty('--load-color', status.color);
+  path.setAttribute('stroke-dasharray', `${Math.min(100, pct1)} 100`);
+  document.getElementById('load1Val').textContent = pct1.toFixed(0) + '%';
+  const trendInfo = trendFrom(l1, l5);
+  trendEl.className = `trend fa-solid ${trendInfo.icon}`;
+  trendEl.setAttribute('aria-label', trendInfo.label);
+  trendEl.title = trendInfo.label;
+  trendEl.style.color = status.color;
+  const l1Str = l1.toLocaleString('fr-FR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+  const tip = `Charge 1 min : ${l1Str} / ${cores} cœurs`;
+  gauge.title = tip;
+  gauge.setAttribute('aria-label', tip);
+  renderMini('5', l5, l1, cores);
+  renderMini('15', l15, l5, cores);
 }
 
 function renderText(json) {
