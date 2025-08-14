@@ -1244,8 +1244,12 @@ h1 {
       .services-grid { grid-template-columns: 1fr; }
       .services-toolbar { justify-content: flex-start; }
       .filter-chips { position: sticky; top: 0; background: var(--bg); padding-top: 0.5rem; }
-      .cpu .summary { flex-direction:column; }
-      .cpu .core-bars { width:100%; }
+      .cpu .card-head { flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:4px; }
+      .cpu .summary { flex-direction:row; gap:4px; }
+      .cpu .core-list { margin-top:var(--gap-2); gap:4px; }
+      .cpu .proc-row { padding:2px; }
+      .cpu .core-bars { flex-direction:row; gap:4px; width:100%; }
+      .cpu .bar { height:12px; }
     }
 
     .gauge:focus-visible,
