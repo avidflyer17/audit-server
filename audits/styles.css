@@ -898,7 +898,13 @@ h1 {
       flex-wrap: wrap;
       gap: var(--gap-2);
     }
-    .mem .badge {
+    .mem .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--gap-2);
+      margin-top: var(--gap-2);
+    }
+    .mem .badge { 
       display: flex;
       align-items: center;
       gap: 0.25rem;
