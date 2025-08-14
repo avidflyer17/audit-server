@@ -1152,6 +1152,11 @@ h1 {
       padding: 1rem 0;
       color: #bbb;
     }
+    .no-data {
+      text-align: center;
+      padding: 1rem 0;
+      color: #bbb;
+    }
     .empty.hidden { display: none; }
     .service-badge.cat-systeme { background: #6c757d; }
     .service-badge.cat-reseau { background: #0d6efd; }
