@@ -1247,10 +1247,10 @@ function renderDisks(disks){
     card.tabIndex = 0;
     const aria = `Disque ${disk.mountpoint} : ${pctDisplay}% utilisés, ${usedStr} utilisés, ${freeStr} libres, total ${totalStr}`;
     card.innerHTML = `
-      <svg class="disk-donut" viewBox="0 0 36 36" role="img" aria-label="${aria}">
-        <circle class="donut-bg" cx="18" cy="18" r="16"></circle>
-        <circle class="donut-ring ${colorClassDisk(pctRaw)}" cx="18" cy="18" r="16" stroke-dasharray="0 100"></circle>
-        <text x="18" y="18" class="donut-value">${pctDisplay}%</text>
+      <svg class="disk-donut" viewBox="0 0 40 40" role="img" aria-label="${aria}">
+        <circle class="donut-bg" cx="20" cy="20" r="16"></circle>
+        <circle class="donut-ring ${colorClassDisk(pctRaw)}" cx="20" cy="20" r="16" stroke-dasharray="0 100"></circle>
+        <text x="20" y="20" class="donut-value">${pctDisplay}%</text>
       </svg>
       <div class="disk-badges">
         <span class="badge">${disk.mountpoint}</span>
@@ -1263,24 +1263,22 @@ function renderDisks(disks){
       ring.setAttribute('stroke-dasharray', `${pctArc} 100`);
     });
     const tip = card.querySelector('.disk-tooltip');
-    function positionTip(){
-      const rect = card.getBoundingClientRect();
-      const tRect = tip.getBoundingClientRect();
-      let top = -tRect.height - 8;
-      if (rect.top + top < 0) top = rect.height + 8;
-      let left = (rect.width - tRect.width) / 2;
-      const overflowRight = rect.left + left + tRect.width - window.innerWidth;
-      if (overflowRight > 0) left -= overflowRight;
-      if (rect.left + left < 0) left = -rect.left + 4;
-      tip.style.top = top + 'px';
-      tip.style.left = left + 'px';
-    }
-    card.addEventListener('mouseenter', () => {
+    ring.addEventListener('mouseenter', () => {
       card.classList.add('show-tooltip');
-      positionTip();
     });
-    card.addEventListener('mouseleave', () => {
+    ring.addEventListener('mouseleave', () => {
       card.classList.remove('show-tooltip');
+    });
+    ring.addEventListener('mousemove', e => {
+      const rect = card.getBoundingClientRect();
+      let left = e.clientX - rect.left + 8;
+      let top = e.clientY - rect.top - tip.offsetHeight - 8;
+      const maxLeft = rect.width - tip.offsetWidth - 4;
+      if (left > maxLeft) left = maxLeft;
+      if (left < 4) left = 4;
+      if (top < 4) top = e.clientY - rect.top + 8;
+      tip.style.left = left + 'px';
+      tip.style.top = top + 'px';
     });
     card.addEventListener('click', () => {
       const txt = `mountpoint=${disk.mountpoint} • used=${usedStr} • free=${freeStr} • total=${totalStr} • ${pctDisplay}%`;
