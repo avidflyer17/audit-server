@@ -1015,13 +1015,6 @@ h1 {
 .kpi { width:200px; height:200px; border-radius:50%; display:grid; place-items:center; }
 @media (max-width:600px){ .kpi { width:150px; height:150px; } }
 
-    .load-legend {
-      margin-top: 0.75rem;
-      display: flex;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    .load-legend .badge { margin: 0; }
 
     .services-title-row {
       display: flex;
@@ -1315,7 +1308,9 @@ h1 {
 
     @media (min-width: 768px) {
       .load-container { flex-direction: row; align-items: center; }
-      .load-cards { flex: none; width: 200px; }
+      .gauge { width: 200px; height: 200px; }
+      .load-cards { flex: 1; flex-direction: row; }
+      .load-cards .mini-card { flex: 1; }
     }
 
     @media (max-width: 600px) {
