@@ -1038,7 +1038,11 @@ function computeRamUsage(ram){
   if (!ram) return null;
   const total = parseSizeToBytes(ram.total);
   const available = parseSizeToBytes(ram.available);
-  const usedApps = (total != null && available != null) ? Math.max(0, total - available) : null;
+  let usedApps = (total != null && available != null) ? Math.max(0, total - available) : null;
+  if (usedApps == null) {
+    const used = parseSizeToBytes(ram.used);
+    if (used != null && total != null) usedApps = used;
+  }
   const percent = (usedApps != null && total) ? clamp(Math.round((usedApps / total) * 100), 0, 100) : null;
   const cache = parseSizeToBytes(ram.buff_cache);
   const free = parseSizeToBytes(ram.free);
@@ -1159,6 +1163,11 @@ function renderMemory(model){
       badges.appendChild(el);
     });
     container.appendChild(card);
+  } else {
+    const msg = document.createElement('div');
+    msg.className = 'no-data';
+    msg.textContent = 'Donnée RAM indisponible';
+    container.appendChild(msg);
   }
 
   if (model.swap && model.swap.totalBytes != null){
@@ -1202,6 +1211,11 @@ function renderMemory(model){
       badges.appendChild(el);
     });
     container.appendChild(card);
+  } else {
+    const msg = document.createElement('div');
+    msg.className = 'no-data';
+    msg.textContent = 'Donnée Swap indisponible';
+    container.appendChild(msg);
   }
 }
 
