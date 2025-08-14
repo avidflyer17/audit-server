@@ -359,21 +359,61 @@ h1 {
     }
 
     .update-badge {
-      display: none;
       position: fixed;
-      bottom: 10px;
-      right: 10px;
-      background: var(--heading);
-      color: var(--bg);
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-family: var(--font-mono);
+      bottom: var(--gap-2);
+      right: var(--gap-2);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--gap-1);
+      max-width: calc(100vw - (var(--gap-2) * 2));
+      background: var(--bg-card);
+      color: var(--text);
+      padding: var(--gap-2) var(--gap-3);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+      font-size: var(--font-md);
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: opacity .3s ease, transform .3s ease, box-shadow .3s ease;
       cursor: pointer;
       z-index: 1100;
     }
 
-    .update-badge.show { display: inline-block; }
+    .update-badge .icon {
+      font-size: 1.25rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .update-badge .content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .update-badge .title {
+      font-weight: 600;
+    }
+
+    .update-badge .message {
+      font-size: var(--font-sm);
+    }
+
+    .update-badge.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .update-badge:hover,
+    .update-badge:focus {
+      box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    }
+
+    .update-badge:active {
+      transform: translateY(2px);
+    }
 
     .sr-only {
       position: absolute;

@@ -76,7 +76,13 @@
     </div>
   </aside>
   <div id="menuOverlay"></div>
-  <span id="updateBadge" class="update-badge">Un nouveau rapport est disponible, il a été chargé automatiquement</span>
+  <div id="updateBadge" class="update-badge" role="status" aria-live="polite" tabindex="0">
+    <span class="icon" aria-hidden="true">📄</span>
+    <div class="content">
+      <div class="title">Nouveau rapport disponible</div>
+      <div class="message">Il a été chargé automatiquement</div>
+    </div>
+  </div>
 
   <main>
       <section class="section-wrap">
