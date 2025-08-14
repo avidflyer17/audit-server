@@ -1284,7 +1284,20 @@ h1 {
     .bar-temp { height: 14px; }
     .chip.used { background: #ff9800; color: #000; }
     .chip.free { background: #4caf50; color: #fff; }
-    .disk-card { margin-bottom: 0.5rem; }
+    .disk-grid { display:grid; gap:var(--gap-3); grid-template-columns:1fr; }
+    @media (min-width:600px) { .disk-grid { grid-template-columns:repeat(2,1fr); } }
+    .disk-card { background:var(--block-bg); border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.2); padding:var(--gap-3); text-align:center; position:relative; }
+    .disk-donut { width:100px; height:100px; margin:0 auto; display:block; }
+    .disk-donut .donut-bg { fill:none; stroke:var(--bar-bg); stroke-width:3; }
+    .disk-donut .donut-ring { fill:none; stroke-width:3; stroke-linecap:round; transform:rotate(-90deg); transform-origin:50% 50%; transition:stroke-dasharray .6s ease, stroke-width .2s ease; }
+    .disk-donut .donut-ring.color-success { stroke:var(--success); }
+    .disk-donut .donut-ring.color-warning { stroke:var(--warn); }
+    .disk-donut .donut-ring.color-danger { stroke:var(--crit); }
+    .disk-card:hover .donut-ring { stroke-width:5; }
+    .donut-value { fill:var(--text); font-size:0.8rem; font-weight:700; text-anchor:middle; dominant-baseline:middle; }
+    .disk-badges { display:flex; justify-content:space-between; margin-top:var(--gap-2); }
+    .disk-tooltip { position:absolute; left:50%; background:var(--bg-card); color:var(--text); padding:4px 8px; border-radius:4px; box-shadow:0 2px 6px rgba(0,0,0,0.2); font-size:var(--font-sm); white-space:nowrap; opacity:0; pointer-events:none; transform:translateX(-50%); transition:opacity .2s; z-index:20; }
+    .disk-card.show-tooltip .disk-tooltip { opacity:1; }
     .cpu .card-head { display:flex; align-items:center; justify-content:space-between; gap:var(--gap-2); flex-wrap:wrap; }
     .cpu .summary { display:flex; gap:var(--gap-2); flex-wrap:wrap; }
     .cpu .summary .badge { white-space:nowrap; }
