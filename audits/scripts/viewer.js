@@ -1127,14 +1127,16 @@ function renderMemory(model){
       <div class="card-head">
         <div class="title">RAM</div>
       </div>
-      <div class="bar" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent ?? 0}"></div>
+      <div class="bar mem-bar" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent ?? 0}"></div>
       <div class="badge-row"></div>`;
     const bar = card.querySelector('.bar');
     const badges = card.querySelector('.badge-row');
 
     const seg = document.createElement('div');
     seg.className = `seg seg-used ${pctClass(info.percent)}`;
-    seg.style.width = (info.percent ?? 0) + '%';
+    const pctRam = info.percent ?? 0;
+    const pctRamWidth = pctRam > 0 && pctRam < 1 ? 1 : pctRam;
+    seg.style.width = pctRamWidth + '%';
     const tip = `Utilisée : ${formatBytesFR(info.usedAppsBytes)} (${info.percent ?? 0} %)`;
     seg.title = tip;
     seg.setAttribute('aria-label', tip);
@@ -1178,14 +1180,16 @@ function renderMemory(model){
       <div class="card-head">
         <div class="title">Swap</div>
       </div>
-      <div class="bar" role="progressbar" aria-label="Utilisation Swap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent ?? 0}"></div>
+      <div class="bar mem-bar" role="progressbar" aria-label="Utilisation Swap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent ?? 0}"></div>
       <div class="badge-row"></div>`;
     const bar = card.querySelector('.bar');
     const badges = card.querySelector('.badge-row');
 
     const seg = document.createElement('div');
     seg.className = `seg seg-used ${pctClass(info.percent ?? 0)}`;
-    seg.style.width = (info.percent ?? 0) + '%';
+    const pctSwap = info.percent ?? 0;
+    const pctSwapWidth = pctSwap > 0 && pctSwap < 1 ? 1 : pctSwap;
+    seg.style.width = pctSwapWidth + '%';
     const tip = `Utilisée : ${formatBytesFR(info.usedBytes)} (${info.percent ?? 0} %)`;
     seg.title = tip;
     seg.setAttribute('aria-label', tip);
