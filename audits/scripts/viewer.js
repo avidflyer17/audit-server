@@ -1121,7 +1121,7 @@ function renderMemory(model){
     card.className = 'card ram';
     card.innerHTML = `
       <div class="card-head">
-        <div class="title">RAM <span class="badge total">${formatBytesFR(info.totalBytes)}</span></div>
+        <div class="title">RAM</div>
       </div>
       <div class="bar" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent ?? 0}"></div>
       <div class="badge-row"></div>`;
@@ -1141,6 +1141,7 @@ function renderMemory(model){
     bar.appendChild(label);
 
     const items = [
+      {icon:'fa-database', label:'Total', val:info.totalBytes, cls:'total'},
       {icon:'fa-microchip', label:'Utilisée', val:info.usedAppsBytes, cls:pctClass(info.percent), tip:'Mémoire utilisée par les applications'},
       {icon:'fa-circle', label:'Libre', val:info.freeBytes, tip:'Mémoire libre'},
       {icon:'fa-layer-group', label:'Cache/buffers', val:info.cacheBytes, tip:'Mémoire cache et buffers'},
@@ -1166,7 +1167,7 @@ function renderMemory(model){
     card.className = 'card swap';
     card.innerHTML = `
       <div class="card-head">
-        <div class="title">Swap <span class="badge total">${formatBytesFR(info.totalBytes)}</span></div>
+        <div class="title">Swap</div>
       </div>
       <div class="bar" role="progressbar" aria-label="Utilisation Swap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent ?? 0}"></div>
       <div class="badge-row"></div>`;
@@ -1186,6 +1187,7 @@ function renderMemory(model){
     bar.appendChild(label);
 
     const items = [
+      {icon:'fa-database', label:'Total', val:info.totalBytes, cls:'total'},
       {icon:'fa-microchip', label:'Utilisée', val:info.usedBytes, cls:pctClass(info.percent ?? 0)},
       {icon:'fa-circle', label:'Libre', val:info.freeBytes}
     ];
