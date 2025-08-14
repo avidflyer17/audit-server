@@ -901,12 +901,12 @@ function summarizeCpu(usageArr=[], tempArr=[], tjmax=100){
 
 function formatPercentFR(n){
   if(n==null || isNaN(n)) return 'N/A';
-  return `${Math.round(n).toLocaleString('fr-FR')} %`;
+  return `${Math.round(n).toLocaleString('fr-FR')} %`;
 }
 
 function formatTempFR(c){
   if(c==null || isNaN(c)) return 'N/A';
-  return `${Number(c).toLocaleString('fr-FR',{minimumFractionDigits:1, maximumFractionDigits:1})} °C`;
+  return `${Number(c).toLocaleString('fr-FR',{minimumFractionDigits:1, maximumFractionDigits:1})} °C`;
 }
 
 function classForSeverity(sev){
@@ -934,13 +934,12 @@ function renderCpu(cpu){
   card.className = 'card cpu';
   card.innerHTML = `
     <div class="card-head">
-      <div class="title"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>CPU</span></div>
-      <div class="subtitle">${model} — ${cpu.cores ?? 'N/A'} cœurs</div>
-    </div>
-    <div class="summary">
-      <div class="badge"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>${formatPercentFR(summary.avgUsage)}</span></div>
-      <div class="badge"><i class="fa-solid fa-temperature-three-quarters" aria-hidden="true"></i><span>${formatTempFR(summary.avgTemp)}</span></div>
-      <div class="badge"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i><span>${summary.max.core!=null?`Core ${summary.max.core} — ${formatPercentFR(summary.max.usage)} / ${formatTempFR(summary.max.temp)}`:'N/A'}</span></div>
+      <div class="summary">
+        <div class="badge"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>${formatPercentFR(summary.avgUsage)}</span></div>
+        <div class="badge"><i class="fa-solid fa-temperature-three-quarters" aria-hidden="true"></i><span>${formatTempFR(summary.avgTemp)}</span></div>
+        <div class="badge"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i><span>${summary.max.core!=null?`Core ${summary.max.core} — ${formatPercentFR(summary.max.usage)} / ${formatTempFR(summary.max.temp)}`:'N/A'}</span></div>
+      </div>
+      <div class="model">${model} <em class="cores">— ${cpu.cores ?? 'N/A'} cœurs</em></div>
     </div>
     <div class="core-list"></div>`;
 
@@ -1023,7 +1022,7 @@ function renderCpu(cpu){
 }
 
 console.assert(percentOfTjMax(73,100) === 73, 'percentOfTjMax');
-console.assert(formatTempFR(73) === '73,0 °C', 'formatTempFR', formatTempFR(73));
+console.assert(formatTempFR(73) === '73,0 °C', 'formatTempFR', formatTempFR(73));
 const __cpuTest = summarizeCpu(
   [{core:0,usage:6},{core:1,usage:12},{core:2,usage:17},{core:3,usage:23}],
   [{core:0,temp:73},{core:1,temp:73},{core:2,temp:73},{core:3,temp:73}],
