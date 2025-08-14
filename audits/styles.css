@@ -741,10 +741,6 @@ h1 {
   align-items: center;
   gap: var(--gap-2);
   padding: var(--gap-2);
-  background: var(--bg-muted);
-  border-radius: var(--radius);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  border-left: 4px solid var(--ip-color);
   flex-wrap: wrap;
 }
 .network-card .ip-row + .ip-row { margin-top: var(--gap-2); }
