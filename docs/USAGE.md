@@ -40,6 +40,12 @@ Use the provided Docker and Nginx setup to serve the `audits` directory. Adjust 
 docker compose up -d
 ```
 
+## 📈 Viewing trends
+
+The `audits/trends.html` page aggregates historical reports and displays charts for load averages, memory usage and
+disk consumption. Ensure the `archives` folder and `index.json` are served alongside this file so the browser can load
+past reports.
+
 ## 🧪 Running tests
 
 A minimal test script ensures the audit generator produces valid JSON output. Execute:

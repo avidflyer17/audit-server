@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Audit Serveur DW - Tendances</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="scripts/trends.js" defer></script>
+</head>
+<body data-theme="dark">
+  <header id="topBar" class="top-bar">
+    <button id="menuToggle" class="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+    <div class="top-brand">
+      <div class="brand-line">
+        <i class="fa-solid fa-brain" aria-hidden="true"></i>
+        <span class="brand-title">Audit Serveur DW</span>
+      </div>
+      <p id="hostname" class="brand-host">-</p>
+      <div class="brand-meta">
+        <div class="meta-item">
+          <span class="meta-label">Généré</span>
+          <span id="generatedValue">--</span>
+          <span id="tzBadge" class="badge"></span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Uptime</span>
+          <span id="uptimeValue">--</span>
+          <span id="uptimeSince"></span>
+        </div>
+      </div>
+    </div>
+    <div id="themeSwitchWrapper">
+      <i id="themeIcon" class="fas fa-moon theme-icon"></i>
+      <label class="switch">
+        <input type="checkbox" id="themeToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </header>
+
+  <aside id="sidebar" class="sidebar">
+    <div id="reportCard" class="report-card card">
+      <div class="card-header">
+        <h2>Rapports</h2>
+      </div>
+
+      <div class="report-grid">
+        <button id="btnLatest" class="btn primary">
+          <span><i class="fa-solid fa-bolt"></i></span>
+          <span class="label">Voir le dernier rapport</span>
+          <small id="latestInfo" class="subinfo"></small>
+        </button>
+
+        <div class="day-control" role="group" aria-label="Choisir un jour">
+          <button id="dayToday" class="seg">Aujourd'hui</button>
+          <button id="dayYesterday" class="seg">Hier</button>
+          <button id="dayCalendar" class="seg" aria-label="Choisir une date" title="Choisir une date"><i class="fa-solid fa-calendar"></i></button>
+          <input type="date" id="datePicker" class="sr-only" />
+        </div>
+
+        <div id="selectorStatus" aria-live="polite"></div>
+
+        <div class="timeline-wrapper">
+          <div id="timeTimeline" class="timeline" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <span id="refreshDot" class="refresh-dot" aria-label="Actualisation automatique" title="Actualisation automatique"></span>
+    </div>
+    <a id="linkTrends" class="btn" href="trends.html"><i class="fa-solid fa-chart-line"></i> Tendances</a>
+  </aside>
+  <div id="menuOverlay"></div>
+
+  <main>
+    <h2><i class="fa-solid fa-chart-line heading-icon"></i>Tendances des métriques</h2>
+    <div class="card chart-card">
+      <h3>Charge moyenne</h3>
+      <canvas id="loadChart"></canvas>
+    </div>
+    <div class="card chart-card">
+      <h3>Mémoire utilisée (%)</h3>
+      <canvas id="memChart"></canvas>
+    </div>
+    <div class="card chart-card">
+      <h3>Disque utilisé (%)</h3>
+      <canvas id="diskChart"></canvas>
+    </div>
+  </main>
+
+  <script>
+    const themeSwitch = document.getElementById("themeToggle");
+    const themeIcon = document.getElementById("themeIcon");
+    function applyTheme(t){
+      document.body.setAttribute("data-theme", t);
+      themeSwitch.checked = t === "light";
+      if (themeIcon) themeIcon.className = t === "light" ? "fas fa-sun theme-icon" : "fas fa-moon theme-icon";
+    }
+    themeSwitch.addEventListener("change", () => {
+      const next = themeSwitch.checked ? "light" : "dark";
+      localStorage.setItem("theme", next);
+      applyTheme(next);
+    });
+    applyTheme(localStorage.getItem("theme") || "dark");
+  </script>
+</body>
+</html>
+
