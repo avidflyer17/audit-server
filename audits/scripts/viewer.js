@@ -81,7 +81,7 @@ function colorClassTemp(v){
 function colorClassDisk(v){
   const val = Number(v);
   if (val < 50) return 'color-success';
-  if (val < 80) return 'color-warning';
+  if (val < 85) return 'color-warning';
   return 'color-danger';
 }
 
@@ -1236,40 +1236,56 @@ function renderDisks(disks){
     return bPct - aPct;
   });
   sorted.forEach(disk => {
-    const totalBytes = parseSizeToBytes(disk.total_bytes ?? disk.size);
-    const usedBytes = parseSizeToBytes(disk.used_bytes ?? disk.used);
-    const freeBytes = (totalBytes != null && usedBytes != null) ? totalBytes - usedBytes : parseSizeToBytes(disk.free_bytes ?? disk.available);
-    let pct = (totalBytes && usedBytes != null) ? (usedBytes / totalBytes) * 100 : null;
-    const pctStr = pct != null ? (pct < 10 ? pct.toFixed(1) : Math.round(pct)) : 'N/A';
-    const totalStr = formatBytes(totalBytes);
-    const usedStr = formatBytes(usedBytes);
-    const freeStr = formatBytes(freeBytes);
+    const pctRaw = parseFloat(String(disk.used_percent).replace('%','')) || 0;
+    const pctDisplay = Math.round(pctRaw);
+    const pctArc = Math.max(pctRaw, 1);
+    const totalStr = disk.size || '';
+    const usedStr = disk.used || '';
+    const freeStr = disk.available || '';
     const card = document.createElement('div');
     card.className = 'disk-card';
-    const barHtml = pct != null ? `
-          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pctStr}">
-            <span class="fill ${colorClassDisk(pct)}" style="width:0"></span>
-            <span class="value">${pctStr}%</span>
-          </div>` : `
-          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-            <span class="value">N/A</span>
-          </div>`;
-    const info = pct != null ? `${usedStr} utilisé / ${totalStr} (${freeStr} libre)` : 'Données incomplètes';
+    card.tabIndex = 0;
+    const aria = `Disque ${disk.mountpoint} : ${pctDisplay}% utilisés, ${usedStr} utilisés, ${freeStr} libres, total ${totalStr}`;
     card.innerHTML = `
-      <div class="proc-row">
-        <span class="proc-name">${disk.mountpoint} <span class="badge-total">${totalStr}</span></span>
-        <div class="proc-bars">${barHtml}</div>
+      <svg class="disk-donut" viewBox="0 0 36 36" role="img" aria-label="${aria}">
+        <circle class="donut-bg" cx="18" cy="18" r="16"></circle>
+        <circle class="donut-ring ${colorClassDisk(pctRaw)}" cx="18" cy="18" r="16" stroke-dasharray="0 100"></circle>
+        <text x="18" y="18" class="donut-value">${pctDisplay}%</text>
+      </svg>
+      <div class="disk-badges">
+        <span class="badge">${disk.mountpoint}</span>
+        <span class="badge">${totalStr}</span>
       </div>
-      <div class="ram-text">${info}</div>`;
+      <div class="disk-tooltip">${usedStr} utilisés • ${freeStr} libres • Total ${totalStr}</div>`;
     container.appendChild(card);
-    if (pct != null){
-      const fill = card.querySelector('.bar .fill');
-      const valueEl = card.querySelector('.bar .value');
-      requestAnimationFrame(()=>{
-        fill.style.width = pct + '%';
-        adjustBarValue(valueEl, fill, pct);
-      });
+    const ring = card.querySelector('.donut-ring');
+    requestAnimationFrame(()=>{
+      ring.setAttribute('stroke-dasharray', `${pctArc} 100`);
+    });
+    const tip = card.querySelector('.disk-tooltip');
+    function positionTip(){
+      const rect = card.getBoundingClientRect();
+      const tRect = tip.getBoundingClientRect();
+      let top = -tRect.height - 8;
+      if (rect.top + top < 0) top = rect.height + 8;
+      let left = (rect.width - tRect.width) / 2;
+      const overflowRight = rect.left + left + tRect.width - window.innerWidth;
+      if (overflowRight > 0) left -= overflowRight;
+      if (rect.left + left < 0) left = -rect.left + 4;
+      tip.style.top = top + 'px';
+      tip.style.left = left + 'px';
     }
+    card.addEventListener('mouseenter', () => {
+      card.classList.add('show-tooltip');
+      positionTip();
+    });
+    card.addEventListener('mouseleave', () => {
+      card.classList.remove('show-tooltip');
+    });
+    card.addEventListener('click', () => {
+      const txt = `mountpoint=${disk.mountpoint} • used=${usedStr} • free=${freeStr} • total=${totalStr} • ${pctDisplay}%`;
+      navigator.clipboard?.writeText(txt);
+    });
   });
 }
 
