@@ -1288,7 +1288,7 @@ function renderDisks(disks){
 }
 
 function parseLoadAvgFR(str) {
-  // Parse "0,21,0,22,0,21" into [0.21, 0.22, 0.21]
+  // Parse FR-formatted string "0,21,0,22,0,21" -> [0.21,0.22,0.21]
   if (typeof str !== 'string') return null;
   const matches = str.match(/\d+(?:,\d+)?/g);
   if (!matches || matches.length < 3) return null;
@@ -1296,20 +1296,20 @@ function parseLoadAvgFR(str) {
 }
 
 function normaliseByCores(load, cores) {
-  // Normalise load by core count and cap at 100%
+  // Convert a load value into percentage of total cores, capped at 100
   if (load == null || !cores) return null;
   return Math.min((load / cores) * 100, 100);
 }
 
 function statusFromRatio(ratio) {
-  // Thresholds: <0.7 low, <1 elevated, otherwise critical
+  // Map load/cores ratio to status & theme color
   if (ratio < 0.7) return { label: 'Faible', cls: 'success', color: 'var(--success)' };
   if (ratio < 1.0) return { label: 'Élevée', cls: 'warning', color: 'var(--warning)' };
   return { label: 'Critique', cls: 'danger', color: 'var(--danger)' };
 }
 
 function trendFrom(l1, l5) {
-  // Compare 1 min vs 5 min load to detect trend
+  // Compare current vs previous load to detect trend
   if (l1 > l5) return { icon: 'fa-chevron-up', label: 'en hausse' };
   if (l1 < l5) return { icon: 'fa-chevron-down', label: 'en baisse' };
   return { icon: 'fa-chevron-right', label: 'stable' };
@@ -1319,34 +1319,44 @@ function renderMini(label, load, prevLoad, cores) {
   const card = document.getElementById(`load${label}Card`);
   const valEl = document.getElementById(`load${label}Val`);
   const bar = document.getElementById(`load${label}Bar`);
+  const fill = document.getElementById(`load${label}Fill`);
+  const dot = document.getElementById(`load${label}Dot`);
   const trend = document.getElementById(`load${label}Trend`);
   if (load == null) {
     card.classList.add('na');
     valEl.textContent = '—';
-    bar.style.width = '0%';
+    fill.style.width = '0%';
+    fill.className = 'fill';
     trend.textContent = 'donnée manquante';
     card.removeAttribute('title');
     card.removeAttribute('aria-label');
     bar.removeAttribute('aria-label');
     bar.removeAttribute('role');
+    dot.style.background = 'var(--bg-muted)';
   } else {
     card.classList.remove('na');
     const pct = normaliseByCores(load, cores);
     valEl.textContent = pct.toFixed(0) + '%';
-    bar.style.width = Math.min(100, pct) + '%';
     const status = statusFromRatio(load / cores);
-    bar.style.background = status.color;
+    fill.className = `fill color-${status.cls}`;
+    requestAnimationFrame(() => {
+      fill.style.width = Math.min(100, pct) + '%';
+    });
+    dot.style.background = status.color;
     const t = trendFrom(load, prevLoad);
     trend.textContent = t.label;
     const rawStr = load.toLocaleString('fr-FR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
-    const tip = `${label} min : ${rawStr} / ${cores} cœurs`;
+    const tip = `${label} min : ${rawStr} / ${cores} cœurs (${pct.toFixed(0)} %)`;
     card.title = tip;
     card.setAttribute('aria-label', tip);
     bar.setAttribute('aria-label', tip);
-    bar.setAttribute('role', 'img');
+    bar.setAttribute('role', 'progressbar');
+    bar.setAttribute('aria-valuemin', '0');
+    bar.setAttribute('aria-valuemax', '100');
+    bar.setAttribute('aria-valuenow', pct.toFixed(0));
   }
 }
 
@@ -1360,6 +1370,7 @@ function renderLoadAverage(raw, cores) {
     document.getElementById('load1Val').textContent = '—';
     trendEl.className = 'trend fa-solid fa-chevron-right';
     trendEl.setAttribute('aria-label', 'stable');
+    trendEl.title = 'stable';
     trendEl.style.color = 'var(--text-muted)';
     path.setAttribute('stroke-dasharray', '0 100');
     gauge.removeAttribute('title');
@@ -1373,7 +1384,9 @@ function renderLoadAverage(raw, cores) {
   const pct1 = normaliseByCores(l1, cores);
   const status = statusFromRatio(l1 / cores);
   gauge.style.setProperty('--load-color', status.color);
-  path.setAttribute('stroke-dasharray', `${Math.min(100, pct1)} 100`);
+  requestAnimationFrame(() => {
+    path.setAttribute('stroke-dasharray', `${Math.min(100, pct1)} 100`);
+  });
   document.getElementById('load1Val').textContent = pct1.toFixed(0) + '%';
   const trendInfo = trendFrom(l1, l5);
   trendEl.className = `trend fa-solid ${trendInfo.icon}`;
@@ -1384,11 +1397,11 @@ function renderLoadAverage(raw, cores) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
-  const tip = `Charge 1 min : ${l1Str} / ${cores} cœurs`;
+  const tip = `Charge 1 min : ${l1Str} / ${cores} cœurs (${pct1.toFixed(0)} %)`;
   gauge.title = tip;
   gauge.setAttribute('aria-label', tip);
   renderMini('5', l5, l1, cores);
-  renderMini('15', l15, l5, cores);
+  renderMini('15', l15, l1, cores);
 }
 
 function renderText(json) {

@@ -120,24 +120,24 @@
             <path class="bg" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32"/>
             <path id="loadGaugePath" class="progress" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32" stroke-dasharray="0 100"/>
           </svg>
-          <div class="gauge-value"><span id="load1Val">--</span><i id="loadTrend" class="trend fa-solid fa-chevron-right"></i></div>
+          <div class="gauge-value"><span id="load1Val">--</span></div>
         </div>
-        <div class="gauge-label">sur 1 min</div>
+        <div class="gauge-label">sur 1 min <i id="loadTrend" class="trend fa-solid fa-chevron-right"></i></div>
       </div>
       <div class="load-cards">
-          <div id="load5Card" class="mini-card card card--compact" tabindex="0">
-            <div class="mini-title">5 min</div>
-            <div class="progress progress--thin" role="img">
-              <div id="load5Bar" class="progress__bar"></div>
-              <div id="load5Val" class="progress__value">--</div>
+          <div id="load5Card" class="mini-card" tabindex="0">
+            <div class="mini-title"><span id="load5Dot" class="status-dot"></span>5 min</div>
+            <div class="mini-bar-row">
+              <div class="bar" id="load5Bar"><span id="load5Fill" class="fill"></span></div>
+              <span id="load5Val" class="mini-val">--</span>
             </div>
             <div id="load5Trend" class="mini-trend">--</div>
           </div>
-          <div id="load15Card" class="mini-card card card--compact" tabindex="0">
-            <div class="mini-title">15 min</div>
-            <div class="progress progress--thin" role="img">
-              <div id="load15Bar" class="progress__bar"></div>
-              <div id="load15Val" class="progress__value">--</div>
+          <div id="load15Card" class="mini-card" tabindex="0">
+            <div class="mini-title"><span id="load15Dot" class="status-dot"></span>15 min</div>
+            <div class="mini-bar-row">
+              <div class="bar" id="load15Bar"><span id="load15Fill" class="fill"></span></div>
+              <span id="load15Val" class="mini-val">--</span>
             </div>
             <div id="load15Trend" class="mini-trend">--</div>
           </div>
