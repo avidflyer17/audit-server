@@ -1021,17 +1021,10 @@ h1 {
       margin-top: 0.75rem;
       display: flex;
       justify-content: center;
-      gap: 12px;
-      align-items: center;
+      gap: 0.5rem;
       flex-wrap: wrap;
-      font-size: 0.85rem;
-      line-height: 1.2;
     }
-    .legend-item { display: flex; align-items: center; gap: 0.25rem; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .dot.color-success { background: var(--success); }
-    .dot.color-warning { background: var(--warning); }
-    .dot.color-danger { background: var(--danger); }
+    .load-legend .badge { margin: 0; }
 
     .services-title-row {
       display: flex;
@@ -1323,7 +1316,7 @@ h1 {
     .gauge:focus-visible,
     .mini-card:focus-visible { outline: 2px solid var(--heading); outline-offset: 4px; }
 
-    @media (min-width: 900px) {
+    @media (min-width: 768px) {
       .load-container { flex-direction: row; align-items: center; }
       .load-cards { flex: none; width: 200px; }
     }
