@@ -1122,35 +1122,28 @@ function renderMemory(model){
     card.innerHTML = `
       <div class="card-head">
         <div class="title">RAM <span class="badge total">${formatBytesFR(info.totalBytes)}</span></div>
-        <div class="percent ${pctClass(info.percent)}">${info.percent ?? 'N/A'}%</div>
       </div>
       <div class="bar" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent ?? 0}"></div>
       <div class="badge-row"></div>`;
     const bar = card.querySelector('.bar');
     const badges = card.querySelector('.badge-row');
 
-    const segs = [
-      {cls:`seg-used ${pctClass(info.percent)}`, label:'Utilisée', val:info.usedAppsBytes, pct:info.seg.usedPct, tip:'Utilisée par les applications'},
-      {cls:'seg-cache', label:'Cache/buffers', val:info.cacheBytes, pct:info.seg.cachePct, tip:'Mémoire cache et buffers'},
-      {cls:'seg-free', label:'Libre', val:info.freeBytes, pct:info.seg.freePct, tip:'Mémoire libre'}
-    ];
-    segs.forEach(seg => {
-      if (seg.val == null || seg.val <= 0) return;
-      const pct = seg.pct;
-      const pctStr = Math.round(pct);
-      const segEl = document.createElement('div');
-      segEl.className = `seg ${seg.cls}`;
-      segEl.style.width = pct + '%';
-      const tip = `${seg.label} : ${formatBytesFR(seg.val)} (${pctStr} %)`;
-      segEl.title = tip;
-      segEl.setAttribute('aria-label', tip);
-      bar.appendChild(segEl);
-    });
+    const seg = document.createElement('div');
+    seg.className = `seg seg-used ${pctClass(info.percent)}`;
+    seg.style.width = (info.percent ?? 0) + '%';
+    const tip = `Utilisée : ${formatBytesFR(info.usedAppsBytes)} (${info.percent ?? 0} %)`;
+    seg.title = tip;
+    seg.setAttribute('aria-label', tip);
+    bar.appendChild(seg);
+    const label = document.createElement('div');
+    label.className = 'bar-label';
+    label.textContent = `${info.percent ?? 'N/A'}%`;
+    bar.appendChild(label);
 
     const items = [
       {icon:'fa-microchip', label:'Utilisée', val:info.usedAppsBytes, cls:pctClass(info.percent), tip:'Mémoire utilisée par les applications'},
-      {icon:'fa-layer-group', label:'Cache/buffers', val:info.cacheBytes, tip:'Mémoire cache et buffers'},
       {icon:'fa-circle', label:'Libre', val:info.freeBytes, tip:'Mémoire libre'},
+      {icon:'fa-layer-group', label:'Cache/buffers', val:info.cacheBytes, tip:'Mémoire cache et buffers'},
       {icon:'fa-check', label:'Disponible', val:info.availableBytes, tip:'Mémoire immédiatement disponible'},
       {icon:'fa-share-nodes', label:'Partagée', val:info.sharedBytes, tip:'Mémoire partagée'}
     ];
@@ -1174,47 +1167,38 @@ function renderMemory(model){
     card.innerHTML = `
       <div class="card-head">
         <div class="title">Swap <span class="badge total">${formatBytesFR(info.totalBytes)}</span></div>
-        <div class="percent ${pctClass(info.percent ?? 0)}">${info.percent ?? 0}%</div>
-      </div>`;
-    if (info.totalBytes > 0){
-      card.innerHTML += `
-        <div class="bar" role="progressbar" aria-label="Utilisation Swap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent}"></div>
-        <div class="badge-row"></div>`;
-      const bar = card.querySelector('.bar');
-      const badges = card.querySelector('.badge-row');
-      const segs = [
-        {cls:`seg-used ${pctClass(info.percent)}`, label:'Utilisée', val:info.usedBytes, pct:info.seg.usedPct, tip:'Swap utilisé'},
-        {cls:'seg-free', label:'Libre', val:info.freeBytes, pct:info.seg.freePct, tip:'Swap libre'}
-      ];
-      segs.forEach(seg => {
-        if (seg.val == null || seg.val <= 0) return;
-        const pct = seg.pct;
-        const pctStr = Math.round(pct);
-        const segEl = document.createElement('div');
-        segEl.className = `seg ${seg.cls}`;
-        segEl.style.width = pct + '%';
-        const tip = `${seg.label} : ${formatBytesFR(seg.val)} (${pctStr} %)`;
-        segEl.title = tip;
-        segEl.setAttribute('aria-label', tip);
-        bar.appendChild(segEl);
-      });
-      const items = [
-        {icon:'fa-microchip', label:'Utilisée', val:info.usedBytes, cls:pctClass(info.percent ?? 0)},
-        {icon:'fa-circle', label:'Libre', val:info.freeBytes}
-      ];
-      items.forEach(b => {
-        if (b.val == null) return;
-        const el = document.createElement('div');
-        el.className = `badge${b.cls ? ' '+b.cls : ''}`;
-        const formatted = formatBytesFR(b.val);
-        el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${formatted}</span>`;
-        el.title = `${b.label} : ${formatted}`;
-        el.setAttribute('aria-label', `${b.label} : ${formatted}`);
-        badges.appendChild(el);
-      });
-    } else {
-      card.innerHTML += '<div class="no-swap">Aucun swap</div>';
-    }
+      </div>
+      <div class="bar" role="progressbar" aria-label="Utilisation Swap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent ?? 0}"></div>
+      <div class="badge-row"></div>`;
+    const bar = card.querySelector('.bar');
+    const badges = card.querySelector('.badge-row');
+
+    const seg = document.createElement('div');
+    seg.className = `seg seg-used ${pctClass(info.percent ?? 0)}`;
+    seg.style.width = (info.percent ?? 0) + '%';
+    const tip = `Utilisée : ${formatBytesFR(info.usedBytes)} (${info.percent ?? 0} %)`;
+    seg.title = tip;
+    seg.setAttribute('aria-label', tip);
+    bar.appendChild(seg);
+    const label = document.createElement('div');
+    label.className = 'bar-label';
+    label.textContent = `${info.percent ?? 0}%`;
+    bar.appendChild(label);
+
+    const items = [
+      {icon:'fa-microchip', label:'Utilisée', val:info.usedBytes, cls:pctClass(info.percent ?? 0)},
+      {icon:'fa-circle', label:'Libre', val:info.freeBytes}
+    ];
+    items.forEach(b => {
+      if (b.val == null) return;
+      const el = document.createElement('div');
+      el.className = `badge${b.cls ? ' '+b.cls : ''}`;
+      const formatted = formatBytesFR(b.val);
+      el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${formatted}</span>`;
+      el.title = `${b.label} : ${formatted}`;
+      el.setAttribute('aria-label', `${b.label} : ${formatted}`);
+      badges.appendChild(el);
+    });
     container.appendChild(card);
   }
 }
