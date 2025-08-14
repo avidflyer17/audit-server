@@ -843,66 +843,193 @@ function showUpdateBadge() {
   updateTimer = setTimeout(hide, 30000);
 }
 
-function renderCpuCores(usages){
-  const container = document.getElementById('cpuCores');
+function cleanCpuModel(modelRaw){
+  if(!modelRaw) return '';
+  const parts = String(modelRaw).split(/\n+/).map(s=>s.replace(/To Be Filled By O\.E\.M\./gi,'').trim()).filter(Boolean);
+  const line = parts.pop() || '';
+  return line.replace(/\s+/g,' ').replace(/CPU\s*@/i,'@').replace(/\s+GHz/i,' GHz').replace(/\s@/,' @ ').trim();
+}
+
+function severityUsage(pct){
+  const v = clamp(Math.round(Number(pct)),0,100);
+  if (v < 50) return 'cool';
+  if (v < 80) return 'warm';
+  if (v <= 100) return 'hot';
+  return 'critical';
+}
+
+function percentOfTjMax(c, tjmax=100){
+  return clamp(Math.round((Number(c)/Number(tjmax))*100),0,100);
+}
+
+function severityTemp(c, tjmax=100){
+  const pct = percentOfTjMax(c, tjmax);
+  if (pct < 50) return 'cool';
+  if (pct < 80) return 'warm';
+  if (pct < 90) return 'hot';
+  return 'critical';
+}
+
+function summarizeCpu(usageArr=[], tempArr=[], tjmax=100){
+  let sumU=0, countU=0, sumT=0, countT=0;
+  let maxUsage=-1, maxCore=null, maxTemp=null;
+  let minU=Infinity, maxU=-Infinity, minT=Infinity, maxT=-Infinity;
+  const len = Math.max(usageArr.length, tempArr.length);
+  for(let i=0;i<len;i++){
+    const u = usageArr[i]?.usage;
+    const t = tempArr[i]?.temp;
+    if (typeof u === 'number'){
+      const cu = clamp(Math.round(u),0,100);
+      sumU += cu; countU++;
+      if (cu > maxUsage){ maxUsage = cu; maxCore = i; maxTemp = typeof t==='number'?clamp(t,0,tjmax):null; }
+      if (cu < minU) minU = cu; if (cu > maxU) maxU = cu;
+    }
+    if (typeof t === 'number'){
+      const ct = clamp(t,0,tjmax);
+      sumT += ct; countT++;
+      if (ct < minT) minT = ct; if (ct > maxT) maxT = ct;
+    }
+  }
+  return {
+    avgUsage: countU? sumU/countU : null,
+    avgTemp: countT? sumT/countT : null,
+    max: {core:maxCore, usage:maxUsage, temp:maxTemp},
+    spreadTemp: countT? maxT - minT : null,
+    spreadUsage: countU? maxU - minU : null
+  };
+}
+
+function formatPercentFR(n){
+  if(n==null || isNaN(n)) return 'N/A';
+  return `${Math.round(n).toLocaleString('fr-FR')} %`;
+}
+
+function formatTempFR(c){
+  if(c==null || isNaN(c)) return 'N/A';
+  return `${Number(c).toLocaleString('fr-FR',{minimumFractionDigits:1, maximumFractionDigits:1})} °C`;
+}
+
+function classForSeverity(sev){
+  switch(sev){
+    case 'cool': return 'color-success';
+    case 'warm': return 'color-warning';
+    case 'hot':
+    case 'critical': return 'color-danger';
+    default: return '';
+  }
+}
+
+function renderCpu(cpu){
+  const container = document.getElementById('cpuSection');
   container.innerHTML = '';
-  if(!Array.isArray(usages) || usages.length === 0){
+  if(!cpu){
     container.innerHTML = '<div class="empty">Aucune donnée CPU</div>';
     return;
   }
-  usages.forEach(u => {
-    const val = Number(u.usage);
-    const card = document.createElement('div');
-    card.className = 'docker-card';
-    card.innerHTML = `
-      <div class="docker-head"><div class="docker-title"><span class="docker-name">CPU ${u.core}</span></div></div>
-      <div class="docker-bars">
-        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${val}">
-          <span class="fill ${colorClassCpu(val)}" style="width:0"></span>
-          <span class="value">${val}%</span>
-        </div>
-      </div>`;
-    container.appendChild(card);
-    const fill = card.querySelector('.bar .fill');
-    const valueEl = card.querySelector('.bar .value');
-    requestAnimationFrame(() => {
-      fill.style.width = val + '%';
-      adjustBarValue(valueEl, fill, val);
-    });
-  });
-}
+  const tjmax = Number(cpu.tjmax_celsius) || 100;
+  const model = cleanCpuModel(cpu.model);
+  const summary = summarizeCpu(cpu.usage||[], cpu.temperatures||[], tjmax);
 
-function renderCpuTemps(temps){
-  const container = document.getElementById('tempsContainer');
-  container.innerHTML = '';
-  if(!Array.isArray(temps) || temps.length === 0){
-    container.innerHTML = '<div class="empty">N/A</div>';
-    return;
-  }
-  temps.forEach(t => {
-    const temp = Number(t.temp);
+  const card = document.createElement('article');
+  card.className = 'card cpu';
+  card.innerHTML = `
+    <div class="card-head">
+      <div class="title"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>CPU</span></div>
+      <div class="subtitle">${model} — ${cpu.cores ?? 'N/A'} cœurs</div>
+    </div>
+    <div class="summary">
+      <div class="badge"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i><span>${formatPercentFR(summary.avgUsage)}</span></div>
+      <div class="badge"><i class="fa-solid fa-temperature-three-quarters" aria-hidden="true"></i><span>${formatTempFR(summary.avgTemp)}</span></div>
+      <div class="badge"><i class="fa-solid fa-arrow-up" aria-hidden="true"></i><span>${summary.max.core!=null?`Core ${summary.max.core} — ${formatPercentFR(summary.max.usage)} / ${formatTempFR(summary.max.temp)}`:'N/A'}</span></div>
+    </div>
+    <div class="core-list"></div>`;
+
+  const list = card.querySelector('.core-list');
+  const len = Math.max(cpu.cores || 0, cpu.usage?.length || 0, cpu.temperatures?.length || 0);
+  for(let i=0;i<len;i++){
+    const u = cpu.usage?.[i]?.usage;
+    const t = cpu.temperatures?.[i]?.temp;
+    let uClamped = null, tClamped = null, uTip='', tTip='';
+    if (typeof u === 'number'){
+      const orig = Math.round(u);
+      uClamped = clamp(orig,0,100);
+      if(uClamped !== orig) uTip=' (normalisée)';
+    }
+    if (typeof t === 'number'){
+      const origT = Number(t);
+      tClamped = clamp(origT,0,tjmax);
+      if(tClamped !== origT) tTip=' (normalisée)';
+    }
+    const pctT = tClamped!=null? percentOfTjMax(tClamped, tjmax):null;
+    const usageText = uClamped!=null? formatPercentFR(uClamped):'N/A';
+    const tempText = tClamped!=null? formatTempFR(tClamped):'N/A';
+
+    const barU = document.createElement('div');
+    barU.className = 'bar bar-usage';
+    barU.setAttribute('role','progressbar');
+    barU.setAttribute('aria-valuemin','0');
+    barU.setAttribute('aria-valuemax','100');
+    barU.setAttribute('aria-valuenow',uClamped ?? 0);
+    barU.setAttribute('aria-label',`Core ${i} — ${usageText} d’utilisation`);
+    barU.title = `Core ${i} — ${usageText} d’utilisation${uTip}`;
+    barU.innerHTML = `<span class="fill ${classForSeverity(severityUsage(uClamped ?? 0))}" style="width:0"></span><span class="value">${usageText}</span>`;
+
+    const barT = document.createElement('div');
+    barT.className = 'bar bar-temp';
+    barT.setAttribute('role','progressbar');
+    barT.setAttribute('aria-valuemin','0');
+    barT.setAttribute('aria-valuemax','100');
+    barT.setAttribute('aria-valuenow',pctT ?? 0);
+    const pctText = pctT!=null?` (${pctT} % de TjMax)`:'';
+    barT.setAttribute('aria-label',`Core ${i} — ${tempText}${pctText}`);
+    barT.title = `Core ${i} — ${tempText}${pctText}${tTip}`;
+    barT.innerHTML = `<span class="fill ${classForSeverity(severityTemp(tClamped ?? 0, tjmax))}" style="width:0"></span><span class="value">${tempText}</span>`;
+
     const row = document.createElement('div');
     row.className = 'proc-row';
-    row.innerHTML = `
-      <span class="proc-icon">🔥</span>
-      <span class="proc-name">Core ${t.core}</span>
-      <div class="proc-bars">
-        <div class="bar bar-temp" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${temp}">
-          <span class="fill ${colorClassTemp(temp)}" style="width:0"></span>
-          <span class="value">${isNaN(temp)?'N/A':temp.toFixed(1)+'°C'}</span>
-        </div>
-      </div>`;
-    container.appendChild(row);
-    if(!isNaN(temp)){
-      const fill = row.querySelector('.bar .fill');
-      const valueEl = row.querySelector('.bar .value');
-      requestAnimationFrame(()=>{
-        fill.style.width = Math.min(100, temp) + '%';
-        adjustBarValue(valueEl, fill, Math.min(100, temp));
-      });
+    row.innerHTML = `<span class="proc-icon">🔥</span><span class="proc-name">Core ${i}</span>`;
+    const bars = document.createElement('div');
+    bars.className = 'core-bars';
+    bars.appendChild(barU);
+    bars.appendChild(barT);
+    row.appendChild(bars);
+    if (severityTemp(tClamped ?? 0, tjmax) === 'critical'){
+      const warn = document.createElement('span');
+      warn.className = 'badge danger crit-badge';
+      warn.textContent = '⚠️';
+      row.appendChild(warn);
     }
-  });
+    list.appendChild(row);
+
+    const fillU = barU.querySelector('.fill');
+    const valU = barU.querySelector('.value');
+    if (uClamped!=null){
+      requestAnimationFrame(()=>{ fillU.style.width = uClamped + '%'; adjustBarValue(valU, fillU, uClamped); });
+    } else {
+      fillU.style.width = '100%';
+      fillU.style.background = 'var(--bg-muted)';
+    }
+    const fillT = barT.querySelector('.fill');
+    const valT = barT.querySelector('.value');
+    if (pctT!=null){
+      requestAnimationFrame(()=>{ fillT.style.width = pctT + '%'; adjustBarValue(valT, fillT, pctT); });
+    } else {
+      fillT.style.width = '100%';
+      fillT.style.background = 'var(--bg-muted)';
+    }
+  }
+
+  container.appendChild(card);
 }
+
+console.assert(percentOfTjMax(73,100) === 73, 'percentOfTjMax');
+console.assert(formatTempFR(73) === '73,0 °C', 'formatTempFR', formatTempFR(73));
+const __cpuTest = summarizeCpu(
+  [{core:0,usage:6},{core:1,usage:12},{core:2,usage:17},{core:3,usage:23}],
+  [{core:0,temp:73},{core:1,temp:73},{core:2,temp:73},{core:3,temp:73}],
+  100
+);
+console.assert(Math.round(__cpuTest.avgUsage) === 15, 'avgUsage', __cpuTest.avgUsage);
 
 function clamp(val, min, max){
   return Math.min(Math.max(val, min), max);
@@ -1364,11 +1491,10 @@ function renderText(json) {
   const isp = json.ip_pub_asn || json.ip_pub_isp || json.ip_pub_org;
   if (isp) { ispBadge.textContent = isp; ispBadge.style.display='inline-block'; } else { ispBadge.style.display='none'; }
 
-  renderLoadAverage(json.load_average, json.cpu?.cores);
-  renderCpuCores(json.cpu?.usage);
-  renderMemory(computeMemoryModel(json.memory));
-  renderDisks(json.disks);
-  renderCpuTemps(json.cpu?.temperatures);
+    renderLoadAverage(json.load_average, json.cpu?.cores);
+    renderCpu(json.cpu);
+    renderMemory(computeMemoryModel(json.memory));
+    renderDisks(json.disks);
 
   renderServices(json.services);
   renderPorts(json.ports);

@@ -1230,12 +1230,20 @@ h1 {
     .chip.used { background: #ff9800; color: #000; }
     .chip.free { background: #4caf50; color: #fff; }
     .disk-card { margin-bottom: 0.5rem; }
-    #cpuCores .docker-card { cursor: default; }
+    .cpu .card-head { display:flex; align-items:center; justify-content:space-between; gap:var(--gap-2); flex-wrap:wrap; }
+    .cpu .title { display:flex; align-items:center; gap:var(--gap-2); font-weight:bold; }
+    .cpu .subtitle { font-size:var(--font-sm); color:var(--text-muted); }
+    .cpu .summary { display:flex; gap:var(--gap-2); flex-wrap:wrap; margin-top:var(--gap-2); }
+    .cpu .core-list { margin-top:var(--gap-3); display:flex; flex-direction:column; gap:var(--gap-2); }
+    .cpu .core-bars { display:flex; flex-direction:column; gap:4px; flex:1 0 160px; }
+    .cpu .crit-badge { margin-left:var(--gap-2); }
 
     @media (max-width: 600px) {
       .services-grid { grid-template-columns: 1fr; }
       .services-toolbar { justify-content: flex-start; }
       .filter-chips { position: sticky; top: 0; background: var(--bg); padding-top: 0.5rem; }
+      .cpu .summary { flex-direction:column; }
+      .cpu .core-bars { width:100%; }
     }
 
     .gauge:focus-visible,
