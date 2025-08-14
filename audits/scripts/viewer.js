@@ -1125,14 +1125,12 @@ function renderMemory(model){
         <div class="percent ${pctClass(info.percent)}">${info.percent ?? 'N/A'}%</div>
       </div>
       <div class="bar" role="progressbar" aria-label="Utilisation RAM" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent ?? 0}"></div>
-      <div class="bar-legend hidden"></div>
-      <div class="badges"></div>`;
+      <div class="badge-row"></div>`;
     const bar = card.querySelector('.bar');
-    const legend = card.querySelector('.bar-legend');
-    const badges = card.querySelector('.badges');
+    const badges = card.querySelector('.badge-row');
 
     const segs = [
-      {cls:`seg-used ${pctClass(info.percent)}`, label:'Utilisée (applications)', val:info.usedAppsBytes, pct:info.seg.usedPct, tip:'Utilisée par les applications'},
+      {cls:`seg-used ${pctClass(info.percent)}`, label:'Utilisée', val:info.usedAppsBytes, pct:info.seg.usedPct, tip:'Utilisée par les applications'},
       {cls:'seg-cache', label:'Cache/buffers', val:info.cacheBytes, pct:info.seg.cachePct, tip:'Mémoire cache et buffers'},
       {cls:'seg-free', label:'Libre', val:info.freeBytes, pct:info.seg.freePct, tip:'Mémoire libre'}
     ];
@@ -1146,62 +1144,25 @@ function renderMemory(model){
       const tip = `${seg.label} : ${formatBytesFR(seg.val)} (${pctStr} %)`;
       segEl.title = tip;
       segEl.setAttribute('aria-label', tip);
-      const label = document.createElement('span');
-      label.className = 'label';
-      label.textContent = `${formatBytesFR(seg.val)} (${pctStr} %)`;
-      segEl.appendChild(label);
       bar.appendChild(segEl);
-      if (pct < 12){
-        label.classList.add('hidden');
-        const item = document.createElement('span');
-        item.className = `legend-item ${seg.cls}`;
-        item.innerHTML = `<span class="dot"></span>${seg.label} : ${formatBytesFR(seg.val)} (${pctStr} %)`;
-        legend.appendChild(item);
-      } else {
-        requestAnimationFrame(()=>adjustBarValue(label, segEl, pct));
-      }
     });
-    legend.classList.toggle('hidden', !legend.childElementCount);
 
-    const badgeGroups = [
-      {
-        title: 'Utilisation',
-        items: [
-          {icon:'fa-microchip', label:'Utilisée (applications)', val:info.usedAppsBytes, cls:pctClass(info.percent), tip:'Mémoire utilisée par les applications'},
-          {icon:'fa-layer-group', label:'Cache/buffers', val:info.cacheBytes, tip:'Mémoire cache et buffers'},
-          {icon:'fa-circle', label:'Libre', val:info.freeBytes, tip:'Mémoire libre'}
-        ]
-      },
-      {
-        title: 'Infos système',
-        items: [
-          {icon:'fa-check', label:'Disponible', val:info.availableBytes, tip:'Mémoire immédiatement disponible'},
-          {icon:'fa-share-nodes', label:'Partagée', val:info.sharedBytes, tip:'Mémoire partagée'}
-        ]
-      }
+    const items = [
+      {icon:'fa-microchip', label:'Utilisée', val:info.usedAppsBytes, cls:pctClass(info.percent), tip:'Mémoire utilisée par les applications'},
+      {icon:'fa-layer-group', label:'Cache/buffers', val:info.cacheBytes, tip:'Mémoire cache et buffers'},
+      {icon:'fa-circle', label:'Libre', val:info.freeBytes, tip:'Mémoire libre'},
+      {icon:'fa-check', label:'Disponible', val:info.availableBytes, tip:'Mémoire immédiatement disponible'},
+      {icon:'fa-share-nodes', label:'Partagée', val:info.sharedBytes, tip:'Mémoire partagée'}
     ];
-    badgeGroups.forEach(group => {
-      const visible = group.items.filter(b => b.val != null);
-      if (!visible.length) return;
-      const gEl = document.createElement('div');
-      gEl.className = 'badge-group';
-      const tEl = document.createElement('div');
-      tEl.className = 'group-title';
-      tEl.textContent = group.title;
-      gEl.appendChild(tEl);
-      const itemsEl = document.createElement('div');
-      itemsEl.className = 'group-items';
-      visible.forEach(b => {
-        const el = document.createElement('div');
-        el.className = `badge${b.cls ? ' '+b.cls : ''}`;
-        const formatted = formatBytesFR(b.val);
-        el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${formatted}</span>`;
-        el.title = `${b.label} : ${formatted}`;
-        el.setAttribute('aria-label', `${b.label} : ${formatted}`);
-        itemsEl.appendChild(el);
-      });
-      gEl.appendChild(itemsEl);
-      badges.appendChild(gEl);
+    items.forEach(b => {
+      if (b.val == null) return;
+      const el = document.createElement('div');
+      el.className = `badge${b.cls ? ' '+b.cls : ''}`;
+      const formatted = formatBytesFR(b.val);
+      el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${formatted}</span>`;
+      el.title = `${b.label} : ${formatted}`;
+      el.setAttribute('aria-label', `${b.label} : ${formatted}`);
+      badges.appendChild(el);
     });
     container.appendChild(card);
   }
@@ -1218,17 +1179,9 @@ function renderMemory(model){
     if (info.totalBytes > 0){
       card.innerHTML += `
         <div class="bar" role="progressbar" aria-label="Utilisation Swap" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${info.percent}"></div>
-        <div class="bar-legend hidden"></div>`;
-    } else {
-      card.innerHTML += '<div class="no-swap">Aucun swap</div>';
-    }
-    card.innerHTML += '<div class="badges"></div>';
-
-    const bar = card.querySelector('.bar');
-    const legend = card.querySelector('.bar-legend');
-    const badges = card.querySelector('.badges');
-
-    if (info.totalBytes > 0 && bar){
+        <div class="badge-row"></div>`;
+      const bar = card.querySelector('.bar');
+      const badges = card.querySelector('.badge-row');
       const segs = [
         {cls:`seg-used ${pctClass(info.percent)}`, label:'Utilisée', val:info.usedBytes, pct:info.seg.usedPct, tip:'Swap utilisé'},
         {cls:'seg-free', label:'Libre', val:info.freeBytes, pct:info.seg.freePct, tip:'Swap libre'}
@@ -1243,61 +1196,25 @@ function renderMemory(model){
         const tip = `${seg.label} : ${formatBytesFR(seg.val)} (${pctStr} %)`;
         segEl.title = tip;
         segEl.setAttribute('aria-label', tip);
-        const label = document.createElement('span');
-        label.className = 'label';
-        label.textContent = `${formatBytesFR(seg.val)} (${pctStr} %)`;
-        segEl.appendChild(label);
         bar.appendChild(segEl);
-        if (pct < 12){
-          label.classList.add('hidden');
-          const item = document.createElement('span');
-          item.className = `legend-item ${seg.cls}`;
-          item.innerHTML = `<span class="dot"></span>${seg.label} : ${formatBytesFR(seg.val)} (${pctStr} %)`;
-          legend.appendChild(item);
-        } else {
-          requestAnimationFrame(()=>adjustBarValue(label, segEl, pct));
-        }
       });
-      legend.classList.toggle('hidden', !legend.childElementCount);
-    }
-
-    const badgeGroups = [
-      {
-        title: 'Utilisation',
-        items: [
-          {icon:'fa-microchip', label:'Utilisée', val:info.usedBytes, cls:pctClass(info.percent ?? 0)},
-          {icon:'fa-circle', label:'Libre', val:info.freeBytes}
-        ]
-      },
-      {
-        title: 'Infos système',
-        items: []
-      }
-    ];
-    badgeGroups.forEach(group => {
-      const visible = group.items.filter(b => b.val != null);
-      if (!visible.length) return;
-      const gEl = document.createElement('div');
-      gEl.className = 'badge-group';
-      const tEl = document.createElement('div');
-      tEl.className = 'group-title';
-      tEl.textContent = group.title;
-      gEl.appendChild(tEl);
-      const itemsEl = document.createElement('div');
-      itemsEl.className = 'group-items';
-      visible.forEach(b => {
+      const items = [
+        {icon:'fa-microchip', label:'Utilisée', val:info.usedBytes, cls:pctClass(info.percent ?? 0)},
+        {icon:'fa-circle', label:'Libre', val:info.freeBytes}
+      ];
+      items.forEach(b => {
+        if (b.val == null) return;
         const el = document.createElement('div');
         el.className = `badge${b.cls ? ' '+b.cls : ''}`;
         const formatted = formatBytesFR(b.val);
         el.innerHTML = `<i class="fa-solid ${b.icon}" aria-hidden="true"></i><span>${b.label} : ${formatted}</span>`;
         el.title = `${b.label} : ${formatted}`;
         el.setAttribute('aria-label', `${b.label} : ${formatted}`);
-        itemsEl.appendChild(el);
+        badges.appendChild(el);
       });
-      gEl.appendChild(itemsEl);
-      badges.appendChild(gEl);
-    });
-
+    } else {
+      card.innerHTML += '<div class="no-swap">Aucun swap</div>';
+    }
     container.appendChild(card);
   }
 }
