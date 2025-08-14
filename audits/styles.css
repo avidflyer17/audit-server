@@ -1231,11 +1231,13 @@ h1 {
     .chip.free { background: #4caf50; color: #fff; }
     .disk-card { margin-bottom: 0.5rem; }
     .cpu .card-head { display:flex; align-items:center; justify-content:space-between; gap:var(--gap-2); flex-wrap:wrap; }
-    .cpu .title { display:flex; align-items:center; gap:var(--gap-2); font-weight:bold; }
-    .cpu .subtitle { font-size:var(--font-sm); color:var(--text-muted); }
-    .cpu .summary { display:flex; gap:var(--gap-2); flex-wrap:wrap; margin-top:var(--gap-2); }
+    .cpu .summary { display:flex; gap:var(--gap-2); flex-wrap:wrap; }
+    .cpu .summary .badge { white-space:nowrap; }
+    .cpu .model { font-size:var(--font-sm); color:var(--text-muted); }
+    .cpu .cores { font-style:italic; }
     .cpu .core-list { margin-top:var(--gap-3); display:flex; flex-direction:column; gap:var(--gap-2); }
     .cpu .core-bars { display:flex; flex-direction:column; gap:4px; flex:1 0 160px; }
+    .cpu .bar-temp .fill { opacity:0.8; }
     .cpu .crit-badge { margin-left:var(--gap-2); }
 
     @media (max-width: 600px) {
