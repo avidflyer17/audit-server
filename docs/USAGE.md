@@ -28,7 +28,7 @@ BASE_DIR=/path/to/audits ./generate-audit-json.sh
 ```
 
 Each execution creates a timestamped file in `archives/` and refreshes `index.json` with the list of available
-reports.
+reports. The structure of each JSON report is described in [REPORT_STRUCTURE.md](REPORT_STRUCTURE.md).
 
 ## 📂 Serving reports
 
