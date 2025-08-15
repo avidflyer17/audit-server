@@ -1298,9 +1298,9 @@ function renderDisks(disks){
 }
 
 function parseLoadAvgFR(str) {
-  // Parse FR-formatted string "0,21,0,22,0,21" -> [0.21,0.22,0.21]
+  // Parse string "0,21,0,22,0,21" or "0.22,0.25,0.31" -> [0.21, 0.22, 0.21]
   if (typeof str !== 'string') return null;
-  const matches = str.match(/\d+(?:,\d+)?/g);
+  const matches = str.match(/\d+(?:[.,]\d+)?/g);
   if (!matches || matches.length < 3) return null;
   return matches.slice(0, 3).map(v => parseFloat(v.replace(',', '.')));
 }
