@@ -14,6 +14,7 @@
   --font-lg: 16px;
   --font-xl: 20px;
   --font-2xl: 28px;
+  --top-bar-space: 64px;
 }
 
 [data-theme="dark"] {
@@ -92,7 +93,7 @@ body {
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-base);
-  padding: var(--gap-5) var(--gap-4) var(--gap-4);
+  padding: 0 var(--gap-4) var(--gap-4);
 }
 
 h1 {
@@ -556,8 +557,12 @@ h1 {
 
     .brand-meta .meta-item {
       display: flex;
-      gap: var(--gap-1);
       align-items: center;
+      gap: var(--gap-1);
+    }
+
+    .brand-meta .meta-item i {
+      color: var(--heading);
     }
 
     .brand-meta .meta-label {
@@ -1338,9 +1343,9 @@ h1 {
       .gauge { width: 140px; height: 140px; }
     }
 
-    @media screen and (max-width: 600px) {
+@media screen and (max-width: 600px) {
       body {
-        padding: 3.5rem 1rem 1rem;
+        padding: 0 1rem 1rem;
       }
       h1 {
         font-size: 1.5rem;
@@ -1368,7 +1373,7 @@ h1 {
   transform: translateX(-100%);
   transition: transform 0.3s ease;
   z-index: 1000;
-  padding: 4rem 1rem 1rem;
+  padding: calc(var(--top-bar-space) + 1rem) 1rem 1rem;
 }
 
 .sidebar.open {
@@ -1394,7 +1399,7 @@ h1 {
 
   main {
     max-width: 900px;
-    margin: calc(var(--gap-5) + var(--gap-3)) auto 0;
+    margin: calc(var(--top-bar-space) + var(--gap-3)) auto 0;
   }
 
   @media (min-width: 1024px) {

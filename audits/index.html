@@ -25,11 +25,13 @@
       <p id="hostname" class="brand-host">-</p>
       <div class="brand-meta">
         <div class="meta-item">
+          <i class="fa-regular fa-calendar-days" aria-hidden="true"></i>
           <span class="meta-label">Généré</span>
           <span id="generatedValue">--</span>
           <span id="tzBadge" class="badge"></span>
         </div>
         <div class="meta-item">
+          <i class="fa-regular fa-clock" aria-hidden="true"></i>
           <span class="meta-label">Uptime</span>
           <span id="uptimeValue">--</span>
           <span id="uptimeSince"></span>
@@ -239,6 +241,14 @@
       applyTheme(next);
     });
     applyTheme(localStorage.getItem("theme") || "dark");
+
+    function updateOffsets(){
+      const topBar = document.getElementById("topBar");
+      const root = document.documentElement;
+      root.style.setProperty("--top-bar-space", topBar.offsetHeight + "px");
+    }
+    window.addEventListener("resize", updateOffsets);
+    updateOffsets();
   </script>
 
 </body>
