@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# ✅ Commandes requises
+REQUIRED_CMDS=(mpstat sensors jq bc docker)
+for cmd in "${REQUIRED_CMDS[@]}"; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "❌ Commande requise manquante : $cmd" >&2
+    exit 1
+  fi
+done
+
 # 🛠 Script de génération de rapport d'audit système
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
