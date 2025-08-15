@@ -691,6 +691,8 @@ function applyDockerFilters(){
 function renderDockerList(){
   const grid = document.getElementById('dockerGrid');
   grid.innerHTML = '';
+  const totalSpan = document.getElementById('dockerTotal');
+  totalSpan.textContent = dockerData.length;
   if (!dockerFiltered.length){
     document.getElementById('dockerEmpty').classList.remove('hidden');
     return;
