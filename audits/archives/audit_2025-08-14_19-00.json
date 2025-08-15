@@ -1,0 +1,779 @@
+{
+  "generated": "14/08/2025 à 19:00",
+  "hostname": "homelabz",
+  "ip_local": "192.168.1.30",
+  "ip_pub": "90.78.117.33",
+  "uptime": "up 2 days, 11 hours, 0 minutes",
+  "load_average": "0,33,0,22,0,20",
+  "memory": {
+    "ram": {
+      "total": "15Gi",
+      "used": "4,0Gi",
+      "free": "2,9Gi",
+      "shared": "107Mi",
+      "buff_cache": "9,0Gi",
+      "available": "11Gi"
+    },
+    "swap": {
+      "total": "4,0Gi",
+      "used": "512Ki",
+      "free": "4,0Gi"
+    }
+  },
+  "disks": [
+    {
+      "filesystem": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+      "size": "98G",
+      "used": "30G",
+      "available": "64G",
+      "used_percent": "32%",
+      "mountpoint": "/"
+    },
+    {
+      "filesystem": "/dev/mapper/ubuntu--vg-lv--0",
+      "size": "367G",
+      "used": "18G",
+      "available": "332G",
+      "used_percent": "5%",
+      "mountpoint": "/home"
+    }
+  ],
+  "cpu": {
+    "model": "                          Intel(R) N95\n                     Intel(R) N95 To Be Filled By O.E.M. CPU @ 2.6GHz",
+    "cores": 4,
+    "usage": [
+      {
+        "core": "0",
+        "usage": 8.0
+      },
+      {
+        "core": "1",
+        "usage": 4.0
+      },
+      {
+        "core": "2",
+        "usage": 4.0
+      },
+      {
+        "core": "3",
+        "usage": 3.0
+      }
+    ],
+    "temperatures": [
+      {
+        "core": 0,
+        "temp": 76.0
+      },
+      {
+        "core": 1,
+        "temp": 76.0
+      },
+      {
+        "core": 2,
+        "temp": 76.0
+      },
+      {
+        "core": 3,
+        "temp": 76.0
+      }
+    ]
+  },
+  "cpu_load_color": "green",
+  "services": [
+    "bluetooth.service",
+    "containerd.service",
+    "cron.service",
+    "dbus-broker.service",
+    "docker.service",
+    "nmbd.service",
+    "ntpsec.service",
+    "polkit.service",
+    "rpc-statd.service",
+    "rpcbind.service",
+    "rsyslog.service",
+    "smbd.service",
+    "ssh.service",
+    "systemd-journald.service",
+    "systemd-logind.service",
+    "systemd-networkd.service",
+    "systemd-resolved.service",
+    "systemd-udevd.service",
+    "thermald.service",
+    "unattended-upgrades.service"
+  ],
+  "top_cpu": [
+    {
+      "pid": "PID",
+      "cmd": "COMMAND",
+      "cpu": "%CPU",
+      "mem": "%MEM"
+    },
+    {
+      "pid": "11360",
+      "cmd": "AdGuardHome",
+      "cpu": "12.1",
+      "mem": "0.7"
+    },
+    {
+      "pid": "10607",
+      "cmd": "crowdsec",
+      "cpu": "2.7",
+      "mem": "0.5"
+    },
+    {
+      "pid": "10904",
+      "cmd": "python3",
+      "cpu": "2.4",
+      "mem": "12.4"
+    },
+    {
+      "pid": "11104",
+      "cmd": "redis-server",
+      "cpu": "1.7",
+      "mem": "0.1"
+    },
+    {
+      "pid": "11752",
+      "cmd": "node-red",
+      "cpu": "1.5",
+      "mem": "0.8"
+    }
+  ],
+  "top_mem": [
+    {
+      "pid": "PID",
+      "cmd": "COMMAND",
+      "mem": "%MEM",
+      "cpu": "%CPU"
+    },
+    {
+      "pid": "10904",
+      "cmd": "python3",
+      "mem": "12.4",
+      "cpu": "2.4"
+    },
+    {
+      "pid": "1181827",
+      "cmd": "jellyfin",
+      "mem": "4.3",
+      "cpu": "0.5"
+    },
+    {
+      "pid": "11358",
+      "cmd": "traefik",
+      "mem": "1.0",
+      "cpu": "0.3"
+    },
+    {
+      "pid": "11561",
+      "cmd": "prometheus",
+      "mem": "0.9",
+      "cpu": "0.1"
+    },
+    {
+      "pid": "11870",
+      "cmd": "node",
+      "mem": "0.8",
+      "cpu": "0.0"
+    }
+  ],
+  "ports": [
+    {
+      "proto": "udp",
+      "port": "172.17.0.1:56349"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:56369"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:7359"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.54:53"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.53%lo:53"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:111"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:123"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:123"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.1:123"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:123"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.255:137"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:137"
+    },
+    {
+      "proto": "udp",
+      "port": "172.17.255.255:137"
+    },
+    {
+      "proto": "udp",
+      "port": "172.17.0.1:137"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.255:137"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:137"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:137"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.255:138"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:138"
+    },
+    {
+      "proto": "udp",
+      "port": "172.17.255.255:138"
+    },
+    {
+      "proto": "udp",
+      "port": "172.17.0.1:138"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.255:138"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:138"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:138"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.1:986"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:58668"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:58708"
+    },
+    {
+      "proto": "udp",
+      "port": "172.17.0.1:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.1:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:60047"
+    },
+    {
+      "proto": "udp",
+      "port": "172.18.0.1:60197"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:60746"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:36860"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.1:46258"
+    },
+    {
+      "proto": "udp",
+      "port": "192.168.1.30:5353"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:5683"
+    },
+    {
+      "proto": "udp",
+      "port": "127.0.0.1:46947"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:55513"
+    },
+    {
+      "proto": "udp",
+      "port": "0.0.0.0:47445"
+    },
+    {
+      "proto": "udp",
+      "port": "[::]:111"
+    },
+    {
+      "proto": "udp",
+      "port": "[fd34:6a79:6518:cb41:6a1d:efff:fe34:eef6]:123"
+    },
+    {
+      "proto": "udp",
+      "port": "[fe80::6a1d:efff:fe34:eef6]%enp1s0:123"
+    },
+    {
+      "proto": "udp",
+      "port": "[::]:123"
+    },
+    {
+      "proto": "udp",
+      "port": "*:57987"
+    },
+    {
+      "proto": "udp",
+      "port": "*:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "*:1900"
+    },
+    {
+      "proto": "udp",
+      "port": "*:59902"
+    },
+    {
+      "proto": "udp",
+      "port": "*:36132"
+    },
+    {
+      "proto": "udp",
+      "port": "[::]:44389"
+    },
+    {
+      "proto": "udp",
+      "port": "*:5353"
+    },
+    {
+      "proto": "udp",
+      "port": "[fd34:6a79:6518:cb41:6a1d:efff:fe34:eef6]:5353"
+    },
+    {
+      "proto": "udp",
+      "port": "[::]:38779"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:40639"
+    },
+    {
+      "proto": "tcp",
+      "port": "192.168.1.30:45173"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:8123"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:8096"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:8080"
+    },
+    {
+      "proto": "tcp",
+      "port": "192.168.1.30:40000"
+    },
+    {
+      "proto": "tcp",
+      "port": "192.168.1.30:39007"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.1:59849"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.1:18554"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.53%lo:53"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.1:11984"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:139"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:22"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:41079"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:111"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:80"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:445"
+    },
+    {
+      "proto": "tcp",
+      "port": "0.0.0.0:443"
+    },
+    {
+      "proto": "tcp",
+      "port": "127.0.0.54:53"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:39527"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:8123"
+    },
+    {
+      "proto": "tcp",
+      "port": "*:18555"
+    },
+    {
+      "proto": "tcp",
+      "port": "[fe80::6a1d:efff:fe34:eef6]%enp1s0:40000"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:139"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:22"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:111"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:445"
+    },
+    {
+      "proto": "tcp",
+      "port": "[fd34:6a79:6518:cb41:6a1d:efff:fe34:eef6]:40000"
+    },
+    {
+      "proto": "tcp",
+      "port": "[::]:42605"
+    }
+  ],
+  "docker": {
+    "containers": [
+      {
+        "name": "homepage",
+        "state": "exited",
+        "health": "137",
+        "uptime": "17 hours ago",
+        "has_stats": false,
+        "cpu_pct": null,
+        "mem_pct": null,
+        "mem_used_bytes": null,
+        "mem_limit_bytes": null
+      },
+      {
+        "name": "audit-server",
+        "state": "running",
+        "health": null,
+        "uptime": "17 hours ago",
+        "has_stats": true,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.02,
+        "mem_used_bytes": 2552234,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "homeassistant",
+        "state": "running",
+        "health": null,
+        "uptime": "2 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.73,
+        "mem_pct": 12.40,
+        "mem_used_bytes": 2050846884,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "authelia",
+        "state": "running",
+        "health": null,
+        "uptime": "4 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.03,
+        "mem_pct": 0.17,
+        "mem_used_bytes": 28259123,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "redis",
+        "state": "running",
+        "health": null,
+        "uptime": "9 days ago",
+        "has_stats": true,
+        "cpu_pct": 1.19,
+        "mem_pct": 0.03,
+        "mem_used_bytes": 4886364,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "zigbee2mqtt",
+        "state": "running",
+        "health": null,
+        "uptime": "12 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.04,
+        "mem_pct": 0.62,
+        "mem_used_bytes": 102718505,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "sablier",
+        "state": "running",
+        "health": null,
+        "uptime": "13 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.14,
+        "mem_pct": 0.08,
+        "mem_used_bytes": 12572426,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "nodered",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "2 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 7.51,
+        "mem_pct": 0.61,
+        "mem_used_bytes": 100180951,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "adguardhome",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "2 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.03,
+        "mem_pct": 0.70,
+        "mem_used_bytes": 115133645,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "adguard-exporter",
+        "state": "running",
+        "health": null,
+        "uptime": "2 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.06,
+        "mem_used_bytes": 10496246,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "portainer",
+        "state": "exited",
+        "health": "2",
+        "uptime": "2 weeks ago",
+        "has_stats": false,
+        "cpu_pct": null,
+        "mem_pct": null,
+        "mem_used_bytes": null,
+        "mem_limit_bytes": null
+      },
+      {
+        "name": "grafana",
+        "state": "exited",
+        "health": "2",
+        "uptime": "3 weeks ago",
+        "has_stats": false,
+        "cpu_pct": null,
+        "mem_pct": null,
+        "mem_used_bytes": null,
+        "mem_limit_bytes": null
+      },
+      {
+        "name": "twingate_connector",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "3 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.53,
+        "mem_pct": 0.11,
+        "mem_used_bytes": 18591252,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "crowdsec",
+        "state": "running",
+        "health": null,
+        "uptime": "3 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.03,
+        "mem_pct": 0.36,
+        "mem_used_bytes": 58909000,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "traefik",
+        "state": "running",
+        "health": null,
+        "uptime": "3 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.20,
+        "mem_pct": 0.51,
+        "mem_used_bytes": 84389396,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "mqtt5",
+        "state": "running",
+        "health": null,
+        "uptime": "3 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.09,
+        "mem_pct": 0.13,
+        "mem_used_bytes": 22324183,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "prometheus",
+        "state": "running",
+        "health": null,
+        "uptime": "4 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.00,
+        "mem_pct": 31.58,
+        "mem_used_bytes": 99331604,
+        "mem_limit_bytes": 314572800
+      },
+      {
+        "name": "jellyfin",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "2 months ago",
+        "has_stats": true,
+        "cpu_pct": 0.04,
+        "mem_pct": 3.77,
+        "mem_used_bytes": 622854144,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "watchtower",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "4 months ago",
+        "has_stats": true,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.05,
+        "mem_used_bytes": 7806648,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "myelectricaldata",
+        "state": "running",
+        "health": null,
+        "uptime": "4 months ago",
+        "has_stats": true,
+        "cpu_pct": 0.34,
+        "mem_pct": 0.71,
+        "mem_used_bytes": 117230797,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "lldap",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "4 months ago",
+        "has_stats": true,
+        "cpu_pct": 3.15,
+        "mem_pct": 0.03,
+        "mem_used_bytes": 5054136,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "it-tools",
+        "state": "exited",
+        "health": "0",
+        "uptime": "4 months ago",
+        "has_stats": false,
+        "cpu_pct": null,
+        "mem_pct": null,
+        "mem_used_bytes": null,
+        "mem_limit_bytes": null
+      },
+      {
+        "name": "dockersocket",
+        "state": "running",
+        "health": null,
+        "uptime": "4 months ago",
+        "has_stats": true,
+        "cpu_pct": 0.14,
+        "mem_pct": 0.02,
+        "mem_used_bytes": 3813671,
+        "mem_limit_bytes": 16535624090
+      }
+    ]
+  }
+}
