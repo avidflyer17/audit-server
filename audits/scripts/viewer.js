@@ -1327,7 +1327,7 @@ function renderMini(label, load, prevLoad, cores) {
     valEl.textContent = '—';
     fill.style.width = '0%';
     fill.className = 'fill';
-    trend.innerHTML = '<i class="fa-solid fa-minus"></i><span>donnée manquante</span>';
+    trend.textContent = 'donnée manquante';
     card.removeAttribute('title');
     card.removeAttribute('aria-label');
     bar.removeAttribute('aria-label');
@@ -1344,7 +1344,7 @@ function renderMini(label, load, prevLoad, cores) {
     });
     dot.style.background = status.color;
     const t = trendFrom(load, prevLoad);
-    trend.innerHTML = `<i class="fa-solid ${t.icon}"></i><span>${t.label}</span>`;
+    trend.textContent = t.label;
     const rawStr = load.toLocaleString('fr-FR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
@@ -1360,26 +1360,7 @@ function renderMini(label, load, prevLoad, cores) {
   }
 }
 
-let loadGaugeObserver;
-
-function setupLoadGauge() {
-  const gauge = document.getElementById('loadGauge');
-  if (!gauge || loadGaugeObserver) return;
-  const bg = gauge.querySelector('path.bg');
-  const path = document.getElementById('loadGaugePath');
-  const update = () => {
-    const size = gauge.offsetWidth;
-    const stroke = size * 0.12;
-    bg.style.strokeWidth = stroke + 'px';
-    path.style.strokeWidth = stroke + 'px';
-  };
-  loadGaugeObserver = new ResizeObserver(update);
-  loadGaugeObserver.observe(gauge);
-  update();
-}
-
 function renderLoadAverage(raw, cores) {
-  setupLoadGauge();
   const gauge = document.getElementById('loadGauge');
   const path = document.getElementById('loadGaugePath');
   const trendEl = document.getElementById('loadTrend');
