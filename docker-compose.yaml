@@ -3,8 +3,8 @@ services:
     image: nginx:alpine
     container_name: audit-server
     volumes:
-      - /home/damswallace/docker/audits-nginx/audits:/usr/share/nginx/html:ro
-      - /home/damswallace/docker/audits-nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${AUDIT_DIR}/audits:/usr/share/nginx/html:ro
+      - ${AUDIT_DIR}/nginx.conf:/etc/nginx/nginx.conf:ro
     expose:
       - "80"  # Pas de publication sur le host
     restart: unless-stopped

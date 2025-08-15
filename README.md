@@ -27,17 +27,18 @@ interface that can be served by Nginx.
    ./generate-audit-json.sh
    ```
 
-The script writes reports to `/home/damswallace/docker/audits-nginx/audits/archives` by default. Override the
-location by setting the `BASE_DIR` environment variable:
+By default, the script writes reports to `./audits/archives`. Override the location by setting the `BASE_DIR`
+environment variable:
 
 ```bash
-BASE_DIR=./audits ./generate-audit-json.sh
+BASE_DIR=/path/to/audits ./generate-audit-json.sh
 ```
 
 ## 🌐 Serving the reports
 
 Use the provided `docker-compose.yaml` and `nginx.conf` to serve the `audits` directory through Nginx and expose
-it behind Traefik. Adjust volume paths or labels as needed for your environment. Run:
+it behind Traefik. Set `AUDIT_DIR` in `.env` to point to the directory containing `audits` and `nginx.conf`, then
+start the service:
 
 ```bash
 docker compose up -d
