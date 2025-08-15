@@ -56,7 +56,8 @@ docker compose up -d
 ## 📚 Documentation
 
 Additional usage instructions are available in the [docs](docs/USAGE.md) directory. Deployment options are
-covered in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+covered in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Details about the JSON audit report structure can be
+found in [docs/REPORT_STRUCTURE.md](docs/REPORT_STRUCTURE.md).
 
 ## 🧪 Testing
 
