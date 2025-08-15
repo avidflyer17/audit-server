@@ -336,6 +336,18 @@ h1 {
       }
     }
 
+    @media (max-width: 600px) {
+      .timeline {
+        flex-direction: column;
+      }
+      .timeline-wrapper {
+        overflow-y: auto;
+      }
+      .time-chip {
+        width: 100%;
+      }
+    }
+
     .time-chip:focus-visible {
       outline: 2px solid var(--heading);
       outline-offset: 4px;
@@ -1405,6 +1417,14 @@ h1 {
   @media (min-width: 1024px) {
     .sidebar {
       width: 320px;
+      transform: none;
+    }
+    main {
+      margin-left: 320px;
+    }
+    #menuToggle,
+    #menuOverlay {
+      display: none !important;
     }
   }
 

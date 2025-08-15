@@ -793,7 +793,10 @@ function renderTimeline(list) {
     btn.dataset.file = item.file;
     btn.dataset.iso = item.iso.toISOString();
     btn.title = `${item.time} — ${formatRelative(item.iso)}`;
-    btn.addEventListener('click', () => selectTime(item.file));
+    btn.addEventListener('click', () => {
+      selectTime(item.file);
+      if (window.innerWidth < 1024) closeMenu?.();
+    });
     timeline.appendChild(btn);
   });
 }
@@ -1588,22 +1591,81 @@ document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('menuOverlay');
   const toggle = document.getElementById('menuToggle');
   const icon = toggle.querySelector('i');
+  let lastFocused;
+  let trapHandler;
 
-  closeMenu = () => {
+  function setAria(isOpen) {
+    toggle.setAttribute('aria-expanded', String(isOpen));
+    sidebar.setAttribute('aria-hidden', String(!isOpen));
+  }
+
+  function openMenu(trap = true) {
+    sidebar.classList.add('open');
+    toggle.classList.add('open');
+    icon.classList.add('fa-xmark');
+    icon.classList.remove('fa-bars');
+    setAria(true);
+    if (trap && window.innerWidth < 1024) {
+      lastFocused = document.activeElement;
+      const focusable = sidebar.querySelectorAll('a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      trapHandler = e => {
+        if (e.key === 'Tab') {
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          closeMenu();
+        }
+      };
+      sidebar.addEventListener('keydown', trapHandler);
+      first?.focus();
+    }
+  }
+
+  closeMenu = (returnFocus = true) => {
     sidebar.classList.remove('open');
     toggle.classList.remove('open');
     icon.classList.remove('fa-xmark');
     icon.classList.add('fa-bars');
+    setAria(false);
+    if (trapHandler) {
+      sidebar.removeEventListener('keydown', trapHandler);
+      trapHandler = null;
+    }
+    if (returnFocus && lastFocused) {
+      lastFocused.focus();
+    }
   };
 
   toggle.addEventListener('click', () => {
-    const isOpen = sidebar.classList.toggle('open');
-    toggle.classList.toggle('open', isOpen);
-    icon.classList.toggle('fa-bars', !isOpen);
-    icon.classList.toggle('fa-xmark', isOpen);
+    if (sidebar.classList.contains('open')) closeMenu(); else openMenu();
   });
 
-  overlay.addEventListener('click', closeMenu);
+  overlay.addEventListener('click', () => closeMenu());
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && sidebar.classList.contains('open') && window.innerWidth < 1024) {
+      closeMenu();
+    }
+  });
+
+  function handleResize() {
+    if (window.innerWidth >= 1024) {
+      openMenu(false);
+    } else {
+      closeMenu(false);
+    }
+  }
+
+  window.addEventListener('resize', handleResize);
+  handleResize();
 });
 
 document.addEventListener('DOMContentLoaded', init);
