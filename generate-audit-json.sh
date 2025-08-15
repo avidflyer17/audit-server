@@ -30,7 +30,8 @@ HOSTNAME=$(hostname)
 
 # 🌐 Réseau
 IP_LOCAL=$(hostname -I | awk '{print $1}')
-IP_PUBLIQUE=$(curl -s ifconfig.me || echo "N/A")
+# IP publique avec délai max 5s ; N/A si la requête échoue
+IP_PUBLIQUE=$(curl -s --max-time 5 ifconfig.me 2>/dev/null || echo "N/A")
 
 # 🧠 RAM & Swap
 MEMORY=$(free -h | awk 'NR==2 {print "{\"total\":\""$2"\",\"used\":\""$3"\",\"free\":\""$4"\",\"shared\":\""$5"\",\"buff_cache\":\""$6"\",\"available\":\""$7"\"}"}')
