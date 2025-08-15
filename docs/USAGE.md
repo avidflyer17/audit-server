@@ -21,11 +21,10 @@ This document provides extra details on how to use the audit script and serve th
 ## 📊 Generating reports
 
 The `generate-audit-json.sh` script collects system information and writes it as JSON files. By default, reports
-are stored under `/home/damswallace/docker/audits-nginx/audits`. You can override this location by setting the
-`BASE_DIR` environment variable:
+are stored under `./audits`. You can override this location by setting the `BASE_DIR` environment variable:
 
 ```bash
-BASE_DIR=./audits ./generate-audit-json.sh
+BASE_DIR=/path/to/audits ./generate-audit-json.sh
 ```
 
 Each execution creates a timestamped file in `archives/` and refreshes `index.json` with the list of available
@@ -33,8 +32,8 @@ reports.
 
 ## 📂 Serving reports
 
-Use the provided Docker and Nginx setup to serve the `audits` directory. Adjust paths or Traefik labels in
-`docker-compose.yaml` to match your environment:
+Use the provided Docker and Nginx setup to serve the `audits` directory. Set `AUDIT_DIR` in `.env` to point to
+your audit directory, then adjust any Traefik labels in `docker-compose.yaml` to match your environment:
 
 ```bash
 docker compose up -d

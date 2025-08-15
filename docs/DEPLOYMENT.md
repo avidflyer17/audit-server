@@ -8,8 +8,7 @@ This guide explains how to serve audit reports through Nginx running in Docker w
    ./generate-audit-json.sh
    ```
 
-   Reports are stored under `/home/damswallace/docker/audits-nginx/audits/archives` by default. Use `BASE_DIR` to
-   change the location.
+   Reports are stored under `./audits/archives` by default. Use `BASE_DIR` to change the location.
 
 2. Start the container:
 
@@ -17,6 +16,6 @@ This guide explains how to serve audit reports through Nginx running in Docker w
    docker compose up -d
    ```
 
-The `docker-compose.yaml` mounts the audit directory and `nginx.conf`, exposes port 80 on the `br-dams` network
-and sets Traefik labels for routing `audit.damswallace.fr`. Adjust paths, network settings or labels to fit your
-environment.
+The `docker-compose.yaml` uses an `AUDIT_DIR` variable from `.env` to mount the audit directory and `nginx.conf`,
+exposes port 80 on the `br-dams` network and sets Traefik labels for routing `audit.damswallace.fr`. Adjust
+paths, network settings or labels to fit your environment.
