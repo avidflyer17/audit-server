@@ -121,7 +121,8 @@ function renderDockerList() {
     const badge = health
       ? `<span class="status-badge status-${health}">${health}</span>`
       : '';
-    card.innerHTML = `<div class="docker-head"><div class="docker-title"><span class="docker-icon">${icon}</span><span class="docker-name">${c.name}</span></div>${badge}</div><div class="docker-uptime">${c.uptime}</div><div class="docker-bars"><div class="bar-outer cpu"><div class="fill ${cpuColor}"></div><span class="bar-value">${c.cpu}%</span></div><div class="bar-outer ram"><div class="fill ${ramColor}"></div><span class="bar-value">${c.memText || c.mem + '%'}%</span></div></div>`;
+    const memDisplay = c.memText || `${c.mem}%`;
+    card.innerHTML = `<div class="docker-head"><div class="docker-title"><span class="docker-icon">${icon}</span><span class="docker-name">${c.name}</span></div>${badge}</div><div class="docker-uptime">${c.uptime}</div><div class="docker-bars"><div class="bar-outer cpu"><div class="fill ${cpuColor}"></div><span class="bar-value">${c.cpu}%</span></div><div class="bar-outer ram"><div class="fill ${ramColor}"></div><span class="bar-value">${memDisplay}</span></div></div>`;
     frag.appendChild(card);
     updates.push({ fills: card.querySelectorAll('.fill'), cpu: c.cpu, mem: c.mem });
   });
