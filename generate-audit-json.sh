@@ -134,6 +134,7 @@ if command -v docker >/dev/null 2>&1; then
       state=$(echo "$status" | awk '{print tolower($1)}')
       [[ "$state" == "up" ]] && state="running"
       health=$(echo "$status" | sed -n 's/.*(\([^)]*\)).*/\1/p')
+      [[ "$state" == "exited" ]] && health="exited"
 
       if [[ -n "${CPU[$name]+x}" ]]; then
         DOCKER_CONTAINERS=$(echo "$DOCKER_CONTAINERS" | jq --arg name "$name" --arg state "$state" --arg uptime "$running_for" --arg health "$health" --arg cpu "${CPU[$name]}" --arg mempct "${MEM_PCT[$name]}" --arg memused "${MEM_USED[$name]}" --arg memlimit "${MEM_LIMIT[$name]}" '. + [{name:$name,state:$state,health:(if $health=="" then null else $health end),uptime:$uptime,has_stats:true,cpu_pct:($cpu|tonumber),mem_pct:($mempct|tonumber),mem_used_bytes:($memused|tonumber),mem_limit_bytes:($memlimit|tonumber)}]')
