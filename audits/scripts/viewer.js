@@ -493,6 +493,7 @@ function renderPortsList(){
   document.getElementById('portsEmpty').classList.add('hidden');
   const byProto = {};
   filteredPorts.forEach(p=>{ if(!byProto[p.proto]) byProto[p.proto]=[]; byProto[p.proto].push(p); });
+  const frag = document.createDocumentFragment();
   ['TCP','UDP'].forEach(proto=>{
     const list = byProto[proto] || [];
     if (!list.length) return;
@@ -507,9 +508,9 @@ function renderPortsList(){
     body.className='accordion-content';
     const byIp={};
     list.forEach(p=>{ if(!byIp[p.ip]) byIp[p.ip]=[]; byIp[p.ip].push(p); });
-    Object.entries(byIp).forEach(([ip,ports])=>{
+    Object.entries(byIp).sort(([a],[b])=>a.localeCompare(b)).forEach(([ip,ports])=>{
       const ipAcc=document.createElement('div');
-      ipAcc.className='ip-accordion';
+      ipAcc.className='ip-accordion open';
       const ipHead=document.createElement('button');
       ipHead.className='accordion-header';
       ipHead.innerHTML=`<span>${ip}</span><span class="count">${ports.length}</span>`;
@@ -530,8 +531,9 @@ function renderPortsList(){
       body.appendChild(ipAcc);
     });
     acc.appendChild(body);
-    container.appendChild(acc);
+    frag.appendChild(acc);
   });
+  container.appendChild(frag);
 }
 
 function renderPorts(ports){
