@@ -2,15 +2,26 @@
 set -euo pipefail
 
 tmp_dir=$(mktemp -d)
-BASE_DIR="$tmp_dir" ./generate-audit-json.sh >/tmp/test_audit.log
-archive_dir="$tmp_dir/archives"
-file=$(ls "$archive_dir"/audit_*.json | head -n 1)
+files=()
 
-if [ ! -f "$file" ]; then
-  echo "No audit file generated" >&2
-  exit 1
-fi
+for i in 1 2; do
+  base="$tmp_dir/run$i"
+  BASE_DIR="$base" ./generate-audit-json.sh >/tmp/test_audit.log
+  archive_dir="$base/archives"
+  file=$(ls "$archive_dir"/audit_*.json | head -n 1)
+  if [ ! -f "$file" ]; then
+    echo "No audit file generated for run $i" >&2
+    exit 1
+  fi
+  files+=("$file")
+done
 
-jq empty "$file"
+for file in "${files[@]}"; do
+  jq empty "$file"
+  jq -e '.cpu.model | length > 0' "$file" >/dev/null
+  jq -e '.cpu.cores | tonumber > 0' "$file" >/dev/null
+  jq -e '.ports | type == "array"' "$file" >/dev/null
+  jq -e '.docker.containers | type == "array"' "$file" >/dev/null
+done
 
-echo "Test passed: audit JSON generated at $file"
+echo "Test passed: audit JSON reports generated and validated at ${files[*]}"

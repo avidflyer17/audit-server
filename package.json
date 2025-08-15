@@ -5,7 +5,8 @@
   "scripts": {
     "build": "esbuild audits/scripts/main.js --bundle --outfile=audits/scripts/viewer.js",
     "lint": "eslint \"audits/scripts/**/*.js\"",
-    "format": "prettier -w \"audits/scripts/**/*.js\""
+    "format": "prettier -w \"audits/scripts/**/*.js\"",
+    "test": "./tests/run.sh"
   },
   "devDependencies": {
     "esbuild": "^0.19.0",
