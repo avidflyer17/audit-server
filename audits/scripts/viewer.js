@@ -1262,6 +1262,10 @@ function renderDisks(disks){
         <circle class="donut-ring ${colorClassDisk(pctRaw)}" cx="20" cy="20" r="16" stroke-dasharray="0 100"></circle>
         <text x="20" y="20" class="donut-value">${pctDisplay}%</text>
       </svg>
+      <div class="disk-info">
+        <span>${usedStr} utilisés</span>
+        <span>${freeStr} libres</span>
+      </div>
       <div class="disk-badges">
         <span class="badge">${disk.mountpoint}</span>
         <span class="badge">${totalStr}</span>
