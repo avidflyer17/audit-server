@@ -951,13 +951,18 @@ h1 {
     .ip-accordion { background: var(--card-bg); border:1px solid var(--card-border); border-radius:8px; margin:0.3rem 0; overflow:hidden; }
     .ip-accordion.open > .accordion-content { display:block; }
     .ip-accordion .accordion-header { background: var(--card-bg); }
-    .port-line { display:flex; align-items:center; gap:0.5rem; padding:0.2rem 0.3rem; font-size:0.9rem; }
+    .port-line { display:flex; align-items:center; gap:0.5rem; padding:0.2rem 0.3rem; font-size:0.9rem; flex-wrap:wrap; }
     .port-line .service-name { flex:1; font-weight:500; }
     .port-line .port-mono { font-family:var(--font-mono); }
-    .port-line .badges { margin-left:auto; display:flex; gap:0.2rem; }
+    .port-line .badges { margin-left:auto; display:flex; gap:0.2rem; flex-wrap:wrap; }
     .port-line .badge { font-size:0.7rem; padding:0.1rem 0.3rem; }
     .port-line .risk-dot { margin-left:0.3rem; }
     .port-line .copy-btn { margin-left:0.3rem; }
+
+    @media (max-width: 600px) {
+      .port-line { flex-direction: column; align-items: flex-start; }
+      .port-line .badges { margin-left: 0; }
+    }
 
     .load-container {
       display: flex;
