@@ -1,6 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
+# Se placer dans le dossier du script
+cd "$(dirname "$0")"
+
+# BASE_DIR absolu par défaut (le dossier audits à côté du script)
+BASE_DIR="${BASE_DIR:-$(pwd)/audits}"
+
+
 # ✅ Commandes requises
 REQUIRED_CMDS=(mpstat sensors jq bc docker)
 for cmd in "${REQUIRED_CMDS[@]}"; do
