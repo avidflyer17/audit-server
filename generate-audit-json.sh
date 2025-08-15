@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # ✅ Commandes requises
 REQUIRED_CMDS=(mpstat sensors jq bc docker)
@@ -33,32 +34,9 @@ IP_LOCAL=$(hostname -I | awk '{print $1}')
 # IP publique avec délai max 5s ; N/A si la requête échoue
 IP_PUBLIQUE=$(curl -s --max-time 5 ifconfig.me 2>/dev/null || echo "N/A")
 
-# 🧠 RAM & Swap
-MEMORY=$(free -h | awk 'NR==2 {print "{\"total\":\""$2"\",\"used\":\""$3"\",\"free\":\""$4"\",\"shared\":\""$5"\",\"buff_cache\":\""$6"\",\"available\":\""$7"\"}"}')
-SWAP=$(free -h | awk 'NR==3 {print "{\"total\":\""$2"\",\"used\":\""$3"\",\"free\":\""$4"\"}"}')
-
 # 💽 Disques
 DISK_ROOT=$(df -h / | awk 'NR==2 {print "{\"filesystem\":\""$1"\",\"size\":\""$2"\",\"used\":\""$3"\",\"available\":\""$4"\",\"used_percent\":\""$5"\",\"mountpoint\":\""$6"\"}"}')
 DISK_HOME=$(df -h /home | awk 'NR==2 {print "{\"filesystem\":\""$1"\",\"size\":\""$2"\",\"used\":\""$3"\",\"available\":\""$4"\",\"used_percent\":\""$5"\",\"mountpoint\":\""$6"\"}"}')
-
-# 🧮 CPU
-CPU_MODEL=$(lscpu | grep "Model name" | sed 's/.*: //')
-CPU_CORES=$(nproc)
-CPU_USAGE_PER_CORE=$(mpstat -P ALL 1 1 | awk '/Average/ && $2 ~ /[0-9]/ {usage=100-$12; printf "{\"core\":\"%s\",\"usage\":%.1f},", $2, usage}' | sed 's/,$//')
-cpu_data=$(echo "[$CPU_USAGE_PER_CORE]")
-
-# 🌡️ Température CPU par cœur
-TEMP_CORES=$(sensors 2>/dev/null | grep -E '^[[:space:]]*Core [0-9]+' | sed 's/+//g; s/°C//g' | awk '{core=$2; temp=$3; gsub(":","",core); printf "{\"core\":%s,\"temp\":%s}\n", core, temp}' | jq -s '.')
-[ -z "$TEMP_CORES" ] && TEMP_CORES="[]"
-
-# 🎯 Couleur charge CPU
-cpu_total_usage=$(echo "$cpu_data" | jq '[.[] | .usage | tonumber] | add / length')
-cpu_color="green"
-if (( $(echo "$cpu_total_usage > 60" | bc -l) )); then cpu_color="orange"; fi
-if (( $(echo "$cpu_total_usage > 85" | bc -l) )); then cpu_color="red"; fi
-
-# 🛠 Services actifs
-SERVICES=$(systemctl list-units --type=service --state=running --no-pager --no-legend | awk '{print $1}' | jq -R . | jq -s .)
 
 # 🔧 Processus gourmands
 TOP_CPU=$(ps -eo pid,comm,%cpu,%mem --sort=-%cpu | head -n 6 | jq -Rn '[inputs | split(" ") | map(select(length > 0)) | select(length >= 4) | {"pid": .[0], "cmd": .[1], "cpu": .[2], "mem": .[3]}]')
@@ -85,6 +63,47 @@ to_bytes() {
     *)   factor=1 ;;
   esac
   awk -v n="$num" -v f="$factor" 'BEGIN{printf "%.0f", n*f}'
+}
+# 🧠 Collecte des statistiques mémoire et swap
+collect_memory() {
+  local free_output mem_total mem_used mem_free mem_shared mem_buff_cache mem_available
+  local swap_total swap_used swap_free
+  free_output=$(free -h)
+    read -r _ mem_total mem_used mem_free mem_shared mem_buff_cache mem_available <<< "$(echo "$free_output" | awk 'NR==2 {print $2, $3, $4, $5, $6, $7}')"
+    read -r _ swap_total swap_used swap_free <<< "$(echo "$free_output" | awk 'NR==3 {print $2, $3, $4}')"
+  jq -n \
+    --arg total "$mem_total" \
+    --arg used "$mem_used" \
+    --arg free "$mem_free" \
+    --arg shared "$mem_shared" \
+    --arg buff_cache "$mem_buff_cache" \
+    --arg available "$mem_available" \
+    --arg swap_total "$swap_total" \
+    --arg swap_used "$swap_used" \
+    --arg swap_free "$swap_free" \
+    '{ram:{total:$total,used:$used,free:$free,shared:$shared,buff_cache:$buff_cache,available:$available},swap:{total:$swap_total,used:$swap_used,free:$swap_free}}'
+}
+
+# 🧮 Collecte des statistiques CPU
+collect_cpu() {
+  local model cores usage_json temp_json total_usage color
+  model=$(lscpu | grep "Model name" | sed 's/.*: //')
+  cores=$(nproc)
+  usage_json=$(mpstat -P ALL 1 1 | awk '/Average/ && $2 ~ /[0-9]/ {usage=100-$12; printf "%s %.1f\n", $2, usage}' | jq -Rn '[inputs | split(" ") | {core:.[0], usage:(.[1]|tonumber)}]')
+  temp_json=$({ sensors 2>/dev/null || true; } | grep -E '^[[:space:]]*Core [0-9]+' | sed 's/+//g; s/°C//g' | awk '{core=$2; temp=$3; gsub(":","",core); print core,temp}' | jq -Rn '[inputs | split(" ") | {core:(.[0]|tonumber), temp:(.[1]|tonumber)}]')
+  [ -z "$temp_json" ] && temp_json="[]"
+  total_usage=$(echo "$usage_json" | jq '[.[]|.usage]|add/length')
+  color="green"
+  if (( $(echo "$total_usage > 60" | bc -l) )); then color="orange"; fi
+  if (( $(echo "$total_usage > 85" | bc -l) )); then color="red"; fi
+  jq -n --arg model "$model" --argjson cores "$cores" --argjson usage "$usage_json" --argjson temps "$temp_json" --arg color "$color" '{model:$model,cores:$cores,usage:$usage,temperatures:$temps,color:$color}'
+}
+
+# 🛠 Collecte des services actifs
+collect_services() {
+  local services
+  services=$(systemctl list-units --type=service --state=running --no-pager --no-legend 2>/dev/null | awk '{print $1}' | jq -R . | jq -s .) || services="[]"
+  echo "${services:-[]}"
 }
 
 # 🐳 Docker
@@ -125,6 +144,13 @@ if command -v docker >/dev/null 2>&1; then
   fi
 fi
 
+# Collecte des métriques
+CPU_DATA=$(collect_cpu)
+CPU_COLOR=$(echo "$CPU_DATA" | jq -r '.color')
+CPU_JSON=$(echo "$CPU_DATA" | jq 'del(.color)')
+MEMORY_JSON=$(collect_memory)
+SERVICES_JSON=$(collect_services)
+
 # 🔧 Création JSON
 jq -n \
   --arg generated "$HUMAN_DATE" \
@@ -133,16 +159,12 @@ jq -n \
   --arg hostname "$HOSTNAME" \
   --arg ip_local "$IP_LOCAL" \
   --arg ip_pub "$IP_PUBLIQUE" \
-  --argjson temp_cores "$TEMP_CORES" \
-  --argjson memory "$MEMORY" \
-  --argjson swap "$SWAP" \
+  --argjson memory "$MEMORY_JSON" \
   --argjson disk_root "$DISK_ROOT" \
   --argjson disk_home "$DISK_HOME" \
-  --arg cpu_model "$CPU_MODEL" \
-  --argjson cpu_cores "$CPU_CORES" \
-  --argjson cpu_usage "$cpu_data" \
-  --arg cpu_color "$cpu_color" \
-  --argjson services "$SERVICES" \
+  --argjson cpu "$CPU_JSON" \
+  --arg cpu_color "$CPU_COLOR" \
+  --argjson services "$SERVICES_JSON" \
   --argjson top_cpu "$TOP_CPU" \
   --argjson top_mem "$TOP_MEM" \
   --argjson ports "$PORTS" \
@@ -154,17 +176,9 @@ jq -n \
     ip_pub: $ip_pub,
     uptime: $uptime,
     load_average: $load_avg,
-    memory: {
-      ram: $memory,
-      swap: $swap
-    },
+    memory: $memory,
     disks: [$disk_root, $disk_home],
-    cpu: {
-      model: $cpu_model,
-      cores: $cpu_cores,
-      usage: $cpu_usage,
-      temperatures: $temp_cores
-    },
+    cpu: $cpu,
     cpu_load_color: $cpu_color,
     services: $services,
     top_cpu: $top_cpu,
@@ -172,7 +186,6 @@ jq -n \
     ports: $ports,
     docker: { containers: $docker_containers }
   }' > "$OUTPUT_FILE"
-
 # 🧹 Nettoyage des anciens fichiers
 find "$ARCHIVE_DIR" -type f -name "audit_*.json" | sort | head -n -21 | xargs -r rm
 
