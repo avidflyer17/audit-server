@@ -1327,7 +1327,10 @@ function renderMini(label, load, prevLoad, cores) {
     valEl.textContent = '—';
     fill.style.width = '0%';
     fill.className = 'fill';
-    trend.textContent = 'donnée manquante';
+    trend.innerHTML = 'donnée manquante';
+    trend.style.color = 'var(--text-muted)';
+    trend.removeAttribute('title');
+    trend.removeAttribute('aria-label');
     card.removeAttribute('title');
     card.removeAttribute('aria-label');
     bar.removeAttribute('aria-label');
@@ -1344,7 +1347,13 @@ function renderMini(label, load, prevLoad, cores) {
     });
     dot.style.background = status.color;
     const t = trendFrom(load, prevLoad);
-    trend.textContent = t.label;
+    trend.innerHTML = `<i class="fa-solid ${t.icon}" aria-hidden="true"></i><span>${t.label}</span>`;
+    let trendColor = 'var(--text-muted)';
+    if (t.icon === 'fa-chevron-up') trendColor = 'var(--success)';
+    else if (t.icon === 'fa-chevron-down') trendColor = 'var(--danger)';
+    trend.style.color = trendColor;
+    trend.setAttribute('aria-label', t.label);
+    trend.title = t.label;
     const rawStr = load.toLocaleString('fr-FR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
