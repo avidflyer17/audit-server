@@ -1064,10 +1064,18 @@ function computeRamUsage(ram){
 
 function computeSwapUsage(swap){
   if (!swap) return null;
-  const total = parseSizeToBytes(swap.total);
-  const used = parseSizeToBytes(swap.used);
+  let total = parseSizeToBytes(swap.total);
+  let used = parseSizeToBytes(swap.used);
   let free = parseSizeToBytes(swap.free);
-  if (free == null && total != null && used != null){
+  // Si les valeurs semblent incohérentes (ex. total < used),
+  // on suppose que total et used ont été inversés dans la source.
+  if (total != null && used != null && used > total && (free == null || free <= total)) {
+    [total, used] = [used, total];
+  }
+  // Déduire les valeurs manquantes ou recalculer si nécessaire
+  if (total != null && free != null) {
+    used = Math.max(0, total - free);
+  } else if (free == null && total != null && used != null) {
     free = Math.max(0, total - used);
   }
   const percent = (used != null && total) ? clamp(Math.round((used / total) * 100), 0, 100) : null;
