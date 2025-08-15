@@ -111,6 +111,7 @@ function renderServicesList() {
     return;
   }
   document.getElementById('servicesEmpty').classList.add('hidden');
+  const frag = document.createDocumentFragment();
   filteredServices.forEach((s) => {
     const item = document.createElement('div');
     item.className = 'service-item';
@@ -185,8 +186,9 @@ function renderServicesList() {
         toggle();
       }
     });
-    list.appendChild(item);
+    frag.appendChild(item);
   });
+  list.appendChild(frag);
   countSpan.textContent = `${filteredServices.length} service${filteredServices.length > 1 ? 's' : ''}`;
 }
 
