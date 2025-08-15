@@ -65,6 +65,18 @@ Run the provided test script to generate a sample report and validate its JSON s
 ./tests/run.sh
 ```
 
+## 🛠️ Development
+
+JavaScript assets are split into ES modules and bundled for the browser. Install Node.js
+dependencies and use the provided npm scripts:
+
+```bash
+npm install
+npm run build   # bundle front-end scripts
+npm run lint    # run ESLint
+npm run format  # format sources with Prettier
+```
+
 ## 📄 License
 
 This project is released under the MIT License. See [LICENSE](LICENSE) for details.
