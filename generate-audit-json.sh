@@ -7,6 +7,9 @@ cd "$(dirname "$0")"
 # BASE_DIR absolu par défaut (le dossier audits à côté du script)
 BASE_DIR="${BASE_DIR:-$(pwd)/audits}"
 
+# 🔢 Versionning du générateur et du schéma
+REPORT_VERSION="1.4.0"
+SCHEMA_VERSION=2
 
 # ✅ Commandes requises
 REQUIRED_CMDS=(mpstat sensors jq bc docker)
@@ -40,6 +43,19 @@ HOSTNAME=$(hostname)
 IP_LOCAL=$(hostname -I | awk '{print $1}')
 # IP publique avec délai max 5s ; N/A si la requête échoue
 IP_PUBLIQUE=$(curl -s --max-time 5 ifconfig.me 2>/dev/null || echo "N/A")
+
+# 🖥️ Système d'exploitation
+OS_NAME=$(grep '^NAME=' /etc/os-release | cut -d= -f2 | tr -d '"' || true)
+OS_VERSION=$(grep '^VERSION=' /etc/os-release | cut -d= -f2 | tr -d '"' || true)
+OS_CODENAME=$(grep '^VERSION_CODENAME=' /etc/os-release | cut -d= -f2 | tr -d '"' || true)
+OS_KERNEL=$(uname -r)
+OS_ARCH=$(uname -m)
+BOOT_RAW=$(who -b 2>/dev/null | awk '{print $3" "$4}')
+BOOT_ISO=$(date -d "$BOOT_RAW" --iso-8601=seconds 2>/dev/null || true)
+OS_JSON=$(jq -n --arg name "$OS_NAME" --arg version "$OS_VERSION" --arg codename "$OS_CODENAME" \
+  --arg kernel "$OS_KERNEL" --arg arch "$OS_ARCH" --arg boot "$BOOT_ISO" \
+  '{name:$name,version:$version,codename:$codename,kernel:$kernel,architecture:$arch,kernel_boot_time:$boot} | with_entries(select(.value != ""))')
+[ "$OS_JSON" = "{}" ] && OS_JSON="null"
 
 # 💽 Disques
 DISK_ROOT=$(df -h / | awk 'NR==2 {print "{\"filesystem\":\""$1"\",\"size\":\""$2"\",\"used\":\""$3"\",\"available\":\""$4"\",\"used_percent\":\""$5"\",\"mountpoint\":\""$6"\"}"}')
@@ -161,6 +177,9 @@ SERVICES_JSON=$(collect_services)
 
 # 🔧 Création JSON
 jq -n \
+  --arg report_version "$REPORT_VERSION" \
+  --argjson schema_version "$SCHEMA_VERSION" \
+  --argjson os "$OS_JSON" \
   --arg generated "$HUMAN_DATE" \
   --arg uptime "$UPTIME" \
   --arg load_avg "$LOAD_AVG" \
@@ -178,6 +197,9 @@ jq -n \
   --argjson ports "$PORTS" \
   --argjson docker_containers "$DOCKER_CONTAINERS" \
   '{
+    report_version: $report_version,
+    schema_version: $schema_version,
+    os: $os,
     generated: $generated,
     hostname: $hostname,
     ip_local: $ip_local,
@@ -193,7 +215,7 @@ jq -n \
     top_mem: $top_mem,
     ports: $ports,
     docker: { containers: $docker_containers }
-  }' > "$OUTPUT_FILE"
+  } | del(.os | nulls)' > "$OUTPUT_FILE"
 # 🧹 Nettoyage des anciens fichiers
 find "$ARCHIVE_DIR" -type f -name "audit_*.json" | sort | head -n -21 | xargs -r rm
 

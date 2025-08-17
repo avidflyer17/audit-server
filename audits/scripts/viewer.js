@@ -6,6 +6,9 @@ let latestEntry = null;
 let currentFile = null;
 let selectedDate = null;
 
+const viewerVersion = '1.4.0';
+const viewerSchema = 3;
+
 const SERVICE_CATEGORIES = ['Système', 'Réseau', 'Stockage/Partages', 'Conteneurs', 'Sécurité', 'Journalisation', 'Mises à jour', 'Autre'];
 const SERVICE_PATTERNS = [
   {regex:/docker|containerd/i, icon:'🐳', category:'Conteneurs'},
@@ -181,6 +184,21 @@ function parseUptime(str){
   if(segments.length===0) segments.push('0 min');
   const totalDays = parts.days + parts.hours/24 + parts.minutes/1440;
   return {text:segments.join(' '), days:totalDays};
+}
+
+function formatBootTime(iso){
+  if(!iso) return null;
+  const d = new Date(iso);
+  if(isNaN(d)) return null;
+  const diff = Date.now() - d.getTime();
+  const mins = Math.floor(diff/60000);
+  const days = Math.floor(mins/1440);
+  const hours = Math.floor((mins % 1440) / 60);
+  let str = '';
+  if (days) str += days + 'j ';
+  if (hours) str += hours + 'h';
+  if (!days && !hours) str += mins + 'min';
+  return 'il y a ' + str.trim();
 }
 
 function setupCopy(id, getter){
@@ -828,6 +846,7 @@ async function selectTime(file) {
   const json = await loadAudit(file);
   if (json) {
     currentFile = file;
+    checkCompatibility(json);
     renderText(json);
     setActiveTime(file);
     if (typeof closeMenu === 'function') closeMenu();
@@ -844,8 +863,14 @@ function updateDayButtons() {
 
 let updateTimer;
 
-function showUpdateBadge() {
+function showNotification({ title, message, icon = 'ℹ️', duration = 6000, type = '' }) {
   const badge = document.getElementById('updateBadge');
+  if (!badge) return;
+  badge.className = 'update-badge';
+  if (type) badge.classList.add(type);
+  badge.querySelector('.icon').textContent = icon;
+  badge.querySelector('.title').textContent = title;
+  badge.querySelector('.message').textContent = message;
   badge.classList.add('show');
   clearTimeout(updateTimer);
   const hide = () => {
@@ -853,7 +878,45 @@ function showUpdateBadge() {
     badge.removeEventListener('click', hide);
   };
   badge.addEventListener('click', hide);
-  updateTimer = setTimeout(hide, 30000);
+  updateTimer = setTimeout(hide, duration);
+}
+
+function showUpdateBadge() {
+  showNotification({
+    title: 'Nouveau rapport disponible',
+    message: 'Il a été chargé automatiquement',
+    icon: '📄',
+    duration: 30000,
+  });
+}
+
+function semverLt(a, b) {
+  const pa = String(a || '').split('.').map((n) => parseInt(n, 10) || 0);
+  const pb = String(b || '').split('.').map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < 3; i++) {
+    if (pa[i] < pb[i]) return true;
+    if (pa[i] > pb[i]) return false;
+  }
+  return false;
+}
+
+function checkCompatibility(json) {
+  const rv = json.report_version;
+  const sv = json.schema_version;
+  const reportOld = !rv || semverLt(rv, viewerVersion);
+  const schemaOld = sv == null || sv < viewerSchema;
+  if (reportOld || schemaOld) {
+    const details = `Rapport v${rv || 'N/A'} · UI v${viewerVersion}`;
+    showNotification({
+      title: 'Rapport ancien',
+      message:
+        'Ce rapport a été généré avec une ancienne version. Certaines informations peuvent être absentes. ' +
+        details,
+      icon: '⚠️',
+      type: 'warning',
+      duration: 8000,
+    });
+  }
 }
 
 function cleanCpuModel(modelRaw){
@@ -1312,6 +1375,54 @@ function renderDisks(disks){
   });
 }
 
+function renderOs(os){
+  const container = document.getElementById('osContent');
+  container.textContent = '';
+  if(!os || Object.keys(os).length === 0){
+    const div = document.createElement('div');
+    div.className = 'empty';
+    div.textContent = 'Non disponible dans ce rapport';
+    container.appendChild(div);
+    return;
+  }
+  const items = [];
+  if(os.name || os.version){
+    items.push({icon:'fa-brands fa-linux', label:'Distribution', value:[os.name, os.version].filter(Boolean).join(' ')});
+  }
+  if(os.codename){
+    items.push({icon:'fa-solid fa-tag', label:'Nom de code', value:os.codename});
+  }
+  if(os.kernel){
+    items.push({icon:'fa-solid fa-terminal', label:'Kernel', value:os.kernel});
+  }
+  if(os.architecture){
+    items.push({icon:'fa-solid fa-microchip', label:'Architecture', value:os.architecture});
+  }
+  if(os.kernel_boot_time){
+    const rel = formatBootTime(os.kernel_boot_time);
+    if(rel) items.push({icon:'fa-regular fa-clock', label:'Démarrage du noyau', value:rel, title:os.kernel_boot_time});
+  }
+  if(items.length === 0){
+    const div = document.createElement('div');
+    div.className = 'empty';
+    div.textContent = 'Non disponible dans ce rapport';
+    container.appendChild(div);
+    return;
+  }
+  items.forEach((it)=>{
+    const row = document.createElement('div');
+    row.className = 'os-item';
+    const label = document.createElement('span');
+    label.className = 'os-label';
+    label.innerHTML = `<i class="${it.icon}" aria-hidden="true"></i> ${it.label}`;
+    const val = document.createElement('span');
+    val.textContent = it.value;
+    if(it.title) val.title = it.title;
+    row.append(label, val);
+    container.appendChild(row);
+  });
+}
+
 function parseLoadAvgFR(str) {
   // Parse string "0,21,0,22,0,21" or "0.22,0.25,0.31" -> [0.21, 0.22, 0.21]
   if (typeof str !== 'string') return null;
@@ -1459,6 +1570,8 @@ function renderText(json) {
   } else {
     sinceEl.textContent = '';
   }
+
+  renderOs(json.os);
 
   const ipLocal = json.ip_local || null;
   const ipLocalSpan = document.getElementById('ipLocal');
