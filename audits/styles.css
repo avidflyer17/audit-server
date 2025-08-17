@@ -916,28 +916,24 @@ h1 {
     }
     .mem .badge[data-tip] { position: relative; }
     .mem .spark { width: 60px; height: 20px; }
-    .ports-legend {
-      font-size: 0.9rem;
-      margin: 0.5rem 0;
+    .ports-summary {
       display: flex;
       flex-wrap: wrap;
       gap: 0.5rem;
-      color: var(--muted);
+      margin: 0.5rem 0;
     }
-    .ports-legend span {
-      display: flex;
-      align-items: center;
-      gap: 0.2rem;
+    .summary-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.25rem 0.6rem;
+      box-shadow: var(--card-shadow);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
     }
-    .risk-dot {
-      width: 0.8rem;
-      height: 0.8rem;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .risk-dot.low { background: var(--success); }
-    .risk-dot.medium { background: var(--warning); }
-    .risk-dot.high { background: var(--danger); }
+    .summary-item.critical { background: var(--danger); color: #fff; }
+    .summary-item.warning { background: var(--warning); color: #000; }
+    .summary-item.low { background: var(--success); color: #000; }
     .ports-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -946,27 +942,39 @@ h1 {
       align-items: center;
     }
     #portSearch { flex: 1; min-width: 180px; }
-    #portSort { background: var(--card-bg); color: var(--text); border: 1px solid var(--card-border); padding: 0.25rem; border-radius: 4px; }
-    .port-accordion { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 0.5rem; box-shadow: var(--card-shadow); overflow: hidden; }
-    .port-accordion + .port-accordion { margin-top: 0.5rem; }
-    .accordion-header { background: var(--card-bg); width: 100%; text-align: left; padding: 0.4rem 0.6rem; border: none; color: var(--text); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .accordion-header .count { background: var(--chip-bg); border-radius:6px; padding:2px 8px; font-family:var(--font-mono); }
-    .accordion-content { display: none; padding:0.4rem; background: var(--card-bg); }
-    .port-accordion.open > .accordion-content { display:block; }
-    .ip-accordion { background: var(--card-bg); border:1px solid var(--card-border); border-radius:8px; margin:0.3rem 0; overflow:hidden; }
-    .ip-accordion.open > .accordion-content { display:block; }
-    .ip-accordion .accordion-header { background: var(--card-bg); }
-    .port-line { display:flex; align-items:center; gap:0.5rem; padding:0.2rem 0.3rem; font-size:0.9rem; flex-wrap:wrap; }
-    .port-line .service-name { flex:1; font-weight:500; }
-    .port-line .port-mono { font-family:var(--font-mono); }
-    .port-line .badges { margin-left:auto; display:flex; gap:0.2rem; flex-wrap:wrap; }
-    .port-line .badge { font-size:0.7rem; padding:0.1rem 0.3rem; }
-    .port-line .risk-dot { margin-left:0.3rem; }
-    .port-line .copy-btn { margin-left:0.3rem; }
+    .sort-toggle { display: flex; border-radius: 6px; overflow: hidden; }
+    .sort-toggle button {
+      background: var(--chip-bg);
+      color: var(--chip-text);
+      border: none;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .sort-toggle button.active { background: var(--chip-active-bg); color: var(--bg); }
+    .service-group { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; box-shadow: var(--card-shadow); margin-bottom: 0.5rem; }
+    .service-group.collapsed .service-body { display: none; }
+    .service-header { width: 100%; display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.6rem; background: none; border: none; color: var(--text); cursor: pointer; text-align: left; }
+    .service-header .icon { font-size: 1.2rem; }
+    .service-header .title { flex: 1; }
+    .service-header .count { background: var(--chip-bg); border-radius:6px; padding:2px 8px; font-family:var(--font-mono); }
+    .service-body { padding: 0.4rem; display: flex; flex-direction: column; gap: 0.3rem; }
+    .port-item { display:flex; align-items:center; gap:0.5rem; padding:0.2rem 0.3rem; font-size:0.9rem; flex-wrap:wrap; border-left:4px solid transparent; }
+    .port-item .port-label { font-family:var(--font-mono); font-weight:500; }
+    .port-item .badges { display:flex; gap:0.2rem; flex-wrap:wrap; }
+    .port-item .instances { margin-left:auto; font-size:0.8rem; color:var(--muted); }
+    .port-item button { margin-left:auto; }
+    .port-item.critical { border-color: var(--danger); }
+    .port-item.warning { border-color: var(--warning); }
+    .port-item.docker { border-color: var(--info); }
+    .port-item.low { border-color: var(--success); }
+    .critical-chip { border:1px solid var(--danger); }
+    .critical-chip.active { background: var(--danger); color:#fff; }
 
     @media (max-width: 600px) {
-      .port-line { flex-direction: column; align-items: flex-start; }
-      .port-line .badges { margin-left: 0; }
+      .port-item { flex-direction: column; align-items: flex-start; }
+      .port-item .badges { margin-left: 0; }
+      .service-header { flex-wrap: wrap; }
     }
 
     .load-container {
