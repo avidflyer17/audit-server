@@ -407,6 +407,11 @@ h1 {
       pointer-events: auto;
     }
 
+    .update-badge.warning {
+      background: var(--warning);
+      color: #000;
+    }
+
     .update-badge:hover,
     .update-badge:focus {
       box-shadow: 0 4px 12px rgba(0,0,0,.25);
@@ -766,6 +771,25 @@ h1 {
 .network-card .copy-btn:focus-visible {
   background: var(--ip-color);
   color: var(--bg);
+}
+
+.os-card .card-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--gap-2);
+}
+
+.os-item {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-1);
+}
+
+.os-label {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-1);
 }
 
     .disk-bar-container {

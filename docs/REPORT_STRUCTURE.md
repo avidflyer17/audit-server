@@ -3,6 +3,15 @@
 The `generate-audit-json.sh` script outputs a JSON file summarizing system metrics. The top-level object
 contains:
 
+- `report_version`: version of the generator used to produce the report.
+- `schema_version`: integer identifying the JSON schema version.
+- `os`: details about the operating system (may be absent).
+- `os.name`: distribution name (e.g. `Ubuntu`).
+- `os.version`: distribution version string.
+- `os.codename`: distribution codename if available.
+- `os.kernel`: kernel version (from `uname -r`).
+- `os.architecture`: machine architecture (from `uname -m`).
+- `os.kernel_boot_time`: kernel boot time in ISO 8601, when available.
 - `generated`: human-readable timestamp of report generation.
 - `hostname`: system hostname.
 - `ip_local`: first local IP address.
@@ -34,6 +43,15 @@ A minimal example:
 
 ```json
 {
+  "report_version": "1.4.0",
+  "schema_version": 2,
+  "os": {
+    "name": "Ubuntu",
+    "version": "24.04.2 LTS",
+    "codename": "Noble Numbat",
+    "kernel": "6.8.0-40-generic",
+    "architecture": "x86_64"
+  },
   "generated": "01/01/2024 à 12:00",
   "hostname": "server1",
   "ip_local": "192.168.1.10",
