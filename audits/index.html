@@ -212,16 +212,14 @@
   <div id="dockerEmpty" class="empty hidden">Aucun conteneur actif</div>
   <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts <span id="portsTotal" class="badge badge-total">0</span></h2>
   <p class="subtitle">Interfaces et services détectés</p>
-  <div id="portsLegend" class="ports-legend"></div>
+  <div id="portsSummary" class="ports-summary"></div>
   <div class="ports-toolbar">
-    <input type="text" id="portSearch" placeholder="Filtrer… ex. 22, ssh, 0.0.0.0" />
+    <input type="text" id="portSearch" placeholder="Filtrer… ex : 22, ssh, 0.0.0.0" />
     <div id="portFilters" class="filter-chips"></div>
-    <select id="portSort">
-      <option value="port-asc">Port ↑</option>
-      <option value="port-desc">Port ↓</option>
-      <option value="service">Service A→Z</option>
-      <option value="risk">Risque</option>
-    </select>
+    <div id="portSortToggle" class="sort-toggle">
+      <button data-sort="risk" class="active">Par criticité</button>
+      <button data-sort="port">Par port</button>
+    </div>
     <button id="portsCopy" class="btn" title="Copier tous"><i class="fa-solid fa-copy"></i></button>
   </div>
   <div id="portsContainer" class="block-wrapper"></div>

@@ -334,12 +334,12 @@ function renderServices(names){
   applyServiceFilters();
 }
 
-const PORT_FILTERS = ['TCP','UDP','Public','Localhost','Docker','System','Unknown'];
+const PORT_FILTERS = ['TCP','UDP','Public','Localhost','Docker','System','Unknown','Critique'];
 let portsData = [];
 let filteredPorts = [];
 let activePortFilters = new Set(PORT_FILTERS);
 let portSearch = '';
-let portSort = 'port-asc';
+let portSort = 'risk';
 let portsInit = false;
 
 const WELL_KNOWN = {
@@ -357,8 +357,6 @@ const WELL_KNOWN = {
   '123':'ntp'
 };
 
-const SENSITIVE_PORTS = [22,80,443,445,139,3306,5432,6379];
-
 function parseAddr(portStr){
   const ipv6 = portStr.match(/^\[([^\]]+)]:(\d+)/);
   if (ipv6) return {ip:ipv6[1].split('%')[0], port:ipv6[2]};
@@ -374,10 +372,10 @@ function getService(port){
 
 function getIcon(service, port, proto, ip){
   const n = Number(port);
-  if (ip.startsWith('172.17.') || /docker|containerd/i.test(service)) return '🐳';
-  if (service === 'ssh' || n===22) return '🔐';
-  if (service === 'dns' || n===53) return '🌐';
-  if (service === 'http' || n===80 || n===443) return '🌍';
+  if (ip.startsWith('172.17.') || /docker|containerd/i.test(service)) return '📦';
+  if (service === 'ssh' || n===22) return '🔒';
+  if (service === 'dns' || n===53) return '🧭';
+  if (service === 'http' || service === 'https' || n===80 || n===443) return '🌐';
   if (service === 'smb' || n===445 || n===139) return '🗂️';
   if (n===111 || n===2049) return '📡';
   if (service === 'mysql' || n===3306) return '🛢️';
@@ -385,7 +383,7 @@ function getIcon(service, port, proto, ip){
   if (service === 'redis' || n===6379) return '⚡';
   if (service === 'node-exporter' || n===9100) return '📈';
   if (service === 'ntp' || n===123) return '🕒';
-  return '◻️';
+  return '❓';
 }
 
 function getBadges(ip, service){
@@ -400,13 +398,18 @@ function getBadges(ip, service){
 
 function getRisk(ip, port, service){
   const n = Number(port);
-  const sensitive = SENSITIVE_PORTS.includes(n) || (n>=9000 && n<=10000);
+  const sensitive = ['ssh','smb','rpcbind'].includes(service) || [22,445,139,111].includes(n) || (service==='Unknown' && n>30000);
   const isPublic = ip==='0.0.0.0' || ip==='*' || ip==='::' || ip==='[::]';
-  const isLan = /^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[01])\./.test(ip) || ip.startsWith('172.17.');
-  const isLocal = /^127\./.test(ip) || ip==='::1';
-  if (isPublic && sensitive) return 'high';
-  if ((isLan) && sensitive) return 'medium';
+  const isDocker = ip.startsWith('172.17.');
+  if (isPublic && sensitive) return 'critical';
+  if (isPublic) return 'warning';
+  if (isDocker) return 'docker';
   return 'low';
+}
+
+function maxRisk(a,b){
+  const order={low:0,docker:1,warning:2,critical:3};
+  return order[a] >= order[b] ? a : b;
 }
 
 function initPortsUI(){
@@ -414,24 +417,12 @@ function initPortsUI(){
   portsInit = true;
   const searchInput = document.getElementById('portSearch');
   const filtersDiv = document.getElementById('portFilters');
-  const sortSelect = document.getElementById('portSort');
+  const sortToggle = document.getElementById('portSortToggle');
   const copyAllBtn = document.getElementById('portsCopy');
-  const legendDiv = document.getElementById('portsLegend');
-  if (legendDiv){
-    legendDiv.innerHTML='';
-    [
-      {cls:'low', label:'faible risque'},
-      {cls:'medium', label:'exposé localement'},
-      {cls:'high', label:'potentiellement exposé / critique'}
-    ].forEach(item=>{
-      const span=document.createElement('span');
-      span.innerHTML=`<span class="risk-dot ${item.cls}"></span>${item.label}`;
-      legendDiv.appendChild(span);
-    });
-  }
   PORT_FILTERS.forEach(f => {
     const chip = document.createElement('button');
     chip.className='filter-chip active';
+    if (f==='Critique') chip.classList.add('critical-chip');
     chip.textContent=f;
     chip.dataset.filter=f;
     chip.addEventListener('click', ()=>{
@@ -442,7 +433,14 @@ function initPortsUI(){
     filtersDiv.appendChild(chip);
   });
   searchInput.addEventListener('input', e=>{ portSearch = e.target.value.toLowerCase(); applyPortFilters(); });
-  sortSelect.addEventListener('change', e=>{ portSort = e.target.value; applyPortFilters(); });
+  sortToggle.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      portSort = btn.dataset.sort;
+      sortToggle.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      applyPortFilters();
+    });
+  });
   if (copyAllBtn){
     copyAllBtn.addEventListener('click', ()=>{
       const text = filteredPorts.map(p=>`${p.ip}:${p.port}/${p.proto.toLowerCase()}`).join('\n');
@@ -451,10 +449,10 @@ function initPortsUI(){
   }
   document.getElementById('portsReset').addEventListener('click', ()=>{
     portSearch='';
-    portSort='port-asc';
+    portSort='risk';
     activePortFilters=new Set(PORT_FILTERS);
     searchInput.value='';
-    sortSelect.value='port-asc';
+    sortToggle.querySelectorAll('button').forEach((b,i)=>{b.classList.toggle('active',i===0);});
     document.querySelectorAll('#portFilters .filter-chip').forEach(c=>c.classList.add('active'));
     applyPortFilters();
   });
@@ -468,72 +466,83 @@ function applyPortFilters(){
     if (p.badges.includes('Docker') && !activePortFilters.has('Docker')) return false;
     if (p.badges.includes('System') && !activePortFilters.has('System')) return false;
     if (p.badges.includes('Unknown') && !activePortFilters.has('Unknown')) return false;
+    if (p.risk === 'critical' && !activePortFilters.has('Critique')) return false;
     const hay = `${p.ip} ${p.port} ${p.service}`.toLowerCase();
     return hay.includes(portSearch);
   });
-  if (portSort==='port-asc') filteredPorts.sort((a,b)=>a.port-b.port);
-  else if (portSort==='port-desc') filteredPorts.sort((a,b)=>b.port-a.port);
-  else if (portSort==='service') filteredPorts.sort((a,b)=>a.service.localeCompare(b.service));
-  else if (portSort==='risk') {
-    const order={high:0,medium:1,low:2};
-    filteredPorts.sort((a,b)=>order[a.risk]-order[b.risk]);
-  }
-  renderPortsList();
+  renderPortGroups();
 }
 
-function renderPortsList(){
-  const container = document.getElementById('portsContainer');
-  container.innerHTML='';
+function updatePortSummary(){
   const totalSpan = document.getElementById('portsTotal');
   totalSpan.textContent = portsData.length;
+  const summaryDiv = document.getElementById('portsSummary');
+  const crit = portsData.filter(p=>p.risk==='critical').length;
+  const warn = portsData.filter(p=>p.risk==='warning').length;
+  const low = portsData.filter(p=>p.risk==='low' || p.risk==='docker').length;
+  summaryDiv.innerHTML = `
+    <div class="summary-item total" title="Total">${portsData.length}</div>
+    <div class="summary-item critical" title="Critiques">${crit}</div>
+    <div class="summary-item warning" title="Potentiellement exposés">${warn}</div>
+    <div class="summary-item low" title="Faible risque / locaux">${low}</div>`;
+}
+
+function renderPortGroups(){
+  const container = document.getElementById('portsContainer');
+  container.innerHTML='';
+  updatePortSummary();
   if (filteredPorts.length===0){
     document.getElementById('portsEmpty').classList.remove('hidden');
     return;
   }
   document.getElementById('portsEmpty').classList.add('hidden');
-  const byProto = {};
-  filteredPorts.forEach(p=>{ if(!byProto[p.proto]) byProto[p.proto]=[]; byProto[p.proto].push(p); });
-  const frag = document.createDocumentFragment();
-  ['TCP','UDP'].forEach(proto=>{
-    const list = byProto[proto] || [];
-    if (!list.length) return;
-    const acc = document.createElement('div');
-    acc.className='port-accordion open';
-    const header=document.createElement('button');
-    header.className='accordion-header';
-    header.innerHTML=`<span>${proto}</span><span class="count">${list.length}</span>`;
-    header.addEventListener('click',()=>acc.classList.toggle('open'));
-    acc.appendChild(header);
-    const body=document.createElement('div');
-    body.className='accordion-content';
-    const byIp={};
-    list.forEach(p=>{ if(!byIp[p.ip]) byIp[p.ip]=[]; byIp[p.ip].push(p); });
-    Object.entries(byIp).sort(([a],[b])=>a.localeCompare(b)).forEach(([ip,ports])=>{
-      const ipAcc=document.createElement('div');
-      ipAcc.className='ip-accordion open';
-      const ipHead=document.createElement('button');
-      ipHead.className='accordion-header';
-      ipHead.innerHTML=`<span>${ip}</span><span class="count">${ports.length}</span>`;
-      ipHead.addEventListener('click',()=>ipAcc.classList.toggle('open'));
-      ipAcc.appendChild(ipHead);
-      const ipBody=document.createElement('div');
-      ipBody.className='accordion-content';
-      ports.forEach(p=>{
-        const line=document.createElement('div');
-        line.className='port-line';
-        line.title=`${p.ip} • ${p.port} • ${p.service}`;
-        const badgesHtml=p.badges.map(b=>`<span class="badge">${b}</span>`).join('');
-        line.innerHTML=`<span class="service-icon">${p.icon}</span><span class="service-name">${p.service}</span><span class="port-mono">:${p.port}/${p.proto.toLowerCase()}</span><span class="badges">${badgesHtml}</span><span class="risk-dot ${p.risk}"></span><button class="copy-btn small" title="Copier">📋</button>`;
-        line.querySelector('.copy-btn').addEventListener('click',e=>{e.stopPropagation();navigator.clipboard.writeText(`${p.ip}:${p.port}/${p.proto.toLowerCase()}`);});
-        ipBody.appendChild(line);
-      });
-      ipAcc.appendChild(ipBody);
-      body.appendChild(ipAcc);
+
+  const byService={};
+  filteredPorts.forEach(p=>{ if(!byService[p.service]) byService[p.service]=[]; byService[p.service].push(p); });
+
+  const groups = Object.entries(byService).map(([service,items])=>{
+    const byPort={};
+    items.forEach(p=>{
+      const key=`${p.port}/${p.proto}`;
+      if(!byPort[key]) byPort[key]={port:p.port, proto:p.proto, instances:[], badges:p.badges, risk:p.risk};
+      byPort[key].instances.push(p);
+      byPort[key].badges = Array.from(new Set([...byPort[key].badges, ...p.badges]));
+      byPort[key].risk = maxRisk(byPort[key].risk, p.risk);
     });
-    acc.appendChild(body);
-    frag.appendChild(acc);
+    const ports=Object.values(byPort).sort((a,b)=>a.port-b.port);
+    let gRisk='low';
+    ports.forEach(p=>{ gRisk=maxRisk(gRisk,p.risk); });
+    const icon=getIcon(service, ports[0]?.port, ports[0]?.proto, items[0].ip);
+    return {service, icon, ports, risk:gRisk};
   });
-  container.appendChild(frag);
+
+  const order={critical:0,warning:1,docker:2,low:3};
+  if (portSort==='risk') groups.sort((a,b)=>order[a.risk]-order[b.risk]);
+  else groups.sort((a,b)=>a.ports[0].port-b.ports[0].port);
+
+  groups.forEach(g=>{
+    const groupDiv=document.createElement('div');
+    groupDiv.className='service-group';
+    if (g.ports.length>6) groupDiv.classList.add('collapsed');
+    const header=document.createElement('button');
+    header.className='service-header';
+    header.innerHTML=`<span class="icon">${g.icon}</span><span class="title">${g.service}</span><span class="count">${g.ports.length}</span>`;
+    header.addEventListener('click',()=>groupDiv.classList.toggle('collapsed'));
+    groupDiv.appendChild(header);
+    const body=document.createElement('div');
+    body.className='service-body';
+    g.ports.forEach(p=>{
+      const item=document.createElement('div');
+      item.className=`port-item ${p.risk}`;
+      const badgesHtml=p.badges.map(b=>`<span class="badge">${b}</span>`).join('');
+      const inst=p.instances.length>1?`<span class="instances" title="${p.instances.map(i=>i.ip).join(', ')}">x${p.instances.length} instances</span>`:'';
+      item.innerHTML=`<span class="port-label">:${p.port}/${p.proto.toLowerCase()}</span><span class="badges">${badgesHtml}</span>${inst}<button class="copy-btn small" title="Copier">📋</button>`;
+      item.querySelector('.copy-btn').addEventListener('click',e=>{e.stopPropagation();navigator.clipboard.writeText(`${p.instances[0].ip}:${p.port}/${p.proto.toLowerCase()}`);});
+      body.appendChild(item);
+    });
+    groupDiv.appendChild(body);
+    container.appendChild(groupDiv);
+  });
 }
 
 function renderPorts(ports){
