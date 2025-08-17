@@ -4,7 +4,7 @@ The `generate-audit-json.sh` script outputs a JSON file summarizing system metri
 contains:
 
 - `report_version`: version of the generator used to produce the report.
-- `schema_version`: integer identifying the JSON schema version.
+- `schema_version`: integer identifying the JSON schema version (currently 3).
 - `os`: details about the operating system (may be absent).
 - `os.name`: distribution name (e.g. `Ubuntu`).
 - `os.version`: distribution version string.
@@ -42,11 +42,11 @@ contains:
 A minimal example:
 
 ```json
-{
-  "report_version": "1.4.0",
-  "schema_version": 2,
-  "os": {
-    "name": "Ubuntu",
+  {
+   "report_version": "1.4.0",
+   "schema_version": 3,
+   "os": {
+     "name": "Ubuntu",
     "version": "24.04.2 LTS",
     "codename": "Noble Numbat",
     "kernel": "6.8.0-40-generic",
