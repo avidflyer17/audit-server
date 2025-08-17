@@ -811,15 +811,16 @@ function showStatus(message, type) {
 }
 
 function renderTimeline(list) {
-  const timeline = document.getElementById('timeTimeline');
+  const timeline = document.getElementById('timeList');
   timeline.innerHTML = '';
   list.forEach(item => {
     const btn = document.createElement('button');
     btn.className = 'time-chip';
-    btn.textContent = item.time;
+    btn.innerHTML = `<i class="fa-regular fa-file-lines" aria-hidden="true"></i><span class="time-label">${item.time}</span>`;
     btn.dataset.file = item.file;
     btn.dataset.iso = item.iso.toISOString();
     btn.title = `${item.time} — ${formatRelative(item.iso)}`;
+    btn.setAttribute('aria-label', `Heure ${item.time}`);
     btn.addEventListener('click', () => selectTime(item.file));
     timeline.appendChild(btn);
   });
@@ -849,6 +850,8 @@ async function selectTime(file) {
     checkCompatibility(json);
     renderText(json);
     setActiveTime(file);
+    const chip = document.querySelector(`.time-chip[data-file="${file}"]`);
+    if (chip) document.dispatchEvent(new CustomEvent('onSelectHour', { detail: chip.dataset.iso }));
     if (typeof closeMenu === 'function') closeMenu();
   }
 }
@@ -1620,29 +1623,41 @@ async function init() {
   }
 
 
-  document.getElementById('btnLatest').addEventListener('click', async () => {
+  const latestEl = document.getElementById('latestCard');
+  const openLatest = async () => {
     if (!latestEntry) return;
     selectedDate = latestEntry.date;
     document.getElementById('datePicker').value = selectedDate;
     updateDayButtons();
     populateDay(selectedDate);
     await selectTime(latestEntry.file);
+    document.dispatchEvent(new CustomEvent('onOpenLatest'));
+  };
+  latestEl.addEventListener('click', openLatest);
+  latestEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openLatest();
+    }
   });
 
-  document.getElementById('dayToday').addEventListener('click', () => {
-    const day = new Date().toISOString().slice(0,10);
+  const applyDay = (day) => {
     document.getElementById('datePicker').value = day;
     selectedDate = day;
     updateDayButtons();
-    populateDay(day);
+    const file = populateDay(day);
+    if (file) selectTime(file);
+    document.dispatchEvent(new CustomEvent('onChangeDate', { detail: day }));
+  };
+
+  document.getElementById('dayToday').addEventListener('click', () => {
+    const day = new Date().toISOString().slice(0,10);
+    applyDay(day);
   });
 
   document.getElementById('dayYesterday').addEventListener('click', () => {
     const day = new Date(Date.now()-86400000).toISOString().slice(0,10);
-    document.getElementById('datePicker').value = day;
-    selectedDate = day;
-    updateDayButtons();
-    populateDay(day);
+    applyDay(day);
   });
 
   document.getElementById('dayCalendar').addEventListener('click', () => {
@@ -1652,9 +1667,23 @@ async function init() {
   });
 
   document.getElementById('datePicker').addEventListener('change', () => {
-    selectedDate = document.getElementById('datePicker').value;
-    updateDayButtons();
-    populateDay(selectedDate);
+    const day = document.getElementById('datePicker').value;
+    applyDay(day);
+  });
+
+  document.getElementById('prevDay').addEventListener('click', () => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() - 1);
+    applyDay(d.toISOString().slice(0,10));
+  });
+
+  document.getElementById('nextDay').addEventListener('click', () => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() + 1);
+    const day = d.toISOString().slice(0,10);
+    const today = new Date().toISOString().slice(0,10);
+    if (day > today) return;
+    applyDay(day);
   });
 
 
@@ -1662,8 +1691,6 @@ async function init() {
 }
 
 async function refreshAudits() {
-  const dot = document.getElementById('refreshDot');
-  dot.classList.add('active');
   const oldList = auditsMap[selectedDate] ? auditsMap[selectedDate].map(e => e.file) : [];
   const wasOnLatest = currentFile && latestEntry && currentFile === latestEntry.file;
   try {
@@ -1692,8 +1719,6 @@ async function refreshAudits() {
     }
   } catch (err) {
     console.error('refresh error', err);
-  } finally {
-    dot.classList.remove('active');
   }
 }
 
