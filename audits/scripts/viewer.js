@@ -812,18 +812,28 @@ function showStatus(message, type) {
 
 function renderTimeline(list) {
   const timeline = document.getElementById('timeList');
+  const picker = document.getElementById('timePicker');
   timeline.innerHTML = '';
+  if (picker) picker.innerHTML = '';
   list.forEach(item => {
     const btn = document.createElement('button');
     btn.className = 'time-chip';
-    btn.innerHTML = `<i class="fa-regular fa-file-lines" aria-hidden="true"></i><span class="time-label">${item.time}</span>`;
+    btn.textContent = item.time;
     btn.dataset.file = item.file;
     btn.dataset.iso = item.iso.toISOString();
     btn.title = `${item.time} — ${formatRelative(item.iso)}`;
-    btn.setAttribute('aria-label', `Heure ${item.time}`);
+    btn.setAttribute('aria-label', `Rapport de ${item.time}`);
     btn.addEventListener('click', () => selectTime(item.file));
     timeline.appendChild(btn);
+    if (picker) {
+      const opt = document.createElement('option');
+      opt.value = item.file;
+      opt.textContent = item.time;
+      opt.dataset.iso = item.iso.toISOString();
+      picker.appendChild(opt);
+    }
   });
+  if (picker) picker.disabled = list.length === 0;
 }
 
 function populateDay(day) {
@@ -836,11 +846,15 @@ function populateDay(day) {
   showStatus('');
   renderTimeline(list);
   const last = list[list.length - 1];
+  const picker = document.getElementById('timePicker');
+  if (picker) picker.value = last.file;
   return last.file;
 }
 
 function setActiveTime(file) {
   document.querySelectorAll('.time-chip').forEach(b => b.classList.toggle('active', b.dataset.file === file));
+  const picker = document.getElementById('timePicker');
+  if (picker && picker.value !== file) picker.value = file;
 }
 
 async function selectTime(file) {
@@ -850,8 +864,14 @@ async function selectTime(file) {
     checkCompatibility(json);
     renderText(json);
     setActiveTime(file);
+    let iso;
     const chip = document.querySelector(`.time-chip[data-file="${file}"]`);
-    if (chip) document.dispatchEvent(new CustomEvent('onSelectHour', { detail: chip.dataset.iso }));
+    if (chip) iso = chip.dataset.iso;
+    if (!iso) {
+      const opt = document.querySelector(`#timePicker option[value="${file}"]`);
+      if (opt) iso = opt.dataset.iso;
+    }
+    if (iso) document.dispatchEvent(new CustomEvent('onSelectHour', { detail: iso }));
     if (typeof closeMenu === 'function') closeMenu();
   }
 }
@@ -1686,6 +1706,13 @@ async function init() {
     applyDay(day);
   });
 
+  const pickerEl = document.getElementById('timePicker');
+  if (pickerEl) {
+    pickerEl.addEventListener('change', (e) => {
+      const file = e.target.value;
+      if (file) selectTime(file);
+    });
+  }
 
   setInterval(refreshAudits, 60000);
 }
