@@ -70,13 +70,14 @@
             <button id="dayCalendar" class="seg" aria-label="Choisir une date" title="Choisir une date"><i class="fa-solid fa-calendar"></i></button>
             <input type="date" id="datePicker" class="sr-only" />
           </div>
+          <select id="timePicker" class="time-picker" aria-label="Sélectionner l'heure du rapport"></select>
           <button id="nextDay" class="nav-arrow" aria-label="Jour suivant">▶</button>
         </div>
 
         <div id="selectorStatus" aria-live="polite"></div>
 
         <div class="timeline-wrapper">
-          <div id="timeList" class="timeline" aria-live="polite"></div>
+          <div id="timeList" class="time-grid" aria-live="polite"></div>
         </div>
       </div>
     </div>
