@@ -18,6 +18,7 @@ done
 
 for file in "${files[@]}"; do
   jq empty "$file"
+  jq -e '.schema_version == 3' "$file" >/dev/null
   jq -e '.cpu.model | length > 0' "$file" >/dev/null
   jq -e '.cpu.cores | tonumber > 0' "$file" >/dev/null
   jq -e '.ports | type == "array"' "$file" >/dev/null

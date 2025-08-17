@@ -9,7 +9,7 @@ BASE_DIR="${BASE_DIR:-$(pwd)/audits}"
 
 # 🔢 Versionning du générateur et du schéma
 REPORT_VERSION="1.4.0"
-SCHEMA_VERSION=2
+SCHEMA_VERSION=3
 
 # ✅ Commandes requises
 REQUIRED_CMDS=(mpstat sensors jq bc docker)
