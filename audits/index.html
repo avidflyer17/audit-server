@@ -54,27 +54,31 @@
       </div>
 
       <div class="report-grid">
-        <button id="btnLatest" class="btn primary">
-          <span><i class="fa-solid fa-bolt"></i></span>
-          <span class="label">Voir le dernier rapport</span>
-          <small id="latestInfo" class="subinfo"></small>
-        </button>
+        <div id="latestCard" class="latest-card" role="button" tabindex="0" aria-label="Ouvrir le dernier rapport">
+          <div class="latest-text">
+            <div class="latest-title">Dernier rapport</div>
+            <div id="latestInfo" class="latest-details"></div>
+          </div>
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </div>
 
-        <div class="day-control" role="group" aria-label="Choisir un jour">
-          <button id="dayToday" class="seg">Aujourd'hui</button>
-          <button id="dayYesterday" class="seg">Hier</button>
-          <button id="dayCalendar" class="seg" aria-label="Choisir une date" title="Choisir une date"><i class="fa-solid fa-calendar"></i></button>
-          <input type="date" id="datePicker" class="sr-only" />
+        <div class="day-nav">
+          <button id="prevDay" class="nav-arrow" aria-label="Jour précédent">◀</button>
+          <div class="day-control" role="group" aria-label="Choisir un jour">
+            <button id="dayToday" class="seg">Aujourd'hui</button>
+            <button id="dayYesterday" class="seg">Hier</button>
+            <button id="dayCalendar" class="seg" aria-label="Choisir une date" title="Choisir une date"><i class="fa-solid fa-calendar"></i></button>
+            <input type="date" id="datePicker" class="sr-only" />
+          </div>
+          <button id="nextDay" class="nav-arrow" aria-label="Jour suivant">▶</button>
         </div>
 
         <div id="selectorStatus" aria-live="polite"></div>
 
         <div class="timeline-wrapper">
-          <div id="timeTimeline" class="timeline" aria-live="polite"></div>
+          <div id="timeList" class="timeline" aria-live="polite"></div>
         </div>
       </div>
-
-      <span id="refreshDot" class="refresh-dot" aria-label="Actualisation automatique" title="Actualisation automatique"></span>
     </div>
   </aside>
   <div id="menuOverlay"></div>
