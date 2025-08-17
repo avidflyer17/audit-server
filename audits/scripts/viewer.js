@@ -890,22 +890,17 @@ function showUpdateBadge() {
   });
 }
 
-function semverLt(a, b) {
-  const pa = String(a || '').split('.').map((n) => parseInt(n, 10) || 0);
-  const pb = String(b || '').split('.').map((n) => parseInt(n, 10) || 0);
-  for (let i = 0; i < 3; i++) {
-    if (pa[i] < pb[i]) return true;
-    if (pa[i] > pb[i]) return false;
-  }
-  return false;
+function semverMajor(v) {
+  const [major] = String(v || '').split('.');
+  return parseInt(major, 10) || 0;
 }
 
 function checkCompatibility(json) {
   const rv = json.report_version;
   const sv = json.schema_version;
-  const reportOld = !rv || semverLt(rv, viewerVersion);
+  const reportOld = semverMajor(rv) !== semverMajor(viewerVersion);
   const schemaOld = sv == null || sv < viewerSchema;
-  if (reportOld || schemaOld) {
+  if (!rv || reportOld || schemaOld) {
     const details = `Rapport v${rv || 'N/A'} · UI v${viewerVersion}`;
     showNotification({
       title: 'Rapport ancien',
