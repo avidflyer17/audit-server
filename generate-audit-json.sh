@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # ✅ Commandes requises
-REQUIRED_CMDS=(mpstat sensors jq bc docker)
+# Docker est optionnel : s'il n'est pas présent, la collecte des conteneurs sera ignorée.
+REQUIRED_CMDS=(mpstat sensors jq bc)
 for cmd in "${REQUIRED_CMDS[@]}"; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "❌ Commande requise manquante : $cmd" >&2
@@ -108,7 +109,8 @@ collect_services() {
 
 # 🐳 Docker
 DOCKER_CONTAINERS="[]"
-if command -v docker >/dev/null 2>&1; then
+# La collecte n'est effectuée que si Docker est disponible et fonctionnel.
+if command -v docker >/dev/null 2>&1 && timeout 5 docker info >/dev/null 2>&1; then
   declare -A CPU MEM_PCT MEM_USED MEM_LIMIT
   while IFS= read -r line; do
     name=$(echo "$line" | sed -n 's/.*"Name":"\([^\"]*\)".*/\1/p')
