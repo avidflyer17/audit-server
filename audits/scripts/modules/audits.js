@@ -1,5 +1,6 @@
 import { renderServices } from './services.js';
 import { renderDocker } from './docker.js';
+import { parseIndex, getLatest, groupByDay } from './timeline.js';
 
 export let auditsIndex = [];
 export let auditsMap = {};
@@ -16,26 +17,6 @@ export async function loadAudit(file) {
   return await res.json();
 }
 
-export function parseIndex(list) {
-  auditsIndex = list || [];
-  auditsMap = {};
-  latestEntry = null;
-  auditsIndex.forEach((file) => {
-    const match = file.match(/audit_(\d{4}-\d{2}-\d{2})_(\d{2}-\d{2})\.json/);
-    if (!match) return;
-    const date = match[1];
-    const time = match[2].replace('-', ':');
-    const iso = new Date(`${date}T${time}:00`);
-    const entry = { file, time, iso, date };
-    if (!auditsMap[date]) auditsMap[date] = [];
-    auditsMap[date].push(entry);
-    if (!latestEntry || iso > latestEntry.iso) latestEntry = entry;
-  });
-  Object.keys(auditsMap).forEach((d) =>
-    auditsMap[d].sort((a, b) => a.iso - b.iso),
-  );
-  return auditsMap;
-}
 
 export function showStatus(message, type) {
   const div = document.getElementById('selectorStatus');
@@ -47,12 +28,15 @@ export async function init() {
   try {
     showStatus('Chargement…', 'loading');
     const list = await fetchIndex();
-    parseIndex(list);
+    auditsIndex = list || [];
+    const parsed = parseIndex(list);
+    auditsMap = Object.fromEntries(groupByDay(parsed));
+    latestEntry = getLatest(parsed);
     if (!latestEntry) {
       showStatus('Aucun rapport', 'empty');
       return;
     }
-    const data = await loadAudit(latestEntry.file);
+    const data = await loadAudit(latestEntry.path);
     renderServices(data.services || []);
     renderDocker(data.docker || []);
     showStatus('');
