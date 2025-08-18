@@ -69,6 +69,7 @@ PORTS=$(ss -tuln | awk 'NR>1 {split($5,a,":" ); port=a[length(a)]; if (port ~ /^
   | jq -Rn '[inputs | split(" ") | map(select(length>0)) | select(length==2) | {"proto": .[0], "port": .[1]}]')
 
 # 📦 Conversion d'unités en octets
+# Les unités KB, MB et GB sont interprétées en base 1024
 to_bytes() {
   local input="$1"
   local num unit factor
@@ -76,9 +77,9 @@ to_bytes() {
   unit=$(echo "$input" | tr ',' '.' | sed -E 's/[0-9\.]+(.*)/\1/')
   case "$unit" in
     B)   factor=1 ;;
-    KB)  factor=1000 ;;
-    MB)  factor=1000000 ;;
-    GB)  factor=1000000000 ;;
+    KB)  factor=1024 ;;
+    MB)  factor=$((1024*1024)) ;;
+    GB)  factor=$((1024*1024*1024)) ;;
     KiB) factor=1024 ;;
     MiB) factor=$((1024*1024)) ;;
     GiB) factor=$((1024*1024*1024)) ;;
