@@ -29,7 +29,6 @@ TIMESTAMP=$(date "+%Y-%m-%d_%H-%M")
 HUMAN_DATE=$(date "+%d/%m/%Y à %H:%M")
 
 # 📁 Dossiers (modifiable avec la variable d'environnement BASE_DIR)
-BASE_DIR="${BASE_DIR:-./audits}"
 ARCHIVE_DIR="$BASE_DIR/archives"
 OUTPUT_FILE="${ARCHIVE_DIR}/audit_${TIMESTAMP}.json"
 mkdir -p "$ARCHIVE_DIR"
