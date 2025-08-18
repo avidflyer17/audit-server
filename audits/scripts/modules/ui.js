@@ -70,3 +70,15 @@ export function adjustBarValue(valueEl, fillEl, val) {
   }
   valueEl.style.color = contrastColor(bg);
 }
+
+export function setupSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('menuToggle');
+  const overlay = document.getElementById('menuOverlay');
+  if (!sidebar || !toggle || !overlay) return;
+  const close = () => sidebar.classList.remove('open');
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
+  overlay.addEventListener('click', close);
+}

@@ -1,6 +1,7 @@
 import { renderServices } from './services.js';
 import { renderDocker } from './docker.js';
 import { parseIndex, getLatest, groupByDay } from './timeline.js';
+import { setupSidebar } from './ui.js';
 
 export let auditsIndex = [];
 export let auditsMap = {};
@@ -25,6 +26,7 @@ export function showStatus(message, type) {
 }
 
 export async function init() {
+  setupSidebar();
   try {
     showStatus('Chargement…', 'loading');
     const list = await fetchIndex();

@@ -229,6 +229,18 @@
       return "color-warning";
     return "color-danger";
   }
+  function setupSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const toggle = document.getElementById("menuToggle");
+    const overlay = document.getElementById("menuOverlay");
+    if (!sidebar || !toggle || !overlay)
+      return;
+    const close = () => sidebar.classList.remove("open");
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
+    overlay.addEventListener("click", close);
+  }
 
   // audits/scripts/modules/docker.js
   var dockerData = [];
@@ -423,6 +435,7 @@
     div.textContent = message || "";
   }
   async function init() {
+    setupSidebar();
     try {
       showStatus("Chargement\u2026", "loading");
       const list = await fetchIndex();
