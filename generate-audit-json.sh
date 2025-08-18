@@ -58,7 +58,15 @@ OS_JSON=$(jq -n --arg name "$OS_NAME" --arg version "$OS_VERSION" --arg codename
 
 # 💽 Disques
 DISK_ROOT=$(df -h / | awk 'NR==2 {print "{\"filesystem\":\""$1"\",\"size\":\""$2"\",\"used\":\""$3"\",\"available\":\""$4"\",\"used_percent\":\""$5"\",\"mountpoint\":\""$6"\"}"}')
-DISK_HOME=$(df -h /home | awk 'NR==2 {print "{\"filesystem\":\""$1"\",\"size\":\""$2"\",\"used\":\""$3"\",\"available\":\""$4"\",\"used_percent\":\""$5"\",\"mountpoint\":\""$6"\"}"}')
+DISK_HOME=null
+if [ -d /home ]; then
+  DISK_HOME=$(df -h /home | awk 'NR==2 {print "{\"filesystem\":\""$1"\",\"size\":\""$2"\",\"used\":\""$3"\",\"available\":\""$4"\",\"used_percent\":\""$5"\",\"mountpoint\":\""$6"\"}"}')
+fi
+DISKS_JSON="[$DISK_ROOT"
+if [ "$DISK_HOME" != "null" ]; then
+  DISKS_JSON="$DISKS_JSON, $DISK_HOME"
+fi
+DISKS_JSON="$DISKS_JSON]"
 
 # 🔧 Processus gourmands
 TOP_CPU=$(ps -eo pid,comm,%cpu,%mem --sort=-%cpu | head -n 6 | jq -Rn '[inputs | split(" ") | map(select(length > 0)) | select(length >= 4) | {"pid": .[0], "cmd": .[1], "cpu": .[2], "mem": .[3]}]')
@@ -187,8 +195,7 @@ jq -n \
   --arg ip_local "$IP_LOCAL" \
   --arg ip_pub "$IP_PUBLIQUE" \
   --argjson memory "$MEMORY_JSON" \
-  --argjson disk_root "$DISK_ROOT" \
-  --argjson disk_home "$DISK_HOME" \
+  --argjson disks "$DISKS_JSON" \
   --argjson cpu "$CPU_JSON" \
   --arg cpu_color "$CPU_COLOR" \
   --argjson services "$SERVICES_JSON" \
@@ -207,7 +214,7 @@ jq -n \
     uptime: $uptime,
     load_average: $load_avg,
     memory: $memory,
-    disks: [$disk_root, $disk_home],
+    disks: $disks,
     cpu: $cpu,
     cpu_load_color: $cpu_color,
     services: $services,
