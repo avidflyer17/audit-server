@@ -11,8 +11,8 @@ BASE_DIR="${BASE_DIR:-$(pwd)/audits}"
 REPORT_VERSION="1.4.0"
 SCHEMA_VERSION=3
 
-# ✅ Commandes requises
-REQUIRED_CMDS=(mpstat sensors jq bc docker)
+# ✅ Commandes requises (Docker est géré séparément)
+REQUIRED_CMDS=(mpstat sensors jq bc)
 for cmd in "${REQUIRED_CMDS[@]}"; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "❌ Commande requise manquante : $cmd" >&2
@@ -128,7 +128,7 @@ collect_services() {
   echo "${services:-[]}"
 }
 
-# 🐳 Docker
+# 🐳 Docker (si installé)
 DOCKER_CONTAINERS="[]"
 if command -v docker >/dev/null 2>&1; then
   declare -A CPU MEM_PCT MEM_USED MEM_LIMIT

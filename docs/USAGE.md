@@ -18,6 +18,9 @@ This document provides extra details on how to use the audit script and serve th
    sudo apt-get install -y bc jq curl lm-sensors sysstat
    ```
 
+Docker n'est pas requis. Si Docker est disponible sur le système,
+le script ajoutera simplement les statistiques des conteneurs au rapport.
+
 ## 📊 Generating reports
 
 The `generate-audit-json.sh` script collects system information and writes it as JSON files. By default, reports
