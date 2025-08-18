@@ -6,12 +6,12 @@ export let auditsMap = {};
 export let latestEntry = null;
 
 export async function fetchIndex() {
-  const res = await fetch('/archives/index.json');
+  const res = await fetch('archives/index.json');
   return await res.json();
 }
 
 export async function loadAudit(file) {
-  const res = await fetch('/archives/' + file);
+  const res = await fetch('archives/' + file);
   if (!res.ok) throw new Error('Fichier inaccessible');
   return await res.json();
 }
