@@ -217,7 +217,7 @@ jq -n \
     docker: { containers: $docker_containers }
   } | del(.os | nulls)' > "$OUTPUT_FILE"
 # 🧹 Nettoyage des anciens fichiers
-find "$ARCHIVE_DIR" -type f -name "audit_*.json" | sort | head -n -21 | xargs -r rm
+find "$ARCHIVE_DIR" -type f -name "audit_*.json" | sort | head -n -60 | xargs -r rm
 
 # 🔄 Mise à jour index.json
 find "$ARCHIVE_DIR" -maxdepth 1 -name "audit_*.json" -printf "%f\n" | sort -r | jq -R . | jq -s . > "$ARCHIVE_DIR/index.json"
