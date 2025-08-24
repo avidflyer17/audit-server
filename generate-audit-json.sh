@@ -74,8 +74,8 @@ collect_memory() {
   local free_output mem_total mem_used mem_free mem_shared mem_buff_cache mem_available
   local swap_total swap_used swap_free
   free_output=$(free -h)
-    read -r _ mem_total mem_used mem_free mem_shared mem_buff_cache mem_available <<< "$(echo "$free_output" | awk 'NR==2 {print $2, $3, $4, $5, $6, $7}')"
-    read -r _ swap_total swap_used swap_free <<< "$(echo "$free_output" | awk 'NR==3 {print $2, $3, $4}')"
+  read -r mem_total mem_used mem_free mem_shared mem_buff_cache mem_available <<< "$(echo "$free_output" | awk 'NR==2 {print $2, $3, $4, $5, $6, $7}')"
+  read -r swap_total swap_used swap_free <<< "$(echo "$free_output" | awk 'NR==3 {print $2, $3, $4}')"
   jq -n \
     --arg total "$mem_total" \
     --arg used "$mem_used" \
