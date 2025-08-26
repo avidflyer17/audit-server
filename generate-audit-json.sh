@@ -40,8 +40,11 @@ IP_PUBLIQUE=$(curl -s --max-time 5 ifconfig.me 2>/dev/null || echo "N/A")
 
 # 💽 Disques
 DISK_ROOT=$(df -h / | awk 'NR==2 {print "{\"filesystem\":\""$1"\",\"size\":\""$2"\",\"used\":\""$3"\",\"available\":\""$4"\",\"used_percent\":\""$5"\",\"mountpoint\":\""$6"\"}"}')
-if [ -d /home ]; then
-  DISK_HOME=$(df -h /home | awk 'NR==2 {print "{\"filesystem\":\""$1"\",\"size\":\""$2"\",\"used\":\""$3"\",\"available\":\""$4"\",\"used_percent\":\""$5"\",\"mountpoint\":\""$6"\"}"}')
+# Allow overriding the path checked for the home mount so tests can simulate its absence without
+# touching the real /home directory.
+HOME_MOUNT="${HOME_MOUNT:-/home}"
+if [ -d "$HOME_MOUNT" ]; then
+  DISK_HOME=$(df -h "$HOME_MOUNT" | awk 'NR==2 {print "{\"filesystem\":\""$1"\",\"size\":\""$2"\",\"used\":\""$3"\",\"available\":\""$4"\",\"used_percent\":\""$5"\",\"mountpoint\":\""$6"\"}"}')
 else
   DISK_HOME=null
 fi
