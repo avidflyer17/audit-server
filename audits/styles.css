@@ -520,6 +520,8 @@ h1 {
       padding: 0.5rem 1rem;
       padding-right: calc(1rem + var(--gap-2));
       z-index: 1100;
+      margin-left: calc(var(--gap-4) * -1);
+      margin-right: calc(var(--gap-4) * -1);
     }
 
     .top-brand {
