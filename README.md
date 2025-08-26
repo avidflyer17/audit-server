@@ -27,8 +27,8 @@ interface that can be served by Nginx.
    ./generate-audit-json.sh
    ```
 
-By default, the script writes reports to `./audits/archives`. Override the location by setting the `BASE_DIR`
-environment variable:
+By default, the script writes reports to `audits/archives` next to the script, ensuring the path remains
+consistent even when invoked from cron. Override the location by setting the `BASE_DIR` environment variable:
 
 ```bash
 BASE_DIR=/path/to/audits ./generate-audit-json.sh
