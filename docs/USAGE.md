@@ -21,7 +21,8 @@ This document provides extra details on how to use the audit script and serve th
 ## 📊 Generating reports
 
 The `generate-audit-json.sh` script collects system information and writes it as JSON files. By default, reports
-are stored under `./audits`. You can override this location by setting the `BASE_DIR` environment variable:
+are stored under `audits` next to the script, so running it from cron or other directories uses the same location.
+You can override this location by setting the `BASE_DIR` environment variable:
 
 ```bash
 BASE_DIR=/path/to/audits ./generate-audit-json.sh
