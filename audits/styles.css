@@ -92,7 +92,7 @@ body {
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-base);
-  padding: var(--gap-5) var(--gap-4) var(--gap-4);
+  padding: 0 var(--gap-4) var(--gap-4);
 }
 
 h1 {
@@ -508,7 +508,7 @@ h1 {
     }
 
     .top-bar {
-      position: fixed;
+      position: sticky;
       top: 0;
       left: 0;
       width: 100%;
@@ -1340,7 +1340,7 @@ h1 {
 
     @media screen and (max-width: 600px) {
       body {
-        padding: 3.5rem 1rem 1rem;
+        padding: 0 1rem 1rem;
       }
       h1 {
         font-size: 1.5rem;
@@ -1394,7 +1394,7 @@ h1 {
 
   main {
     max-width: 900px;
-    margin: calc(var(--gap-5) + var(--gap-3)) auto 0;
+    margin: var(--gap-4) auto 0;
   }
 
   @media (min-width: 1024px) {
