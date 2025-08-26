@@ -45,7 +45,8 @@ for file in "${files[@]}"; do
   jq empty "$file"
   jq -e '.cpu.model | length > 0' "$file" >/dev/null
   jq -e '.cpu.cores | tonumber > 0' "$file" >/dev/null
-  jq -e '.ports | type == "array"' "$file" >/dev/null
+  jq -e '.ports.entries | type == "array"' "$file" >/dev/null
+  jq -e '.ports.meta.privileged != null' "$file" >/dev/null
   jq -e '.docker.containers | type == "array"' "$file" >/dev/null
 done
 

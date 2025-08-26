@@ -12,7 +12,7 @@ for cmd in "${REQUIRED_CMDS[@]}"; do
 done
 
 # 🛠 Script de génération de rapport d'audit système
-export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH
 
 
 # 📅 Timestamp
@@ -51,8 +51,7 @@ TOP_CPU=$(ps -eo pid,comm,%cpu,%mem --sort=-%cpu | head -n 6 | jq -Rn '[inputs |
 TOP_MEM=$(ps -eo pid,comm,%mem,%cpu --sort=-%mem | head -n 6 | jq -Rn '[inputs | split(" ") | map(select(length > 0)) | select(length >= 4) | {"pid": .[0], "cmd": .[1], "mem": .[2], "cpu": .[3]}]')
 
 # 🌐 Ports ouverts
-PORTS=$(ss -tuln | awk 'NR>1 {split($5,a,":" ); port=a[length(a)]; if (port ~ /^[0-9]+$/) print $1, port}' \
-  | jq -Rn '[inputs | split(" ") | map(select(length>0)) | select(length==2) | {"proto": .[0], "port": .[1]}]')
+PORTS=$(node scripts/collect-open-ports.js)
 
 # 📦 Conversion d'unités en octets
 to_bytes() {

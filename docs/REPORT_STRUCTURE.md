@@ -23,7 +23,18 @@ contains:
 - `services`: array of active systemd service names.
 - `top_cpu`: list of processes consuming the most CPU (`pid`, `cmd`, `cpu`, `mem`).
 - `top_mem`: list of processes consuming the most memory (`pid`, `cmd`, `mem`, `cpu`).
-- `ports`: array of listening network ports (`proto`, `port`).
+- `ports`: object describing listening network ports and tooling metadata.
+  - `meta`: generation context (`generated_at`, `host`, `ips_host`, `docker_networks`, `privileged`, `tooling`).
+  - `entries`: array grouped by `proto`/`port` with exposure details.
+    - `proto`: `tcp` or `udp`.
+    - `port`: numeric port.
+    - `ip_versions`: set of `"ipv4"`/`"ipv6"` seen for this port.
+    - `services`: detected service names.
+    - `scopes`: exposure classification such as `Public`, `Localhost`, `Docker`, or `System`.
+    - `bindings`: list of bindings (`local_address`, `scope`, `pid`, `process`, `source`, `state`).
+    - `risk`: object `{ level, reasons[] }` summarizing severity.
+    - `counts`: aggregate counters (`bindings`, `public_bindings`, `processes`).
+    - `copy_hints`: short text helpers for the UI.
 - `docker`: object with `containers` array, each entry containing:
   - `name`, `state`, `health`, `uptime`.
   - `has_stats`: `true` if resource statistics are available.
@@ -64,7 +75,29 @@ A minimal example:
   "services": ["sshd.service"],
   "top_cpu": [],
   "top_mem": [],
-  "ports": [ { "proto": "tcp", "port": "22" } ],
+  "ports": {
+    "meta": {
+      "generated_at": "...",
+      "host": "server1",
+      "privileged": true,
+      "tooling": { "ss": { "cmd": "ss -tulnH", "version": "iproute2" } }
+    },
+    "entries": [
+      {
+        "proto": "tcp",
+        "port": 22,
+        "ip_versions": ["ipv4"],
+        "services": ["ssh"],
+        "scopes": ["Public"],
+        "bindings": [
+          { "local_address": "0.0.0.0", "scope": "Public", "pid": 123, "process": "sshd", "source": "ss", "state": "LISTEN", "notes": "" }
+        ],
+        "risk": { "level": "critical", "reasons": ["ssh exposed publicly"] },
+        "counts": { "bindings": 1, "public_bindings": 1, "processes": 1 },
+        "copy_hints": { "summary": "tcp/22 - ssh", "mitigation": "ufw deny 22/tcp" }
+      }
+    ]
+  },
   "docker": { "containers": [] }
 }
 ```
