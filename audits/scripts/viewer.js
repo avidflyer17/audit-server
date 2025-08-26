@@ -334,218 +334,336 @@ function renderServices(names){
   applyServiceFilters();
 }
 
-const PORT_FILTERS = ['TCP','UDP','Public','Localhost','Docker','System','Unknown'];
+const PORT_PROTO = ['tcp', 'udp'];
+const PORT_SCOPES = ['Public', 'Localhost', 'Docker', 'System', 'Unknown'];
+const PORT_RISKS = ['critical', 'warn', 'local', 'low'];
+const PORT_CATS = [
+  { key: 'web', label: 'Web' },
+  { key: 'admin', label: 'Admin' },
+  { key: 'db', label: 'DB' },
+  { key: 'fileshare', label: 'Fileshare' },
+  { key: 'infra', label: 'Infra' },
+  { key: 'unknown', label: 'Autre' }
+];
+const RISK_ORDER = { critical: 0, warn: 1, local: 2, low: 3 };
+
 let portsData = [];
 let filteredPorts = [];
-let activePortFilters = new Set(PORT_FILTERS);
+let filters = {
+  proto: new Set(PORT_PROTO),
+  scope: new Set(PORT_SCOPES),
+  risk: new Set(PORT_RISKS),
+  category: new Set(PORT_CATS.map(c => c.key))
+};
 let portSearch = '';
-let portSort = 'port-asc';
+let sortKey = 'risk';
+let sortDir = 1;
 let portsInit = false;
 
-const WELL_KNOWN = {
-  '22':'ssh',
-  '53':'dns',
-  '80':'http',
-  '443':'https',
-  '445':'smb',
-  '139':'smb',
-  '111':'rpcbind',
-  '3306':'mysql',
-  '5432':'postgres',
-  '6379':'redis',
-  '9100':'node-exporter',
-  '123':'ntp'
-};
-
-const SENSITIVE_PORTS = [22,80,443,445,139,3306,5432,6379];
-
-function parseAddr(portStr){
-  const ipv6 = portStr.match(/^\[([^\]]+)]:(\d+)/);
-  if (ipv6) return {ip:ipv6[1].split('%')[0], port:ipv6[2]};
-  const parts = portStr.split(':');
-  const port = parts.pop();
-  const ip = parts.join(':') || '*';
-  return {ip, port};
+function createCopyButton(label, getter){
+  const btn = document.createElement('button');
+  btn.className = 'copy-btn';
+  btn.title = label;
+  btn.setAttribute('aria-label', label);
+  btn.innerHTML = '<i class="fa-regular fa-copy"></i>';
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const text = getter();
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+      setTimeout(() => { btn.innerHTML = original; }, 1000);
+    });
+  });
+  return btn;
 }
 
-function getService(port){
-  return WELL_KNOWN[port] || 'Unknown';
+function buildSummary(p){
+  const svc = p.services[0] || 'unknown';
+  const scopes = p.scopes.join(', ') || 'None';
+  const reasons = p.risk.reasons.join(' + ');
+  return `${p.proto}/${p.port} ${svc} — scopes: ${scopes}; bindings: ${p.counts.bindings}; procs: ${p.counts.processes}; risk: ${p.risk.level}${reasons ? ` (${reasons})` : ''}`;
 }
 
-function getIcon(service, port, proto, ip){
-  const n = Number(port);
-  if (ip.startsWith('172.17.') || /docker|containerd/i.test(service)) return '🐳';
-  if (service === 'ssh' || n===22) return '🔐';
-  if (service === 'dns' || n===53) return '🌐';
-  if (service === 'http' || n===80 || n===443) return '🌍';
-  if (service === 'smb' || n===445 || n===139) return '🗂️';
-  if (n===111 || n===2049) return '📡';
-  if (service === 'mysql' || n===3306) return '🛢️';
-  if (service === 'postgres' || n===5432) return '🐘';
-  if (service === 'redis' || n===6379) return '⚡';
-  if (service === 'node-exporter' || n===9100) return '📈';
-  if (service === 'ntp' || n===123) return '🕒';
-  return '◻️';
+function buildMitigation(p){
+  if (p.scopes.includes('Public')) {
+    return `ufw deny proto ${p.proto} from any to any port ${p.port}`;
+  }
+  return '# non public — vérifier règles locales';
 }
 
-function getBadges(ip, service){
-  const badges = [];
-  if (ip.startsWith('172.17.')) badges.push('Docker');
-  if (/^127\./.test(ip) || ip==='::1') badges.push('Localhost');
-  if (ip==='0.0.0.0' || ip==='*' || ip==='::' || ip==='[::]') badges.push('Public');
-  if (['ssh','dns','http','https','smb','rpcbind','mysql','postgres','redis','node-exporter','ntp'].includes(service)) badges.push('System');
-  if (service === 'Unknown') badges.push('Unknown');
-  return badges;
+function renderPortDetails(p){
+  const wrap = document.createElement('div');
+  const info = document.createElement('div');
+  const reasons = p.risk.reasons.join(' + ');
+  info.className = 'details-info';
+  info.textContent = `Services: ${p.services.join(', ')}${reasons ? ' — ' + reasons : ''}`;
+  wrap.appendChild(info);
+  const table = document.createElement('table');
+  table.className = 'bindings-table';
+  table.innerHTML = '<thead><tr><th>Adresse</th><th>IP</th><th>Scope</th><th>État</th><th>Processus</th><th>Utilisateur</th></tr></thead>';
+  const tb = document.createElement('tbody');
+  p.bindings.forEach(b => {
+    const tr = document.createElement('tr');
+    const addrTd = document.createElement('td');
+    const parts = b.local_address.split('%');
+    if (parts[1]) addrTd.innerHTML = `${parts[0]}<span class="iface">%${parts[1]}</span>`; else addrTd.textContent = b.local_address;
+    tr.appendChild(addrTd);
+    const ipTd = document.createElement('td');
+    ipTd.textContent = b.ip_version;
+    tr.appendChild(ipTd);
+    const scTd = document.createElement('td');
+    scTd.textContent = b.scope;
+    tr.appendChild(scTd);
+    const stTd = document.createElement('td');
+    stTd.textContent = b.state || '—';
+    tr.appendChild(stTd);
+    const prTd = document.createElement('td');
+    prTd.textContent = (b.process && b.pid) ? `${b.process}[${b.pid}]` : '—';
+    tr.appendChild(prTd);
+    const usTd = document.createElement('td');
+    usTd.textContent = b.user || '—';
+    tr.appendChild(usTd);
+    tb.appendChild(tr);
+  });
+  table.appendChild(tb);
+  wrap.appendChild(table);
+  return wrap;
 }
 
-function getRisk(ip, port, service){
-  const n = Number(port);
-  const sensitive = SENSITIVE_PORTS.includes(n) || (n>=9000 && n<=10000);
-  const isPublic = ip==='0.0.0.0' || ip==='*' || ip==='::' || ip==='[::]';
-  const isLan = /^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[01])\./.test(ip) || ip.startsWith('172.17.');
-  const isLocal = /^127\./.test(ip) || ip==='::1';
-  if (isPublic && sensitive) return 'high';
-  if ((isLan) && sensitive) return 'medium';
-  return 'low';
+function updateChipCounts(){
+  const counts = { proto:{}, scope:{}, risk:{}, category:{} };
+  filteredPorts.forEach(p => {
+    counts.proto[p.proto] = (counts.proto[p.proto] || 0) + 1;
+    p.scopes.forEach(s => { counts.scope[s] = (counts.scope[s] || 0) + 1; });
+    counts.risk[p.risk.level] = (counts.risk[p.risk.level] || 0) + 1;
+    counts.category[p.category] = (counts.category[p.category] || 0) + 1;
+  });
+  document.querySelectorAll('#protoFilters .filter-chip').forEach(ch => {
+    const v = ch.dataset.value; ch.querySelector('.count').textContent = counts.proto[v] || 0;
+  });
+  document.querySelectorAll('#scopeFilters .filter-chip').forEach(ch => {
+    const v = ch.dataset.value; ch.querySelector('.count').textContent = counts.scope[v] || 0;
+  });
+  document.querySelectorAll('#riskFilters .filter-chip').forEach(ch => {
+    const v = ch.dataset.value; ch.querySelector('.count').textContent = counts.risk[v] || 0;
+  });
+  document.querySelectorAll('#catFilters .filter-chip').forEach(ch => {
+    const v = ch.dataset.value; ch.querySelector('.count').textContent = counts.category[v] || 0;
+  });
+}
+
+function matchSearch(p){
+  const hay = [
+    p.port,
+    p.proto,
+    ...(p.services || []),
+    ...p.bindings.map(b => b.local_address),
+    ...p.bindings.map(b => b.process || ''),
+    ...p.bindings.map(b => b.user || '')
+  ].join(' ').toLowerCase();
+  return hay.includes(portSearch);
+}
+
+function sortPorts(){
+  if (sortKey === 'port') {
+    filteredPorts.sort((a, b) => (a.port - b.port) * sortDir);
+  } else if (sortKey === 'service') {
+    filteredPorts.sort((a, b) => a.services[0].localeCompare(b.services[0]) * sortDir);
+  } else {
+    filteredPorts.sort((a, b) => {
+      const diff = RISK_ORDER[a.risk.level] - RISK_ORDER[b.risk.level];
+      if (diff !== 0) return diff * sortDir;
+      return a.port - b.port;
+    });
+  }
+}
+
+function applyPortFilters(){
+  filteredPorts = portsData.filter(p => {
+    if (!filters.proto.has(p.proto)) return false;
+    if (!p.scopes.some(s => filters.scope.has(s))) return false;
+    if (!filters.risk.has(p.risk.level)) return false;
+    if (!filters.category.has(p.category)) return false;
+    return matchSearch(p);
+  });
+  sortPorts();
+  updateChipCounts();
+  document.getElementById('portsCount').textContent = filteredPorts.length;
+  renderPortsTable();
+}
+
+function toggleRow(row, detail){
+  const expanded = row.getAttribute('aria-expanded') === 'true';
+  row.setAttribute('aria-expanded', !expanded);
+  detail.classList.toggle('hidden', expanded);
+  detail.setAttribute('aria-hidden', expanded);
+}
+
+function renderPortsTable(){
+  const tbody = document.getElementById('portsBody');
+  tbody.textContent = '';
+  if (!filteredPorts.length){
+    document.getElementById('portsEmpty').classList.remove('hidden');
+    return;
+  }
+  document.getElementById('portsEmpty').classList.add('hidden');
+  filteredPorts.forEach(p => {
+    const row = document.createElement('tr');
+    row.className = 'port-row';
+    row.tabIndex = 0;
+    row.setAttribute('aria-expanded', 'false');
+
+    const portTd = document.createElement('td');
+    portTd.textContent = `${p.proto}/${p.port}`;
+    row.appendChild(portTd);
+
+    const svcTd = document.createElement('td');
+    const svc = p.services[0] || '';
+    svcTd.textContent = svc;
+    if (p.services.length > 1){
+      const more = document.createElement('span');
+      more.className = 'more-svc';
+      more.textContent = ` (+${p.services.length - 1})`;
+      svcTd.appendChild(more);
+    }
+    row.appendChild(svcTd);
+
+    const catTd = document.createElement('td');
+    const catMeta = PORT_CATS.find(c => c.key === p.category);
+    const catBadge = document.createElement('span');
+    catBadge.className = `badge cat-${p.category}`;
+    catBadge.textContent = catMeta ? catMeta.label : p.category;
+    catTd.appendChild(catBadge);
+    row.appendChild(catTd);
+
+    const scopeTd = document.createElement('td');
+    p.scopes.forEach(s => {
+      const b = document.createElement('span');
+      b.className = 'badge scope-badge';
+      b.textContent = s;
+      scopeTd.appendChild(b);
+    });
+    row.appendChild(scopeTd);
+
+    const procTd = document.createElement('td');
+    procTd.textContent = p.counts.processes;
+    row.appendChild(procTd);
+
+    const bindTd = document.createElement('td');
+    bindTd.className = 'bindings-cell';
+    bindTd.textContent = p.counts.bindings;
+    row.appendChild(bindTd);
+
+    const riskTd = document.createElement('td');
+    const riskBadge = document.createElement('span');
+    riskBadge.className = `badge risk-${p.risk.level}`;
+    riskBadge.textContent = p.risk.level;
+    if (p.risk.reasons && p.risk.reasons.length) riskBadge.title = p.risk.reasons.join(' + ');
+    riskTd.appendChild(riskBadge);
+    row.appendChild(riskTd);
+
+    const actTd = document.createElement('td');
+    actTd.appendChild(createCopyButton('Copier résumé', () => buildSummary(p)));
+    actTd.appendChild(createCopyButton('Copier mitigation', () => buildMitigation(p)));
+    row.appendChild(actTd);
+
+    const detailRow = document.createElement('tr');
+    detailRow.className = 'details-row hidden';
+    detailRow.setAttribute('aria-hidden', 'true');
+    const detailTd = document.createElement('td');
+    detailTd.colSpan = 8;
+    detailTd.appendChild(renderPortDetails(p));
+    detailRow.appendChild(detailTd);
+
+    const toggle = () => toggleRow(row, detailRow);
+    row.addEventListener('click', e => { if (e.target.closest('.copy-btn')) return; toggle(); });
+    bindTd.addEventListener('click', e => { e.stopPropagation(); toggle(); });
+
+    tbody.appendChild(row);
+    tbody.appendChild(detailRow);
+  });
 }
 
 function initPortsUI(){
   if (portsInit) return;
   portsInit = true;
-  const searchInput = document.getElementById('portSearch');
-  const filtersDiv = document.getElementById('portFilters');
-  const sortSelect = document.getElementById('portSort');
-  const copyAllBtn = document.getElementById('portsCopy');
-  const legendDiv = document.getElementById('portsLegend');
-  if (legendDiv){
-    legendDiv.innerHTML='';
-    [
-      {cls:'low', label:'faible risque'},
-      {cls:'medium', label:'exposé localement'},
-      {cls:'high', label:'potentiellement exposé / critique'}
-    ].forEach(item=>{
-      const span=document.createElement('span');
-      span.innerHTML=`<span class="risk-dot ${item.cls}"></span>${item.label}`;
-      legendDiv.appendChild(span);
+  const buildChips = (id, list, type, map) => {
+    const container = document.getElementById(id);
+    list.forEach(item => {
+      const val = typeof item === 'string' ? item : item.key;
+      const label = typeof item === 'string' ? item.toUpperCase ? item.toUpperCase() : item : item.label;
+      const chip = document.createElement('button');
+      chip.className = 'filter-chip active';
+      chip.dataset.type = type;
+      chip.dataset.value = val;
+      chip.innerHTML = `${label} <span class="count"></span>`;
+      chip.addEventListener('click', () => {
+        const set = filters[type];
+        if (set.has(val)) set.delete(val); else set.add(val);
+        chip.classList.toggle('active');
+        applyPortFilters();
+      });
+      container.appendChild(chip);
     });
-  }
-  PORT_FILTERS.forEach(f => {
-    const chip = document.createElement('button');
-    chip.className='filter-chip active';
-    chip.textContent=f;
-    chip.dataset.filter=f;
-    chip.addEventListener('click', ()=>{
-      if (activePortFilters.has(f)) activePortFilters.delete(f); else activePortFilters.add(f);
-      chip.classList.toggle('active');
+  };
+  buildChips('protoFilters', PORT_PROTO, 'proto');
+  buildChips('scopeFilters', PORT_SCOPES, 'scope');
+  buildChips('riskFilters', PORT_RISKS, 'risk');
+  buildChips('catFilters', PORT_CATS, 'category');
+
+  const searchInput = document.getElementById('portSearch');
+  let t;
+  searchInput.addEventListener('input', e => {
+    clearTimeout(t);
+    t = setTimeout(() => { portSearch = e.target.value.toLowerCase(); applyPortFilters(); }, 250);
+  });
+
+  document.getElementById('portsCopy').addEventListener('click', () => {
+    const text = filteredPorts.map(p => buildSummary(p)).join('\n');
+    navigator.clipboard.writeText(text);
+  });
+
+  document.querySelectorAll('#portsTable th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.sort;
+      if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
       applyPortFilters();
     });
-    filtersDiv.appendChild(chip);
   });
-  searchInput.addEventListener('input', e=>{ portSearch = e.target.value.toLowerCase(); applyPortFilters(); });
-  sortSelect.addEventListener('change', e=>{ portSort = e.target.value; applyPortFilters(); });
-  if (copyAllBtn){
-    copyAllBtn.addEventListener('click', ()=>{
-      const text = filteredPorts.map(p=>`${p.ip}:${p.port}/${p.proto.toLowerCase()}`).join('\n');
-      navigator.clipboard.writeText(text);
-    });
-  }
-  document.getElementById('portsReset').addEventListener('click', ()=>{
-    portSearch='';
-    portSort='port-asc';
-    activePortFilters=new Set(PORT_FILTERS);
-    searchInput.value='';
-    sortSelect.value='port-asc';
-    document.querySelectorAll('#portFilters .filter-chip').forEach(c=>c.classList.add('active'));
+
+  document.getElementById('portsReset').addEventListener('click', () => {
+    filters = {
+      proto: new Set(PORT_PROTO),
+      scope: new Set(PORT_SCOPES),
+      risk: new Set(PORT_RISKS),
+      category: new Set(PORT_CATS.map(c => c.key))
+    };
+    portSearch = '';
+    searchInput.value = '';
+    document.querySelectorAll('.ports-filters .filter-chip').forEach(c => c.classList.add('active'));
     applyPortFilters();
   });
-}
 
-function applyPortFilters(){
-  filteredPorts = portsData.filter(p=>{
-    if (!activePortFilters.has(p.proto)) return false;
-    if (p.badges.includes('Public') && !activePortFilters.has('Public')) return false;
-    if (p.badges.includes('Localhost') && !activePortFilters.has('Localhost')) return false;
-    if (p.badges.includes('Docker') && !activePortFilters.has('Docker')) return false;
-    if (p.badges.includes('System') && !activePortFilters.has('System')) return false;
-    if (p.badges.includes('Unknown') && !activePortFilters.has('Unknown')) return false;
-    const hay = `${p.ip} ${p.port} ${p.service}`.toLowerCase();
-    return hay.includes(portSearch);
-  });
-  if (portSort==='port-asc') filteredPorts.sort((a,b)=>a.port-b.port);
-  else if (portSort==='port-desc') filteredPorts.sort((a,b)=>b.port-a.port);
-  else if (portSort==='service') filteredPorts.sort((a,b)=>a.service.localeCompare(b.service));
-  else if (portSort==='risk') {
-    const order={high:0,medium:1,low:2};
-    filteredPorts.sort((a,b)=>order[a.risk]-order[b.risk]);
+  const legend = document.getElementById('riskLegend');
+  if (legend) {
+    legend.innerHTML = PORT_RISKS.map(r => `<span class="badge risk-${r}">${r}</span>`).join(' ');
   }
-  renderPortsList();
 }
 
-function renderPortsList(){
-  const container = document.getElementById('portsContainer');
-  container.innerHTML='';
-  const totalSpan = document.getElementById('portsTotal');
-  totalSpan.textContent = portsData.length;
-  if (filteredPorts.length===0){
-    document.getElementById('portsEmpty').classList.remove('hidden');
-    return;
-  }
-  document.getElementById('portsEmpty').classList.add('hidden');
-  const byProto = {};
-  filteredPorts.forEach(p=>{ if(!byProto[p.proto]) byProto[p.proto]=[]; byProto[p.proto].push(p); });
-  const frag = document.createDocumentFragment();
-  ['TCP','UDP'].forEach(proto=>{
-    const list = byProto[proto] || [];
-    if (!list.length) return;
-    const acc = document.createElement('div');
-    acc.className='port-accordion open';
-    const header=document.createElement('button');
-    header.className='accordion-header';
-    header.innerHTML=`<span>${proto}</span><span class="count">${list.length}</span>`;
-    header.addEventListener('click',()=>acc.classList.toggle('open'));
-    acc.appendChild(header);
-    const body=document.createElement('div');
-    body.className='accordion-content';
-    const byIp={};
-    list.forEach(p=>{ if(!byIp[p.ip]) byIp[p.ip]=[]; byIp[p.ip].push(p); });
-    Object.entries(byIp).sort(([a],[b])=>a.localeCompare(b)).forEach(([ip,ports])=>{
-      const ipAcc=document.createElement('div');
-      ipAcc.className='ip-accordion open';
-      const ipHead=document.createElement('button');
-      ipHead.className='accordion-header';
-      ipHead.innerHTML=`<span>${ip}</span><span class="count">${ports.length}</span>`;
-      ipHead.addEventListener('click',()=>ipAcc.classList.toggle('open'));
-      ipAcc.appendChild(ipHead);
-      const ipBody=document.createElement('div');
-      ipBody.className='accordion-content';
-      ports.forEach(p=>{
-        const line=document.createElement('div');
-        line.className='port-line';
-        line.title=`${p.ip} • ${p.port} • ${p.service}`;
-        const badgesHtml=p.badges.map(b=>`<span class="badge">${b}</span>`).join('');
-        line.innerHTML=`<span class="service-icon">${p.icon}</span><span class="service-name">${p.service}</span><span class="port-mono">:${p.port}/${p.proto.toLowerCase()}</span><span class="badges">${badgesHtml}</span><span class="risk-dot ${p.risk}"></span><button class="copy-btn small" title="Copier">📋</button>`;
-        line.querySelector('.copy-btn').addEventListener('click',e=>{e.stopPropagation();navigator.clipboard.writeText(`${p.ip}:${p.port}/${p.proto.toLowerCase()}`);});
-        ipBody.appendChild(line);
-      });
-      ipAcc.appendChild(ipBody);
-      body.appendChild(ipAcc);
-    });
-    acc.appendChild(body);
-    frag.appendChild(acc);
-  });
-  container.appendChild(frag);
-}
-
-function renderPorts(ports){
+function renderPorts(list){
   initPortsUI();
-  portsData = (ports||[]).map(p=>{
-    const {ip,port} = parseAddr(p.port);
-    const service = getService(port);
-    const badges = getBadges(ip, service);
-    const risk = getRisk(ip, port, service);
-    const icon = getIcon(service, port, p.proto, ip);
-    return {proto:p.proto.toUpperCase(), ip, port:Number(port), service, badges, risk, icon};
-  });
+  portsData = Array.isArray(list) ? list.map(p => ({
+    proto: p.proto.toLowerCase(),
+    port: p.port,
+    services: p.services || ['unknown'],
+    category: p.category || 'unknown',
+    scopes: [...new Set(p.scopes || [])],
+    counts: p.counts || { bindings: 0, processes: 0, public_bindings: 0 },
+    risk: p.risk || { level: 'low', reasons: [] },
+    bindings: p.bindings || []
+  })) : [];
   applyPortFilters();
 }
 

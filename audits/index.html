@@ -208,22 +208,34 @@
   </div>
   <div id="dockerGrid" class="docker-grid"></div>
   <div id="dockerEmpty" class="empty hidden">Aucun conteneur actif</div>
-  <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts <span id="portsTotal" class="badge badge-total">0</span></h2>
-  <p class="subtitle">Interfaces et services détectés</p>
-  <div id="portsLegend" class="ports-legend"></div>
-  <div class="ports-toolbar">
-    <input type="text" id="portSearch" placeholder="Filtrer… ex. 22, ssh, 0.0.0.0" />
-    <div id="portFilters" class="filter-chips"></div>
-    <select id="portSort">
-      <option value="port-asc">Port ↑</option>
-      <option value="port-desc">Port ↓</option>
-      <option value="service">Service A→Z</option>
-      <option value="risk">Risque</option>
-    </select>
-    <button id="portsCopy" class="btn" title="Copier tous"><i class="fa-solid fa-copy"></i></button>
+  <h2><i class="fa-solid fa-plug heading-icon"></i>Ports ouverts <span id="portsCount" class="badge badge-total">0</span></h2>
+  <div class="ports-filters">
+    <div id="protoFilters" class="filter-chips" role="group" aria-label="Protocoles"></div>
+    <div id="scopeFilters" class="filter-chips" role="group" aria-label="Exposition"></div>
+    <div id="riskFilters" class="filter-chips" role="group" aria-label="Risque"></div>
+    <div id="catFilters" class="filter-chips" role="group" aria-label="Catégorie"></div>
   </div>
-  <div id="portsContainer" class="block-wrapper"></div>
+  <div class="ports-actions">
+    <input type="text" id="portSearch" placeholder="Rechercher un port ou un service…" aria-label="Rechercher un port ou un service…" />
+    <button id="portsCopy" class="copy-btn" title="Copier la liste filtrée" aria-label="Copier la liste filtrée"><i class="fa-regular fa-copy"></i></button>
+  </div>
+  <table id="portsTable" class="ports-table">
+    <thead>
+      <tr>
+        <th data-sort="port">Port</th>
+        <th data-sort="service">Service</th>
+        <th>Catégorie</th>
+        <th>Exposition</th>
+        <th>Processus</th>
+        <th class="bindings-header">Bindings</th>
+        <th data-sort="risk">Risque</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="portsBody"></tbody>
+  </table>
   <div id="portsEmpty" class="empty hidden">Aucun port ne correspond. <button id="portsReset" class="btn">Réinitialiser</button></div>
+  <div id="riskLegend" class="risk-legend"></div>
   </main>
   <script>
     const themeSwitch = document.getElementById("themeToggle");
