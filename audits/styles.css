@@ -909,58 +909,26 @@ h1 {
     }
     .mem .badge[data-tip] { position: relative; }
     .mem .spark { width: 60px; height: 20px; }
-    .ports-legend {
-      font-size: 0.9rem;
-      margin: 0.5rem 0;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      color: var(--muted);
-    }
-    .ports-legend span {
-      display: flex;
-      align-items: center;
-      gap: 0.2rem;
-    }
-    .risk-dot {
-      width: 0.8rem;
-      height: 0.8rem;
-      border-radius: 50%;
-      display: inline-block;
-    }
-    .risk-dot.low { background: var(--success); }
-    .risk-dot.medium { background: var(--warning); }
-    .risk-dot.high { background: var(--danger); }
-    .ports-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-      align-items: center;
-    }
-    #portSearch { flex: 1; min-width: 180px; }
-    #portSort { background: var(--card-bg); color: var(--text); border: 1px solid var(--card-border); padding: 0.25rem; border-radius: 4px; }
-    .port-accordion { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 0.5rem; box-shadow: var(--card-shadow); overflow: hidden; }
-    .port-accordion + .port-accordion { margin-top: 0.5rem; }
-    .accordion-header { background: var(--card-bg); width: 100%; text-align: left; padding: 0.4rem 0.6rem; border: none; color: var(--text); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-    .accordion-header .count { background: var(--chip-bg); border-radius:6px; padding:2px 8px; font-family:var(--font-mono); }
-    .accordion-content { display: none; padding:0.4rem; background: var(--card-bg); }
-    .port-accordion.open > .accordion-content { display:block; }
-    .ip-accordion { background: var(--card-bg); border:1px solid var(--card-border); border-radius:8px; margin:0.3rem 0; overflow:hidden; }
-    .ip-accordion.open > .accordion-content { display:block; }
-    .ip-accordion .accordion-header { background: var(--card-bg); }
-    .port-line { display:flex; align-items:center; gap:0.5rem; padding:0.2rem 0.3rem; font-size:0.9rem; flex-wrap:wrap; }
-    .port-line .service-name { flex:1; font-weight:500; }
-    .port-line .port-mono { font-family:var(--font-mono); }
-    .port-line .badges { margin-left:auto; display:flex; gap:0.2rem; flex-wrap:wrap; }
-    .port-line .badge { font-size:0.7rem; padding:0.1rem 0.3rem; }
-    .port-line .risk-dot { margin-left:0.3rem; }
-    .port-line .copy-btn { margin-left:0.3rem; }
-
-    @media (max-width: 600px) {
-      .port-line { flex-direction: column; align-items: flex-start; }
-      .port-line .badges { margin-left: 0; }
-    }
+    .ports-filters { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem; }
+    .ports-actions { display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem; }
+    #portSearch { flex:1; min-width:180px; }
+    .ports-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+    .ports-table th, .ports-table td { padding:0.3rem 0.4rem; border-bottom:1px solid var(--card-border); }
+    .ports-table th { position:sticky; top:0; background:var(--bg); cursor:pointer; }
+    .ports-table tbody tr:nth-child(even) { background:rgba(255,255,255,0.03); }
+    .ports-table tr.port-row { cursor:pointer; }
+    .ports-table td .badge { margin-right:0.2rem; }
+    .details-row.hidden { display:none; }
+    .bindings-table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
+    .bindings-table th, .bindings-table td { padding:0.2rem 0.3rem; border-bottom:1px solid var(--card-border); font-size:0.85rem; }
+    .bindings-table tbody tr:nth-child(even) { background:rgba(255,255,255,0.03); }
+    .risk-legend { margin-top:0.5rem; display:flex; gap:0.5rem; font-size:0.8rem; }
+    .badge.risk-critical { background:var(--crit); color:#fff; }
+    .badge.risk-warn { background:var(--warn); color:#000; }
+    .badge.risk-local { background:var(--info); color:#fff; }
+    .badge.risk-low { background:var(--chip-bg); color:var(--text); }
+    .iface { color:var(--text-muted); }
+    .filter-chip .count { margin-left:0.25rem; opacity:0.7; }
 
     .load-container {
       display: flex;
