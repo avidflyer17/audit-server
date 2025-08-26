@@ -565,8 +565,12 @@ function renderPortsTable(){
     row.appendChild(riskTd);
 
     const actTd = document.createElement('td');
-    actTd.appendChild(createCopyButton('Copier résumé', () => buildSummary(p)));
-    actTd.appendChild(createCopyButton('Copier mitigation', () => buildMitigation(p)));
+    actTd.appendChild(
+      createCopyButton(
+        'Copier résumé et mitigation',
+        () => `${buildSummary(p)}\n${buildMitigation(p)}`
+      )
+    );
     row.appendChild(actTd);
 
     const detailRow = document.createElement('tr');
