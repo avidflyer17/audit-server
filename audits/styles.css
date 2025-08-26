@@ -518,10 +518,7 @@ h1 {
       align-items: center;
       background: var(--block-bg);
       padding: 0.5rem 1rem;
-      padding-right: calc(1rem + var(--gap-2));
       z-index: 1100;
-      margin-left: calc(var(--gap-4) * -1);
-      margin-right: calc(var(--gap-4) * -1);
     }
 
     .top-brand {
@@ -644,8 +641,7 @@ h1 {
 
   @media screen and (max-width: 600px) {
     .top-bar {
-      padding: 10px;
-      padding-right: calc(10px + var(--gap-2));
+      padding: 10px var(--gap-4);
     }
     #themeSwitchWrapper { gap: 0.5rem; }
     .switch { width: 40px; height: 20px; }
@@ -1409,3 +1405,53 @@ h1 {
     }
   }
 
+  /* === Compactage du bandeau en desktop === */
+@media (min-width: 900px){
+  /* grille du header + padding vertical plus serré */
+  .top-bar{
+    grid-template-columns: 44px 1fr auto;  /* menu | brand | switch */
+    padding-block: .4rem;
+  }
+
+  /* la marque passe sur UNE SEULE ligne */
+  .top-brand{
+    justify-self: start;     /* au lieu de center */
+    text-align: left;
+    display: flex;
+    flex-direction: row;     /* au lieu de column */
+    align-items: center;
+    gap: var(--gap-3);
+  }
+
+  .brand-line{
+    display: flex;
+    align-items: center;
+    gap: var(--gap-2);
+    margin-right: var(--gap-3);
+  }
+
+  /* hostname en ligne, non wrap */
+  .brand-host{
+    margin: 0;
+    opacity: .7;
+    white-space: nowrap;
+  }
+  .brand-host::before{
+    margin: 0 var(--gap-2);
+    opacity: .5;
+  }
+
+  /* "Généré / Uptime" sur une ligne pour éviter que le header regrossisse */
+  .brand-meta{
+    display: flex;
+    gap: var(--gap-4);
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    font-size: var(--font-sm);
+  }
+
+  /* le switch thème reste bien collé à droite */
+  #themeSwitchWrapper{
+    justify-self: end;
+  }
+}
