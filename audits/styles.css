@@ -922,7 +922,6 @@ h1 {
     .bindings-table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
     .bindings-table th, .bindings-table td { padding:0.2rem 0.3rem; border-bottom:1px solid var(--card-border); font-size:0.85rem; }
     .bindings-table tbody tr:nth-child(even) { background:rgba(255,255,255,0.03); }
-    .risk-legend { margin-top:0.5rem; display:flex; gap:0.5rem; font-size:0.8rem; }
     .badge.risk-critical { background:var(--crit); color:#fff; }
     .badge.risk-warn { background:var(--warn); color:#000; }
     .badge.risk-local { background:var(--info); color:#fff; }
