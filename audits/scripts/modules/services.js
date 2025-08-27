@@ -105,7 +105,7 @@ function renderServicesList() {
   const list = document.getElementById('servicesList');
   list.textContent = '';
   const countSpan = document.getElementById('servicesCount');
-  countSpan.textContent = filteredServices.length;
+  if (countSpan) countSpan.textContent = filteredServices.length;
   if (filteredServices.length === 0) {
     document.getElementById('servicesEmpty').classList.remove('hidden');
     return;
