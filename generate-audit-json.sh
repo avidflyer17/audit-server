@@ -27,7 +27,8 @@ mkdir -p "$ARCHIVE_DIR"
 
 # 🔍 Infos système
 UPTIME=$(uptime -p)
-LOAD_AVG=$(uptime | awk -F'load average:' '{print $2}' | sed 's/ //g')
+# Normalize load average: capture numbers, convert commas to dots, join with commas
+LOAD_AVG=$(uptime | grep -o '[0-9][0-9]*[.,][0-9]*' | head -n3 | tr ',' '.' | paste -sd, -)
 HOSTNAME=$(hostname)
 
 # 🌐 Réseau

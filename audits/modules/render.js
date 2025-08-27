@@ -33,16 +33,24 @@ export function renderMeta(data) {
 }
 
 export function renderLoad(avg, cpu) {
-  const parseValues = (str) => {
-    if (!str) return [null, null, null];
-    let parts = str.split(',');
-    if (parts.length > 3) parts = str.replace(/,/g, '.').trim().split(/\s+/);
-    const vals = parts.slice(0, 3).map((p) => {
-      const n = parseFloat(p.replace(',', '.').trim());
+  const parseValues = (val) => {
+    if (!val && val !== 0) return [null, null, null];
+    if (Array.isArray(val)) {
+      const a = val
+        .slice(0, 3)
+        .map((x) =>
+          typeof x === 'number' ? x : parseFloat(String(x).replace(',', '.')),
+        );
+      while (a.length < 3) a.push(null);
+      return a;
+    }
+    const m = String(val).match(/\d+(?:[.,]\d+)?/g) || [];
+    const out = m.slice(0, 3).map((s) => {
+      const n = parseFloat(s.replace(',', '.'));
       return Number.isFinite(n) ? n : null;
     });
-    while (vals.length < 3) vals.push(null);
-    return vals;
+    while (out.length < 3) out.push(null);
+    return out;
   };
   const dash = '—';
   const formatVal = (v) => (v != null ? v.toFixed(2) : dash);
@@ -122,7 +130,7 @@ export function renderCpu(cpu) {
   model.textContent = (cpu.model || '').trim();
   section.appendChild(model);
   const frag = document.createDocumentFragment();
-  (cpu.usage || []).forEach((c) => {
+  (Array.isArray(cpu.usage) ? cpu.usage : []).forEach((c) => {
     const div = document.createElement('div');
     div.className = 'cpu-core';
     div.textContent = `c${c.core}: ${c.usage}%`;
@@ -153,7 +161,7 @@ export function renderDisks(disks) {
   const container = document.getElementById('disksContainer');
   if (!container) return;
   container.textContent = '';
-  (disks || []).forEach((d) => {
+  (Array.isArray(disks) ? disks : []).forEach((d) => {
     const div = document.createElement('div');
     div.className = 'disk-card';
     div.innerHTML = `<strong>${d.mountpoint || d.filesystem}</strong> ${d.used} / ${d.size} (${d.used_percent || ''})`;
@@ -165,12 +173,14 @@ function renderTop(list, id, key) {
   const div = document.getElementById(id);
   if (!div) return;
   div.textContent = '';
-  (list || []).slice(1).forEach((p) => {
-    const item = document.createElement('div');
-    item.className = 'proc-item';
-    item.textContent = `${p.cmd} (${p.pid}) - ${p[key]}%`;
-    div.appendChild(item);
-  });
+  (Array.isArray(list) ? list : [])
+    .slice(1)
+    .forEach((p) => {
+      const item = document.createElement('div');
+      item.className = 'proc-item';
+      item.textContent = `${p.cmd} (${p.pid}) - ${p[key]}%`;
+      div.appendChild(item);
+    });
 }
 
 export function renderTopCpu(list) {
@@ -185,24 +195,25 @@ export function renderPorts(list) {
   const body = document.getElementById('portsBody');
   if (!body) return;
   body.textContent = '';
-  (list || []).forEach((p) => {
+  (Array.isArray(list) ? list : []).forEach((p) => {
     const processes = new Set();
-    (p.bindings || []).forEach((b) => {
+    (Array.isArray(p.bindings) ? p.bindings : []).forEach((b) => {
       if (b.process) processes.add(b.process);
     });
     const tr = document.createElement('tr');
     tr.innerHTML =
-      `<td>${p.port}</td><td>${(p.services || []).join(', ')}</td>` +
-      `<td>${p.category || ''}</td><td>${(p.scopes || []).join(', ')}</td>` +
+      `<td>${p.port}</td><td>${(Array.isArray(p.services) ? p.services : []).join(', ')}</td>` +
+      `<td>${p.category || ''}</td><td>${(Array.isArray(p.scopes) ? p.scopes : []).join(', ')}</td>` +
       `<td>${Array.from(processes).join(', ')}</td>` +
-      `<td>${(p.bindings || []).length}</td><td>${p.risk?.level || ''}</td>`;
+      `<td>${(Array.isArray(p.bindings) ? p.bindings : []).length}</td><td>${p.risk?.level || ''}</td>`;
     body.appendChild(tr);
   });
   const count = document.getElementById('portsCount');
-  if (count) count.textContent = list ? list.length : 0;
+  if (count) count.textContent = Array.isArray(list) ? list.length : 0;
 }
 
 export function renderAudit(data) {
+  if (!data) return;
   renderMeta(data);
   renderLoad(data.load_average, data.cpu);
   renderCpu(data.cpu);
