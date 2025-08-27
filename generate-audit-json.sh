@@ -62,7 +62,7 @@ ip_in_cidr_list_prefix() {
     local base=${cidr%/*}
     local bits=${cidr#*/}
     local pfx=""
-    IFS='.' read -r o1 o2 o3 o4 <<< "$base"
+      IFS='.' read -r o1 o2 o3 _ <<< "$base"  # Fourth octet intentionally ignored
     case "$bits" in
       8)  pfx="${o1}." ;;
       16) pfx="${o1}.${o2}." ;;
@@ -120,7 +120,7 @@ collect_ports() {
   if [[ -n "$docker_subnets" ]]; then
     for c in $docker_subnets; do
       local base=${c%/*}; local bits=${c#*/}
-      IFS='.' read -r o1 o2 o3 o4 <<< "$base"
+      IFS='.' read -r o1 o2 o3 _ <<< "$base"  # Fourth octet intentionally ignored
       case "$bits" in
         8)  prefixes+=("${o1}.") ;;
         16) prefixes+=("${o1}.${o2}.") ;;
