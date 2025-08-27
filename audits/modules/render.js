@@ -60,14 +60,26 @@ export function renderLoad(avg, cpu) {
     if (lvl <= 1) return 'var(--warn)';
     return 'var(--crit)';
   };
-  const setVal = (id, v) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = formatVal(v);
-  };
+  const [l1, l5, l15] = parseValues(avg);
   const cores = parseInt(cpu?.cores, 10);
   const max = Number.isFinite(cores) && cores > 0 ? cores : null;
-  const [l1, l5, l15] = parseValues(avg);
-  setVal('load1Val', l1);
+
+  // centre de la jauge : % + détail
+  const elPct = document.getElementById('load1Pct');
+  const elDetail = document.getElementById('load1Detail');
+  const pct = l1 != null && max ? Math.round((l1 / max) * 100) : null;
+
+  if (elPct) elPct.textContent = pct != null ? `${pct}%` : '—';
+  if (elDetail) {
+    let badge = '';
+    if (pct == null) badge = '';
+    else if (pct < 70) badge = 'OK';
+    else if (pct <= 100) badge = 'Attention';
+    else badge = 'Saturé';
+    elDetail.textContent = l1 != null && max
+      ? `${l1.toFixed(2)} / ${cores} cœurs · ${badge}`
+      : l1 != null ? `${l1.toFixed(2)} (cœurs inconnus)` : '—';
+  }
   const gaugeWrap = document.getElementById('loadGauge');
   const gauge = document.getElementById('loadGaugePath');
   if (gaugeWrap && gauge) {
@@ -97,10 +109,12 @@ export function renderLoad(avg, cpu) {
     card?.setAttribute('aria-label', title);
     if (!card || !fill || !dot || !bar || !valEl) return;
     if (val != null) {
-      valEl.textContent = formatVal(val);
+      const level = max ? val / max : null;
+      const pct = level != null ? Math.round(level * 100) : null;
+      valEl.textContent = pct != null
+        ? `${formatVal(val)} (${pct}%)`
+        : formatVal(val);
       if (max) {
-        const level = val / max;
-        const pct = level * 100;
         card.classList.remove('na');
         const color = colorFor(level);
         fill.style.background = color;
@@ -119,6 +133,16 @@ export function renderLoad(avg, cpu) {
   };
   renderBar('load5', l5, '5');
   renderBar('load15', l15, '15');
+
+  // Tendance (1 vs 5 min) via #loadTrend
+  const trendIcon = document.getElementById('loadTrend');
+  if (trendIcon && l1 != null && l5 != null) {
+    const delta = l1 - l5;
+    trendIcon.classList.remove('fa-chevron-right', 'fa-arrow-up', 'fa-arrow-down', 'fa-minus');
+    if (Math.abs(delta) < 0.05) trendIcon.classList.add('fa-minus');
+    else if (delta > 0) trendIcon.classList.add('fa-arrow-up');
+    else trendIcon.classList.add('fa-arrow-down');
+  }
 }
 
 export function renderCpu(cpu) {
