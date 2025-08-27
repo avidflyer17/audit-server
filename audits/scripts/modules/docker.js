@@ -103,7 +103,7 @@ function renderDockerList() {
   const grid = document.getElementById('dockerGrid');
   grid.textContent = '';
   const countSpan = document.getElementById('dockerCount');
-  if (countSpan) countSpan.textContent = dockerFiltered.length;
+  countSpan.textContent = dockerFiltered.length;
   if (!dockerFiltered.length) {
     document.getElementById('dockerEmpty').classList.remove('hidden');
     return;
