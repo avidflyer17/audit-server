@@ -1,5 +1,6 @@
 import { renderServices } from './services.js';
 import { renderDocker } from './docker.js';
+import { renderAudit, initMenu } from './render.js';
 
 export let auditsIndex = [];
 export let auditsMap = {};
@@ -53,8 +54,10 @@ export async function init() {
       return;
     }
     const data = await loadAudit(latestEntry.file);
+    renderAudit(data);
     renderServices(data.services || []);
     renderDocker(data.docker || []);
+    initMenu();
     showStatus('');
   } catch (err) {
     console.error(err);
