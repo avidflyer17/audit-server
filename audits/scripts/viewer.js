@@ -346,39 +346,6 @@ let sortKey = 'risk';
 let sortDir = 1;
 let portsInit = false;
 
-function createCopyButton(label, getter){
-  const btn = document.createElement('button');
-  btn.className = 'copy-btn';
-  btn.title = label;
-  btn.setAttribute('aria-label', label);
-  btn.innerHTML = '<i class="fa-regular fa-copy"></i>';
-  btn.addEventListener('click', e => {
-    e.stopPropagation();
-    const text = getter();
-    if (!text) return;
-    navigator.clipboard.writeText(text).then(() => {
-      const original = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-check"></i>';
-      setTimeout(() => { btn.innerHTML = original; }, 1000);
-    });
-  });
-  return btn;
-}
-
-function buildSummary(p){
-  const svc = p.services[0] || 'unknown';
-  const scopes = p.scopes.join(', ') || 'None';
-  const reasons = p.risk.reasons.join(' + ');
-  return `${p.proto}/${p.port} ${svc} — scopes: ${scopes}; bindings: ${p.counts.bindings}; procs: ${p.counts.processes}; risk: ${p.risk.level}${reasons ? ` (${reasons})` : ''}`;
-}
-
-function buildMitigation(p){
-  if (p.scopes.includes('Public')) {
-    return `ufw deny proto ${p.proto} from any to any port ${p.port}`;
-  }
-  return '# non public — vérifier règles locales';
-}
-
 function renderPortDetails(p){
   const wrap = document.createElement('div');
   const info = document.createElement('div');
@@ -550,25 +517,16 @@ function renderPortsTable(){
     riskTd.appendChild(riskBadge);
     row.appendChild(riskTd);
 
-    const actTd = document.createElement('td');
-    actTd.appendChild(
-      createCopyButton(
-        'Copier résumé et mitigation',
-        () => `${buildSummary(p)}\n${buildMitigation(p)}`
-      )
-    );
-    row.appendChild(actTd);
-
     const detailRow = document.createElement('tr');
     detailRow.className = 'details-row hidden';
     detailRow.setAttribute('aria-hidden', 'true');
     const detailTd = document.createElement('td');
-    detailTd.colSpan = 8;
+    detailTd.colSpan = 7;
     detailTd.appendChild(renderPortDetails(p));
     detailRow.appendChild(detailTd);
 
     const toggle = () => toggleRow(row, detailRow);
-    row.addEventListener('click', e => { if (e.target.closest('.copy-btn')) return; toggle(); });
+    row.addEventListener('click', toggle);
     bindTd.addEventListener('click', e => { e.stopPropagation(); toggle(); });
 
     tbody.appendChild(row);
