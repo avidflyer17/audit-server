@@ -116,7 +116,10 @@
             <path class="bg" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32"/>
             <path id="loadGaugePath" class="progress" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32" stroke-dasharray="0 100"/>
           </svg>
-          <div class="gauge-value"><span id="load1Val">--</span></div>
+          <div class="gauge-value">
+            <div id="load1Pct">--%</div>
+            <div id="load1Detail" class="minor">--</div>
+          </div>
         </div>
         <div class="gauge-label">sur 1 min <i id="loadTrend" class="trend fa-solid fa-chevron-right"></i></div>
       </div>
