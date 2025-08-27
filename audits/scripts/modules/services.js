@@ -105,8 +105,8 @@ function renderServicesList() {
   const list = document.getElementById('servicesList');
   list.textContent = '';
   const countSpan = document.getElementById('servicesCount');
-  countSpan.textContent = filteredServices.length;
   if (filteredServices.length === 0) {
+    countSpan.textContent = '0 service';
     document.getElementById('servicesEmpty').classList.remove('hidden');
     return;
   }
@@ -189,6 +189,7 @@ function renderServicesList() {
     frag.appendChild(item);
   });
   list.appendChild(frag);
+  countSpan.textContent = `${filteredServices.length} service${filteredServices.length > 1 ? 's' : ''}`;
 }
 
 export function renderServices(names) {
