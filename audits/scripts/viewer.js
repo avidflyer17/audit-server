@@ -183,20 +183,6 @@ function parseUptime(str){
   return {text:segments.join(' '), days:totalDays};
 }
 
-function setupCopy(id, getter){
-  const btn = document.getElementById(id);
-  if(!btn) return;
-  btn.onclick = () => {
-    const text = getter();
-    if(!text || text==='--' || text==='N/A') return;
-    navigator.clipboard.writeText(text).then(()=>{
-      const original = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-check"></i>';
-      setTimeout(()=>{ btn.innerHTML = original; },1000);
-    });
-  };
-}
-
 let dockerData = [];
 let dockerFiltered = [];
 let dockerFilters = new Set(['healthy','unhealthy','running','exited']);
@@ -622,11 +608,6 @@ function initPortsUI(){
   searchInput.addEventListener('input', e => {
     clearTimeout(t);
     t = setTimeout(() => { portSearch = e.target.value.toLowerCase(); applyPortFilters(); }, 250);
-  });
-
-  document.getElementById('portsCopy').addEventListener('click', () => {
-    const text = filteredPorts.map(p => buildSummary(p)).join('\n');
-    navigator.clipboard.writeText(text);
   });
 
   document.querySelectorAll('#portsTable th[data-sort]').forEach(th => {
@@ -1575,12 +1556,10 @@ function renderText(json) {
   const ipLocalSpan = document.getElementById('ipLocal');
   ipLocalSpan.textContent = ipLocal || 'N/A';
   document.getElementById('ipLocalChip').classList.toggle('na', !ipLocal);
-  setupCopy('copyIpLocal', () => ipLocalSpan.textContent);
   const ipPub = json.ip_pub || null;
   const ipPubSpan = document.getElementById('ipPublic');
   ipPubSpan.textContent = ipPub || 'N/A';
   document.getElementById('ipPublicChip').classList.toggle('na', !ipPub);
-  setupCopy('copyIpPublic', () => ipPubSpan.textContent);
   const netBadge = document.getElementById('netBadge');
   const netInfo = json.local_net || json.ip_local_net;
   if (netInfo) { netBadge.textContent = netInfo; netBadge.style.display='inline-block'; } else { netBadge.style.display='none'; }
