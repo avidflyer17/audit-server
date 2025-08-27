@@ -52,4 +52,14 @@ for file in "${files[@]}"; do
   jq -e '.docker.containers | type == "array"' "$file" >/dev/null
 done
 
+# Ensure the ports table no longer exposes copy/paste actions
+if rg -q '<th>Actions</th>' audits/index.html; then
+  echo "Actions column still present in ports table" >&2
+  exit 1
+fi
+if rg -q 'Copier résumé et mitigation' audits/scripts/viewer.js; then
+  echo "Copy helper still present in scripts" >&2
+  exit 1
+fi
+
 echo "Test passed: audit JSON reports generated and validated at ${files[*]}"
