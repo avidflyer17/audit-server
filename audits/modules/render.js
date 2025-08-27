@@ -32,21 +32,85 @@ export function renderMeta(data) {
   setText('uptimeValue', data.uptime || '--');
 }
 
-export function renderLoad(avg) {
-  const parts = (avg || '').split(',').map((s) => s.trim());
-  const [l1, l5, l15] = [parts[0], parts[1], parts[2]];
-  setText('load1Val', l1 || '--');
-  setText('load5Val', l5 || '--');
-  setText('load15Val', l15 || '--');
+export function renderLoad(avg, cpu) {
+  const parseValues = (str) => {
+    if (!str) return [null, null, null];
+    let parts = str.split(',');
+    if (parts.length > 3) parts = str.replace(/,/g, '.').trim().split(/\s+/);
+    const vals = parts.slice(0, 3).map((p) => {
+      const n = parseFloat(p.replace(',', '.').trim());
+      return Number.isFinite(n) ? n : null;
+    });
+    while (vals.length < 3) vals.push(null);
+    return vals;
+  };
+  const dash = '—';
+  const formatVal = (v) => (v != null ? v.toFixed(2) : dash);
+  const colorFor = (lvl) => {
+    if (lvl == null) return 'var(--bar-bg)';
+    if (lvl < 0.7) return 'var(--ok)';
+    if (lvl <= 1) return 'var(--warn)';
+    return 'var(--crit)';
+  };
+  const setVal = (id, v) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = formatVal(v);
+  };
+  const cores = parseInt(cpu?.cores, 10);
+  const max = Number.isFinite(cores) && cores > 0 ? cores : null;
+  const [l1, l5, l15] = parseValues(avg);
+  setVal('load1Val', l1);
+  const gaugeWrap = document.getElementById('loadGauge');
   const gauge = document.getElementById('loadGaugePath');
-  if (gauge && l1) {
-    const pct = Math.min(parseFloat(l1) * 10, 100);
-    gauge.setAttribute('stroke-dasharray', pct + ' 100');
+  if (gaugeWrap && gauge) {
+    const title = `Charge moyenne sur 1 minute : ${formatVal(l1)}`;
+    gaugeWrap.setAttribute('title', title);
+    gaugeWrap.setAttribute('aria-label', title);
+    if (l1 != null && max) {
+      const level = l1 / max;
+      const pct = Math.min(level * 100, 100);
+      gaugeWrap.classList.remove('na');
+      gaugeWrap.style.setProperty('--load-color', colorFor(level));
+      gauge.setAttribute('stroke-dasharray', pct + ' 100');
+    } else {
+      gaugeWrap.classList.add('na');
+      gaugeWrap.style.setProperty('--load-color', 'var(--bar-bg)');
+      gauge.setAttribute('stroke-dasharray', '0 100');
+    }
   }
-  const fill5 = document.getElementById('load5Fill');
-  if (fill5 && l5) fill5.style.width = Math.min(parseFloat(l5) * 10, 100) + '%';
-  const fill15 = document.getElementById('load15Fill');
-  if (fill15 && l15) fill15.style.width = Math.min(parseFloat(l15) * 10, 100) + '%';
+  const renderBar = (prefix, val, label) => {
+    const card = document.getElementById(prefix + 'Card');
+    const fill = document.getElementById(prefix + 'Fill');
+    const dot = document.getElementById(prefix + 'Dot');
+    const bar = document.getElementById(prefix + 'Bar');
+    const valEl = document.getElementById(prefix + 'Val');
+    const title = `Charge moyenne sur ${label} minutes : ${formatVal(val)}`;
+    card?.setAttribute('title', title);
+    card?.setAttribute('aria-label', title);
+    if (!card || !fill || !dot || !bar || !valEl) return;
+    if (val != null) {
+      valEl.textContent = formatVal(val);
+      if (max) {
+        const level = val / max;
+        const pct = level * 100;
+        card.classList.remove('na');
+        const color = colorFor(level);
+        fill.style.background = color;
+        dot.style.background = color;
+        bar.classList.toggle('overflow', pct > 100);
+        fill.style.width = pct + '%';
+        return;
+      }
+    }
+    card.classList.add('na');
+    if (val == null) valEl.textContent = dash;
+    fill.style.width = '0';
+    fill.style.background = 'var(--bar-bg)';
+    dot.style.background = 'var(--bar-bg)';
+    bar.classList.remove('overflow');
+  };
+  renderBar('load5', l5, '5');
+  renderBar('load15', l15, '15');
 }
 
 export function renderCpu(cpu) {
@@ -140,7 +204,7 @@ export function renderPorts(list) {
 
 export function renderAudit(data) {
   renderMeta(data);
-  renderLoad(data.load_average);
+  renderLoad(data.load_average, data.cpu);
   renderCpu(data.cpu);
   renderMemory(data.memory);
   renderDisks(data.disks);
