@@ -1,5 +1,5 @@
-import { renderServices } from './services.js';
-import { renderDocker } from './docker.js';
+import { renderServices } from './modules/services.js';
+import { renderDocker } from './modules/docker.js';
 
 export let auditsIndex = [];
 export let auditsMap = {};
