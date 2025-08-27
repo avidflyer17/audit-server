@@ -1,67 +1,70 @@
 # Audit Server
 
-This project provides a lightweight way to collect and view system audit reports. A Bash script gathers
-metrics such as CPU usage, memory consumption, open ports, running services, and Docker container stats,
-then writes the results to JSON files. Static files under `audits` display the reports through a simple web
-interface that can be served by Nginx.
+**Version 1.2.0** – this repository reflects the state of the project at release v1.2.0. All work that occurred
+after this tag has been discarded.
 
-## 🚀 Installation
+Audit Server generates periodic JSON reports describing the state of a host and exposes them through a static web
+viewer. The solution is composed of three parts:
 
-1. 📥 Clone the repository
+* `generate-audit-json.sh` – Bash script that collects metrics (CPU, memory, disks, services, open ports and
+  Docker containers) and stores them as timestamped JSON files.
+* `audits/` – static HTML, CSS and JavaScript viewer that loads and renders those JSON files in a browser.
+* `docker-compose.yaml` and `nginx.conf` – optional container setup to serve the viewer with Nginx.
+
+The front‑end code is written as ES modules and bundled with [esbuild](https://esbuild.github.io/). Development
+dependencies such as `esbuild`, `eslint` and `prettier` are listed in `package.json`.
+
+## 📦 Prerequisites
+
+The audit script relies on a handful of system utilities:
+
+```text
+bc, jq, curl, lm-sensors, sysstat (for mpstat), ss, awk, sed and grep
+```
+
+Docker is optional; if it is available, container statistics are included in the report. Node.js is required only
+when rebuilding the front‑end bundle.
+
+## 🛠️ Installation
+
+1. Clone the repository:
 
    ```bash
    git clone https://github.com/your-org/audit-server.git
    cd audit-server
    ```
 
-2. 🧰 Install dependencies
+2. Install the required packages listed above using your distribution’s package manager.
 
-   ```bash
-   sudo apt-get update
-   sudo apt-get install -y bc jq curl lm-sensors sysstat
-   ```
-
-3. ▶️ Generate your first audit
+3. Generate a first report:
 
    ```bash
    ./generate-audit-json.sh
    ```
 
-By default, the script writes reports to `audits/archives` next to the script, ensuring the path remains
-consistent even when invoked from cron. Override the location by setting the `BASE_DIR` environment variable:
+   Reports are written to `audits/archives` next to the script. Set `BASE_DIR` to use a different directory:
 
-```bash
-BASE_DIR=/path/to/audits ./generate-audit-json.sh
-```
+   ```bash
+   BASE_DIR=/path/to/audits ./generate-audit-json.sh
+   ```
+
+For more detailed installation steps, see [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
 ## 🌐 Serving the reports
 
-Use the provided `docker-compose.yaml` and `nginx.conf` to serve the `audits` directory through Nginx and expose
-it behind Traefik. Set `AUDIT_DIR` in `.env` to point to the directory containing `audits` and `nginx.conf`, then
-start the service:
+The repository includes a minimal Nginx setup. After creating at least one report, serve the viewer with Docker
+Compose:
 
 ```bash
 docker compose up -d
 ```
 
-## 🗂️ Directory structure
-
-```
-├── audits               # Web interface and generated reports
-├── generate-audit-json.sh
-├── docker-compose.yaml
-└── nginx.conf
-```
-
-## 📚 Documentation
-
-Additional usage instructions are available in the [docs](docs/USAGE.md) directory. Deployment options are
-covered in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Details about the JSON audit report structure can be
-found in [docs/REPORT_STRUCTURE.md](docs/REPORT_STRUCTURE.md).
+`AUDIT_DIR` in `.env` must point to the directory containing `audits` and `nginx.conf`. Traefik labels in the
+compose file route requests to the container; adjust them to match your environment.
 
 ## 🧪 Testing
 
-Run the provided test script to generate a sample report and validate its JSON structure:
+Run the test suite to verify that the audit generator produces a valid JSON file:
 
 ```bash
 ./tests/run.sh
@@ -69,8 +72,7 @@ Run the provided test script to generate a sample report and validate its JSON s
 
 ## 🛠️ Development
 
-JavaScript assets are split into ES modules and bundled for the browser. Install Node.js
-dependencies and use the provided npm scripts:
+If you modify the JavaScript modules under `audits/scripts`, rebuild the bundled viewer and run the linters:
 
 ```bash
 npm install
@@ -78,6 +80,12 @@ npm run build   # bundle front-end scripts
 npm run lint    # run ESLint
 npm run format  # format sources with Prettier
 ```
+
+## 📚 Additional documentation
+
+* [docs/USAGE.md](docs/USAGE.md) – operating the audit script and viewer
+* [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) – Docker/Nginx deployment guide
+* [docs/REPORT_STRUCTURE.md](docs/REPORT_STRUCTURE.md) – JSON report reference
 
 ## 📄 License
 

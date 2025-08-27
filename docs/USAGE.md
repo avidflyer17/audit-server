@@ -1,22 +1,7 @@
 # 📘 Audit Server Documentation
 
-This document provides extra details on how to use the audit script and serve the resulting reports.
-
-## 🚀 Installation
-
-1. 📥 Clone the repository
-
-   ```bash
-   git clone https://github.com/your-org/audit-server.git
-   cd audit-server
-   ```
-
-2. 🧰 Install dependencies
-
-   ```bash
-   sudo apt-get update
-   sudo apt-get install -y bc jq curl lm-sensors sysstat
-   ```
+This document provides extra details on how to use the audit script and serve the resulting reports. It applies to
+version 1.2.0 of the project. For installation instructions, see [INSTALLATION.md](INSTALLATION.md).
 
 ## 📊 Generating reports
 
