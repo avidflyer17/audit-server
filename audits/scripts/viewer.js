@@ -589,10 +589,6 @@ function initPortsUI(){
     applyPortFilters();
   });
 
-  const legend = document.getElementById('riskLegend');
-  if (legend) {
-    legend.innerHTML = PORT_RISKS.map(r => `<span class="badge risk-${r}">${r}</span>`).join(' ');
-  }
 }
 
 function renderPorts(list){
