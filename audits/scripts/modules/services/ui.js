@@ -1,4 +1,4 @@
-import { SERVICE_CATEGORIES, ServiceStore } from './data.js';
+import ServiceStore, { SERVICE_CATEGORIES } from './data.js';
 
 let servicesInit = false;
 let servicesList;
@@ -83,11 +83,11 @@ export function initServicesUI() {
     filtersDiv.appendChild(chip);
   });
   searchInput.addEventListener('input', (e) => {
-    ServiceStore.updateSearch(e.target.value);
+    ServiceStore.setSearch(e.target.value);
     renderServicesList();
   });
   sortSelect.addEventListener('change', (e) => {
-    ServiceStore.updateSort(e.target.value);
+    ServiceStore.setSort(e.target.value);
     renderServicesList();
   });
   document.getElementById('resetFilters').addEventListener('click', () => {
@@ -103,3 +103,4 @@ export function initServicesUI() {
   servicesList.addEventListener('click', handleServicesListClick);
   servicesList.addEventListener('keydown', handleServicesListKeydown);
 }
+

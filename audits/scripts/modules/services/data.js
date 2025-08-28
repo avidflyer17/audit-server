@@ -1,3 +1,5 @@
+import { createListStore } from '../store.js';
+
 export const SERVICE_CATEGORIES = [
   'Système',
   'Réseau',
@@ -36,61 +38,50 @@ function getServiceMeta(name) {
   return { icon: '⬜', category: 'Autre' };
 }
 
-export const ServiceStore = {
-  data: [],
-  filtered: [],
-  activeCats: new Set(SERVICE_CATEGORIES),
-  search: '',
+const ServiceStore = createListStore({
   sort: 'az',
-  setData(names) {
-    this.data = (names || []).map((n) => {
-      const meta = getServiceMeta(n);
-      return {
-        name: n,
-        icon: meta.icon,
-        category: meta.category,
-        desc: 'Service systemd',
-      };
-    });
-    return this.applyFilters();
-  },
-  applyFilters() {
-    this.filtered = this.data.filter(
-      (s) =>
-        this.activeCats.has(s.category) &&
-        s.name.toLowerCase().includes(this.search),
+  search: '',
+  filterFunc(service) {
+    return (
+      this.activeCats.has(service.category) &&
+      service.name.toLowerCase().includes(this.search)
     );
-    if (this.sort === 'az')
-      this.filtered.sort((a, b) => a.name.localeCompare(b.name));
-    else if (this.sort === 'za')
-      this.filtered.sort((a, b) => b.name.localeCompare(a.name));
+  },
+  sortFunc(list) {
+    if (this.sort === 'az') list.sort((a, b) => a.name.localeCompare(b.name));
+    else if (this.sort === 'za') list.sort((a, b) => b.name.localeCompare(a.name));
     else if (this.sort === 'cat')
-      this.filtered.sort(
+      list.sort(
         (a, b) =>
           a.category.localeCompare(b.category) || a.name.localeCompare(b.name),
       );
-    return this.filtered;
   },
-  updateSearch(value) {
-    this.search = value.toLowerCase();
-    return this.applyFilters();
-  },
-  updateSort(value) {
-    this.sort = value;
-    return this.applyFilters();
-  },
-  toggleCategory(cat) {
-    if (this.activeCats.has(cat)) this.activeCats.delete(cat);
-    else this.activeCats.add(cat);
-    return this.applyFilters();
-  },
-  resetFilters() {
+  resetFunc() {
     this.search = '';
     this.sort = 'az';
     this.activeCats = new Set(SERVICE_CATEGORIES);
-    return this.applyFilters();
   },
-  getFiltered() {
-    return this.filtered;
-  },
+});
+
+ServiceStore.activeCats = new Set(SERVICE_CATEGORIES);
+
+ServiceStore.setData = function (names) {
+  this.data = (names || []).map((n) => {
+    const meta = getServiceMeta(n);
+    return {
+      name: n,
+      icon: meta.icon,
+      category: meta.category,
+      desc: 'Service systemd',
+    };
+  });
+  return this.applyFilters();
 };
+
+ServiceStore.toggleCategory = function (cat) {
+  if (this.activeCats.has(cat)) this.activeCats.delete(cat);
+  else this.activeCats.add(cat);
+  return this.applyFilters();
+};
+
+export default ServiceStore;
