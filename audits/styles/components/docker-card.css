@@ -1,0 +1,12 @@
+    .docker-card { background: var(--block-bg); padding: 0.75rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: transform 0.2s ease; }
+    .docker-card:hover { transform: translateY(-2px); }
+    .docker-card:focus-within { outline: 2px solid var(--heading); outline-offset: 2px; }
+    .docker-head { display: flex; align-items: center; justify-content: space-between; }
+    .docker-title { display: flex; align-items: center; gap: 0.5rem; }
+    .docker-name { font-weight: bold; }
+    .status-badge { padding: 2px 6px; border-radius: 6px; font-size: 0.75rem; font-family: var(--font-mono); }
+    .status-healthy { background: #4caf50; color: #fff; }
+    .status-starting { background: #ff9800; color: #000; }
+    .status-unhealthy { background: #f44336; color: #fff; }
+    .status-exited { background: #777; color: #fff; }
+    .status-running { background: #4caf50; color: #fff; }
