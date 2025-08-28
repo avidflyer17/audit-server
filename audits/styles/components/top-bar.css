@@ -1,11 +1,11 @@
-    .top-bar {
+      .top-bar {
       position: sticky;
       top: 0;
       left: 0;
       width: 100%;
       box-sizing: border-box;
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto 1fr auto auto;
       align-items: center;
       background: var(--block-bg);
       padding: 0.5rem 1rem;
@@ -39,21 +39,22 @@
       opacity: 0.7;
     }
 
-    .brand-meta {
+    .top-meta {
+      justify-self: end;
+      text-align: right;
       display: flex;
       gap: var(--gap-3);
-      justify-content: center;
-      flex-wrap: wrap;
       font-size: var(--font-sm);
     }
 
-    .brand-meta .meta-item {
+    .top-meta .meta-item {
       display: flex;
       gap: var(--gap-1);
       align-items: center;
+      justify-content: flex-end;
     }
 
-    .brand-meta .meta-label {
+    .top-meta .meta-label {
       font-weight: 600;
     }
 
@@ -146,7 +147,7 @@
   @media (min-width: 900px){
     /* grille du header + padding vertical plus serré */
     .top-bar{
-      grid-template-columns: 44px 1fr auto;  /* menu | brand | switch */
+      grid-template-columns: 44px 1fr auto auto;  /* menu | brand | meta | switch */
       padding-block: .4rem;
     }
 
@@ -179,7 +180,7 @@
     }
 
     /* "Généré / Uptime" sur une ligne pour éviter que le header regrossisse */
-    .brand-meta{
+    .top-meta{
       display: flex;
       gap: var(--gap-4);
       flex-wrap: nowrap;
