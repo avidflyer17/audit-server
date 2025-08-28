@@ -1,46 +1,19 @@
 import { iconFor, colorClassCpu, colorClassRam } from './ui.js';
+import { createListStore } from './store.js';
 
-export const DockerStore = {
-  data: [],
-  filtered: [],
-  filters: new Set(['healthy', 'unhealthy', 'running', 'exited']),
-  search: '',
+export const DockerStore = createListStore({
   sort: 'name',
-  setData(arr) {
-    this.data = arr;
-    return this.applyFilters();
+  filters: new Set(['healthy', 'unhealthy', 'running', 'exited']),
+  filterFunc(c) {
+    const status = c.health === 'starting' ? 'running' : c.health || c.state;
+    return this.filters.has(status) && c.name.toLowerCase().includes(this.search);
   },
-  setSearch(val) {
-    this.search = val.toLowerCase();
-    return this.applyFilters();
+  sortFunc(list) {
+    if (this.sort === 'cpu') list.sort((a, b) => b.cpu - a.cpu);
+    else if (this.sort === 'ram') list.sort((a, b) => b.mem - a.mem);
+    else list.sort((a, b) => a.name.localeCompare(b.name));
   },
-  setSort(val) {
-    this.sort = val;
-    return this.applyFilters();
-  },
-  toggleFilter(f) {
-    if (this.filters.has(f)) this.filters.delete(f);
-    else this.filters.add(f);
-    return this.applyFilters();
-  },
-  applyFilters() {
-    this.filtered = this.data.filter((c) => {
-      const status = c.health === 'starting' ? 'running' : c.health || c.state;
-      return (
-        this.filters.has(status) &&
-        c.name.toLowerCase().includes(this.search)
-      );
-    });
-    if (this.sort === 'cpu') this.filtered.sort((a, b) => b.cpu - a.cpu);
-    else if (this.sort === 'ram') this.filtered.sort((a, b) => b.mem - a.mem);
-    else this.filtered.sort((a, b) => a.name.localeCompare(b.name));
-    return this.filtered;
-  },
-  getFiltered() {
-    return this.filtered;
-  },
-};
-
+});
 let dockerInit = false;
 
 function formatBytes(b) {
