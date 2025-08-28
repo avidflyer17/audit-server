@@ -3,7 +3,7 @@ import ServiceStore, { SERVICE_CATEGORIES } from './data.js';
 let servicesInit = false;
 let servicesList;
 
-function toggleServiceItem(item) {
+export function toggleServiceItem(item) {
   const expanded = item.classList.toggle('expanded');
   item.setAttribute('aria-expanded', expanded);
 }

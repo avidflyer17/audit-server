@@ -6,11 +6,14 @@
     "build": "esbuild audits/scripts/main.js --bundle --outfile=audits/scripts/viewer.js && esbuild audits/styles/index.css --bundle --outfile=audits/styles.css",
     "lint": "eslint \"audits/scripts/**/*.js\"",
     "format": "prettier -w \"audits/scripts/**/*.js\"",
-    "test": "vitest run && ./tests/run.sh"
+    "test": "vitest run && NODE_OPTIONS=--experimental-vm-modules jest && ./tests/run.sh"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
     "esbuild": "^0.19.0",
     "eslint": "^8.57.0",
+    "jest": "^30.1.1",
+    "jest-environment-jsdom": "^30.1.1",
     "prettier": "^3.2.5",
     "vitest": "^3.2.4"
   }
