@@ -18,4 +18,10 @@ describe('renderServices', () => {
     const card = document.querySelector('.docker-card');
     expect(card.querySelector('.docker-name').textContent).toBe('—');
   });
+
+  it('normalizes string entries', () => {
+    renderServices(['ssh.service']);
+    const card = document.querySelector('.docker-card');
+    expect(card.querySelector('.docker-name').textContent).toBe('ssh.service');
+  });
 });

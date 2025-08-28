@@ -1,6 +1,19 @@
 import { renderServices } from './services.js';
 import { renderDocker } from './docker.js';
 
+function renderInfo(data = {}) {
+  const hostname = document.getElementById('hostname');
+  const generated = document.getElementById('generatedValue');
+  const ipLocal = document.getElementById('ipLocal');
+  const ipPublic = document.getElementById('ipPublic');
+  const uptime = document.getElementById('uptimeValue');
+  if (hostname) hostname.textContent = data.hostname || '-';
+  if (generated) generated.textContent = data.generated || '--';
+  if (ipLocal) ipLocal.textContent = data.ip_local || 'N/A';
+  if (ipPublic) ipPublic.textContent = data.ip_pub || 'N/A';
+  if (uptime) uptime.textContent = data.uptime || '--';
+}
+
 export let auditsIndex = [];
 export let auditsMap = {};
 export let latestEntry = null;
@@ -63,6 +76,7 @@ export async function init() {
       return;
     }
     const data = await loadAudit(latestEntry.file);
+    renderInfo(data);
     renderServices(data.services || []);
     renderDocker(data.docker || []);
     showStatus('');

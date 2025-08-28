@@ -52,7 +52,6 @@
   function renderServiceCard(svc = {}) {
     const id = svc.id || svc.unit_name || "\u2014";
     const meta = getMeta(id);
-    const icon = meta.icon;
     const category = svc.category || meta.category;
     const catClass = "cat-" + category.toLowerCase().replace(/[\s/]+/g, "-");
     const state = (svc.state || "unknown").toLowerCase().replace(/[^a-z-]/g, "-");
@@ -60,20 +59,54 @@
     const unit = svc.unit_name || "\u2014";
     const type = svc.type || "\u2014";
     const desc = svc.description || "\u2014";
-    const sinceHtml = sinceText ? `<div class="card-subtle">since ${sinceText}</div>` : "";
-    return `<article class="docker-card service-card" role="group" aria-label="${id}">
-    <div class="docker-head">
-      <div class="docker-title"><span class="docker-icon">${icon}</span><h3 class="docker-name">${id}</h3></div>
-      <span class="status-badge status-${state}" aria-label="${state}">${state}</span>
-    </div>
-    ${sinceHtml}
-    <div class="card-meta">
-      <span class="meta-item"><strong>Unit\xE9 :</strong> ${unit}</span>
-      <span class="badge">${type}</span>
-      <span class="badge ${catClass}">${category}</span>
-    </div>
-    <p class="card-desc" title="${desc}">${desc}</p>
-  </article>`;
+    const article = document.createElement("article");
+    article.className = "docker-card service-card";
+    article.setAttribute("role", "group");
+    article.setAttribute("aria-label", id);
+    const head = document.createElement("div");
+    head.className = "docker-head";
+    const titleDiv = document.createElement("div");
+    titleDiv.className = "docker-title";
+    const iconSpan = document.createElement("span");
+    iconSpan.className = "docker-icon";
+    iconSpan.textContent = meta.icon;
+    const nameH3 = document.createElement("h3");
+    nameH3.className = "docker-name";
+    nameH3.textContent = id;
+    titleDiv.append(iconSpan, nameH3);
+    const pill = document.createElement("span");
+    pill.className = `status-badge status-${state}`;
+    pill.setAttribute("aria-label", state);
+    pill.textContent = state;
+    head.append(titleDiv, pill);
+    article.appendChild(head);
+    if (sinceText) {
+      const sinceDiv = document.createElement("div");
+      sinceDiv.className = "card-subtle";
+      sinceDiv.textContent = `since ${sinceText}`;
+      article.appendChild(sinceDiv);
+    }
+    const metaDiv = document.createElement("div");
+    metaDiv.className = "card-meta";
+    const unitSpan = document.createElement("span");
+    unitSpan.className = "meta-item";
+    const unitStrong = document.createElement("strong");
+    unitStrong.textContent = "Unit\xE9 :";
+    unitSpan.append(unitStrong, document.createTextNode(" " + unit));
+    const typeSpan = document.createElement("span");
+    typeSpan.className = "badge";
+    typeSpan.textContent = type;
+    const catSpan = document.createElement("span");
+    catSpan.className = `badge ${catClass}`;
+    catSpan.textContent = category;
+    metaDiv.append(unitSpan, typeSpan, catSpan);
+    article.appendChild(metaDiv);
+    const descP = document.createElement("p");
+    descP.className = "card-desc";
+    descP.title = desc;
+    descP.textContent = desc;
+    article.appendChild(descP);
+    return article;
   }
   function renderServices(list = []) {
     const grid = document.getElementById("servicesGrid");
@@ -81,15 +114,23 @@
     const countSpan = document.getElementById("servicesCount");
     if (!grid || !empty || !countSpan)
       return;
-    const sorted = [...list].sort((a, b) => String(a.id || "").localeCompare(String(b.id || "")));
+    const normalized = (list || []).map(
+      (s) => typeof s === "string" ? { id: s } : s || {}
+    );
+    const sorted = [...normalized].sort(
+      (a, b) => String(a.id || "").localeCompare(String(b.id || ""))
+    );
     countSpan.textContent = `${sorted.length} service${sorted.length > 1 ? "s" : ""}`;
     if (!sorted.length) {
-      grid.innerHTML = "";
+      grid.textContent = "";
       empty.classList.remove("hidden");
       return;
     }
     empty.classList.add("hidden");
-    grid.innerHTML = sorted.map(renderServiceCard).join("");
+    grid.textContent = "";
+    const frag = document.createDocumentFragment();
+    sorted.forEach((svc) => frag.appendChild(renderServiceCard(svc)));
+    grid.appendChild(frag);
   }
 
   // audits/scripts/modules/ui.js
@@ -347,6 +388,23 @@
   }
 
   // audits/scripts/modules/audits.js
+  function renderInfo(data = {}) {
+    const hostname = document.getElementById("hostname");
+    const generated = document.getElementById("generatedValue");
+    const ipLocal = document.getElementById("ipLocal");
+    const ipPublic = document.getElementById("ipPublic");
+    const uptime = document.getElementById("uptimeValue");
+    if (hostname)
+      hostname.textContent = data.hostname || "-";
+    if (generated)
+      generated.textContent = data.generated || "--";
+    if (ipLocal)
+      ipLocal.textContent = data.ip_local || "N/A";
+    if (ipPublic)
+      ipPublic.textContent = data.ip_pub || "N/A";
+    if (uptime)
+      uptime.textContent = data.uptime || "--";
+  }
   var auditsIndex = [];
   var auditsMap = {};
   var latestEntry = null;
@@ -409,6 +467,7 @@
         return;
       }
       const data = await loadAudit(latestEntry.file);
+      renderInfo(data);
       renderServices(data.services || []);
       renderDocker(data.docker || []);
       showStatus("");
