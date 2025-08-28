@@ -346,11 +346,33 @@ let sortKey = 'risk';
 let sortDir = 1;
 let portsInit = false;
 
+function formatPort(proto, port){
+  return `${proto}/${port}`;
+}
+
+function firstService(services){
+  return services && services.length ? services[0] : 'unknown';
+}
+
+function uniqueScopes(scopes){
+  const order = ['Public', 'Docker', 'Localhost'];
+  const set = new Set(scopes || []);
+  return order.filter(s => set.has(s));
+}
+
+function riskToBadge(level){
+  return `badge-risk ${level}`;
+}
+
+function categoryToBadge(cat){
+  return `badge badge-${cat}`;
+}
+
 function renderPortDetails(p){
   const wrap = document.createElement('div');
   const info = document.createElement('div');
   const reasons = p.risk.reasons.join(' + ');
-  info.className = 'details-info';
+  info.className = 'wrap details-title';
   info.textContent = `Services: ${p.services.join(', ')}${reasons ? ' — ' + reasons : ''}`;
   wrap.appendChild(info);
   const table = document.createElement('table');
@@ -464,73 +486,84 @@ function renderPortsTable(){
   document.getElementById('portsEmpty').classList.add('hidden');
   filteredPorts.forEach(p => {
     const row = document.createElement('tr');
-    row.className = 'port-row';
     row.tabIndex = 0;
+    row.setAttribute('role', 'button');
     row.setAttribute('aria-expanded', 'false');
 
     const portTd = document.createElement('td');
-    portTd.textContent = `${p.proto}/${p.port}`;
+    portTd.textContent = formatPort(p.proto, p.port);
     row.appendChild(portTd);
 
     const svcTd = document.createElement('td');
-    const svc = p.services[0] || '';
+    svcTd.className = 'truncate';
+    const svc = firstService(p.services);
     svcTd.textContent = svc;
-    if (p.services.length > 1){
-      const more = document.createElement('span');
-      more.className = 'more-svc';
-      more.textContent = ` (+${p.services.length - 1})`;
-      svcTd.appendChild(more);
-    }
+    svcTd.title = svc;
     row.appendChild(svcTd);
 
     const catTd = document.createElement('td');
     const catMeta = PORT_CATS.find(c => c.key === p.category);
     const catBadge = document.createElement('span');
-    catBadge.className = `badge cat-${p.category}`;
+    catBadge.className = categoryToBadge(p.category);
     catBadge.textContent = catMeta ? catMeta.label : p.category;
     catTd.appendChild(catBadge);
     row.appendChild(catTd);
 
     const scopeTd = document.createElement('td');
-    p.scopes.forEach(s => {
-      const b = document.createElement('span');
-      b.className = 'badge scope-badge';
-      b.textContent = s;
-      scopeTd.appendChild(b);
+    scopeTd.className = 'chips';
+    uniqueScopes(p.scopes).forEach(s => {
+      const chip = document.createElement('span');
+      chip.className = `chip chip-${s.toLowerCase()}`;
+      chip.textContent = s;
+      scopeTd.appendChild(chip);
     });
     row.appendChild(scopeTd);
 
     const procTd = document.createElement('td');
+    procTd.className = 'col-processus';
     procTd.textContent = p.counts.processes;
     row.appendChild(procTd);
 
     const bindTd = document.createElement('td');
-    bindTd.className = 'bindings-cell';
+    bindTd.className = 'col-bindings';
     bindTd.textContent = p.counts.bindings;
     row.appendChild(bindTd);
 
     const riskTd = document.createElement('td');
     const riskBadge = document.createElement('span');
-    riskBadge.className = `badge risk-${p.risk.level}`;
+    riskBadge.className = riskToBadge(p.risk.level);
     riskBadge.textContent = p.risk.level;
     if (p.risk.reasons && p.risk.reasons.length) riskBadge.title = p.risk.reasons.join(' + ');
     riskTd.appendChild(riskBadge);
     row.appendChild(riskTd);
 
     const detailRow = document.createElement('tr');
-    detailRow.className = 'details-row hidden';
+    detailRow.className = 'row-details hidden';
     detailRow.setAttribute('aria-hidden', 'true');
-    const detailTd = document.createElement('td');
-    detailTd.colSpan = 7;
-    detailTd.appendChild(renderPortDetails(p));
-    detailRow.appendChild(detailTd);
+    const detailCell = document.createElement('td');
+    detailCell.colSpan = 7;
+    detailCell.appendChild(renderPortDetails(p));
+    detailRow.appendChild(detailCell);
 
     const toggle = () => toggleRow(row, detailRow);
     row.addEventListener('click', toggle);
+    row.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(); } });
     bindTd.addEventListener('click', e => { e.stopPropagation(); toggle(); });
 
     tbody.appendChild(row);
     tbody.appendChild(detailRow);
+  });
+  makeResponsivePortsTable();
+}
+
+function makeResponsivePortsTable(){
+  const table = document.querySelector('.ports-table');
+  if (!table) return;
+  const headers = [...table.querySelectorAll('thead th')].map(th => th.textContent.trim());
+  table.querySelectorAll('tbody tr:not(.row-details)').forEach(tr => {
+    [...tr.children].forEach((td, i) => {
+      td.setAttribute('data-label', headers[i] || '');
+    });
   });
 }
 
@@ -568,7 +601,7 @@ function initPortsUI(){
     t = setTimeout(() => { portSearch = e.target.value.toLowerCase(); applyPortFilters(); }, 250);
   });
 
-  document.querySelectorAll('#portsTable th[data-sort]').forEach(th => {
+  document.querySelectorAll('.ports-table thead [data-sort]').forEach(th => {
     th.addEventListener('click', () => {
       const key = th.dataset.sort;
       if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
