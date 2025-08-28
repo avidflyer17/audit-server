@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Added scrolling animation for long service names in active service cards.
+
 ## [1.3.1] - 2025-10-15
 
 - Updated documentation for release v1.3.1.
