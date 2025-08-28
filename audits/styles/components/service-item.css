@@ -9,7 +9,7 @@
     .service-item:hover {
       transform: translateY(-2px);
     }
-    .service-item:focus-visible {
+    .service-item:focus-within {
       outline: 2px solid var(--heading);
       outline-offset: 2px;
     }
