@@ -6,11 +6,12 @@
     "build": "esbuild audits/scripts/main.js --bundle --outfile=audits/scripts/viewer.js && esbuild audits/styles/index.css --bundle --outfile=audits/styles.css",
     "lint": "eslint \"audits/scripts/**/*.js\"",
     "format": "prettier -w \"audits/scripts/**/*.js\"",
-    "test": "./tests/run.sh"
+    "test": "vitest run && ./tests/run.sh"
   },
   "devDependencies": {
     "esbuild": "^0.19.0",
     "eslint": "^8.57.0",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "vitest": "^3.2.4"
   }
 }
