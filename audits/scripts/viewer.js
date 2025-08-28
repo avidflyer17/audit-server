@@ -389,6 +389,291 @@
     renderDockerList();
   }
 
+  // ===== Helper functions for core metrics =====
+  function parseSizeToBytes(str) {
+    if (!str)
+      return null;
+    const m = String(str).trim().match(/^([0-9]+(?:[.,][0-9]+)?)\s*(B|KB|MB|GB|TB|KiB|MiB|GiB|TiB)?$/i);
+    if (!m)
+      return null;
+    let [, num, unit] = m;
+    num = parseFloat(num.replace(',', '.'));
+    const map = { b: 1, kb: 1e3, mb: 1e6, gb: 1e9, tb: 1e12, kib: 1024, mib: 1024 ** 2, gib: 1024 ** 3, tib: 1024 ** 4 };
+    unit = (unit || 'B').toLowerCase();
+    return Math.round(num * (map[unit] || 1));
+  }
+  function formatBytes(bytes) {
+    if (bytes == null || isNaN(bytes))
+      return 'N/A';
+    const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
+    let i = 0;
+    let n = bytes;
+    while (n >= 1024 && i < units.length - 1) {
+      n /= 1024;
+      i++;
+    }
+    return n.toLocaleString('fr-FR', { maximumFractionDigits: i ? 1 : 0 }) + ' ' + units[i];
+  }
+  function pctClass(pct) {
+    if (pct == null)
+      return '';
+    if (pct < 40)
+      return 'ok';
+    if (pct < 70)
+      return 'warn';
+    return 'crit';
+  }
+  function parseLoadAverage(value) {
+    if (!value)
+      return null;
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      const one = Number(value.one ?? value['1min'] ?? value['1m']);
+      const five = Number(value.five ?? value['5min'] ?? value['5m']);
+      const fifteen = Number(value.fifteen ?? value['15min'] ?? value['15m']);
+      if ([one, five, fifteen].some((v) => isNaN(v)))
+        return null;
+      return { one, five, fifteen };
+    }
+    const parts = String(value).split(/[\s,]+/).filter(Boolean);
+    if (parts.length < 3)
+      return null;
+    const nums = parts.slice(0, 3).map((p) => parseFloat(p.replace(',', '.')));
+    if (nums.some((v) => isNaN(v)))
+      return null;
+    return { one: nums[0], five: nums[1], fifteen: nums[2] };
+  }
+  function loadToPercent(load, cores) {
+    if (load == null || !cores)
+      return { pct: null, rawPct: null };
+    const rawPct = load / cores * 100;
+    const pct = Math.max(0, Math.min(100, rawPct));
+    return { pct, rawPct };
+  }
+  function loadColor(v) {
+    if (v == null)
+      return 'var(--muted)';
+    if (v < 70)
+      return 'var(--ok)';
+    if (v < 100)
+      return 'var(--warn)';
+    return 'var(--crit)';
+  }
+  function arrowFromDiff(d) {
+    if (d > 5)
+      return 'up';
+    if (d < -5)
+      return 'down';
+    return 'right';
+  }
+  function renderMini(label, cur, prev) {
+    const fill = document.getElementById(`load${label}Fill`);
+    const valEl = document.getElementById(`load${label}Val`);
+    const trend = document.getElementById(`load${label}Trend`);
+    const dot = document.getElementById(`load${label}Dot`);
+    if (!cur || cur.pct == null) {
+      valEl.textContent = '--';
+      fill.style.width = '0%';
+      trend.textContent = '--';
+      dot && (dot.style.background = 'var(--muted)');
+      return;
+    }
+    const pct = Math.max(0, Math.min(100, cur.pct));
+    valEl.textContent = Math.round(pct) + '%';
+    fill.style.width = pct + '%';
+    const diff = prev && prev.pct != null ? cur.pct - prev.pct : 0;
+    const arrow = arrowFromDiff(diff);
+    trend.textContent = arrow === 'up' ? '↑' : arrow === 'down' ? '↓' : '→';
+    dot && (dot.style.background = loadColor(cur.pct));
+  }
+  function renderLoadAverage(raw, cores) {
+    const loads = parseLoadAverage(raw);
+    const path = document.getElementById('loadGaugePath');
+    const trendEl = document.getElementById('loadTrend');
+    if (!loads || !cores) {
+      document.getElementById('load1Val').textContent = '--';
+      path.setAttribute('stroke-dasharray', '0 100');
+      trendEl.className = 'trend fa-solid fa-chevron-right';
+      renderMini('5', null, null);
+      renderMini('15', null, null);
+      return;
+    }
+    const one = loadToPercent(loads.one, cores);
+    const five = loadToPercent(loads.five, cores);
+    const fifteen = loadToPercent(loads.fifteen, cores);
+    document.getElementById('load1Val').textContent = one.pct != null ? Math.round(one.pct) + '%' : '--';
+    const dash = one.pct != null ? Math.max(0, Math.min(100, one.pct)) : 0;
+    path.setAttribute('stroke-dasharray', `${dash} 100`);
+    const arrow = arrowFromDiff(one.pct - (five.pct ?? one.pct));
+    trendEl.className = `trend fa-solid fa-chevron-${arrow}`;
+    renderMini('5', five, one);
+    renderMini('15', fifteen, five);
+  }
+  function renderCpu(cpu) {
+    const container = document.getElementById('cpuSection');
+    container.innerHTML = '';
+    if (!cpu) {
+      container.innerHTML = '<div class="empty">Aucune donnée CPU</div>';
+      return;
+    }
+    const card = document.createElement('article');
+    card.className = 'card cpu-card';
+    const head = document.createElement('div');
+    head.className = 'card-head';
+    head.innerHTML = `<div class="title"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>CPU</span></div><div class="subtitle">${cpu.model || ''}${cpu.cores ? ' — ' + cpu.cores + ' cœurs' : ''}</div>`;
+    card.appendChild(head);
+    const list = document.createElement('div');
+    list.className = 'core-list';
+    const len = Math.max(cpu.usage?.length || 0, cpu.temperatures?.length || 0);
+    for (let i = 0; i < len; i++) {
+      const usage = cpu.usage?.[i]?.usage;
+      const temp = cpu.temperatures?.[i]?.temp;
+      const row = document.createElement('div');
+      row.className = 'proc-row';
+      row.innerHTML = `<span class="proc-name">Core ${cpu.usage?.[i]?.core ?? i}</span>`;
+      const bars = document.createElement('div');
+      bars.className = 'core-bars';
+      const barU = document.createElement('div');
+      barU.className = 'bar bar-usage';
+      barU.innerHTML = `<span class="fill" style="width:0"></span><span class="value">${usage != null ? usage + '%' : 'N/A'}</span>`;
+      barU.setAttribute('role', 'progressbar');
+      barU.setAttribute('aria-valuemin', '0');
+      barU.setAttribute('aria-valuemax', '100');
+      barU.setAttribute('aria-valuenow', usage ?? 0);
+      const barT = document.createElement('div');
+      barT.className = 'bar bar-temp';
+      barT.innerHTML = `<span class="fill" style="width:0"></span><span class="value">${temp != null ? temp + '°C' : 'N/A'}</span>`;
+      barT.setAttribute('role', 'progressbar');
+      barT.setAttribute('aria-valuemin', '0');
+      barT.setAttribute('aria-valuemax', '100');
+      barT.setAttribute('aria-valuenow', temp ?? 0);
+      bars.append(barU, barT);
+      row.appendChild(bars);
+      list.appendChild(row);
+      const fillU = barU.querySelector('.fill');
+      const valU = barU.querySelector('.value');
+      const fillT = barT.querySelector('.fill');
+      const valT = barT.querySelector('.value');
+      if (usage != null) {
+        requestAnimationFrame(() => {
+          const pct = Math.max(0, Math.min(100, usage));
+          fillU.style.width = pct + '%';
+          adjustBarValue(valU, fillU, pct);
+        });
+      }
+      if (temp != null) {
+        requestAnimationFrame(() => {
+          const pct = Math.max(0, Math.min(100, temp));
+          fillT.style.width = pct + '%';
+          adjustBarValue(valT, fillT, pct);
+        });
+      }
+    }
+    card.appendChild(list);
+    container.appendChild(card);
+  }
+  function renderMemory(memory) {
+    const container = document.getElementById('memorySection');
+    container.innerHTML = '';
+    if (!memory) {
+      container.innerHTML = '<div class="empty">Aucune donnée mémoire</div>';
+      return;
+    }
+    const ram = memory.ram;
+    if (ram) {
+      const total = parseSizeToBytes(ram.total);
+      const available = parseSizeToBytes(ram.available);
+      const cache = parseSizeToBytes(ram.buff_cache);
+      const free = parseSizeToBytes(ram.free);
+      const used = total != null && available != null ? total - available : null;
+      const usedPct = used != null && total ? used / total * 100 : null;
+      const cachePct = cache != null && total ? cache / total * 100 : 0;
+      const freePct = free != null && total ? free / total * 100 : 0;
+      const card = document.createElement('article');
+      card.className = 'card ram';
+      const cls = pctClass(usedPct);
+      card.innerHTML = `<div class="card-head"><div class="title">RAM <span class="badge total">${ram.total}</span></div><div class="percent ${cls}">${usedPct != null ? Math.round(usedPct) : 'N/A'}%</div></div><div class="bar"><div class="seg seg-used ${cls}" style="width:${usedPct || 0}%"><span class="label">Apps</span></div><div class="seg seg-cache" style="width:${cachePct}%"><span class="label">Cache</span></div><div class="seg seg-free" style="width:${freePct}%"><span class="label">Libre</span></div></div>`;
+      container.appendChild(card);
+    }
+    const swap = memory.swap;
+    if (swap && swap.total) {
+      const total = parseSizeToBytes(swap.total);
+      const used = parseSizeToBytes(swap.used);
+      const free = parseSizeToBytes(swap.free);
+      const usedPct = used != null && total ? used / total * 100 : null;
+      const freePct = free != null && total ? free / total * 100 : 0;
+      const card = document.createElement('article');
+      card.className = 'card swap';
+      const cls = pctClass(usedPct);
+      card.innerHTML = `<div class="card-head"><div class="title">Swap <span class="badge total">${swap.total}</span></div><div class="percent ${cls}">${usedPct != null ? Math.round(usedPct) : 'N/A'}%</div></div><div class="bar"><div class="seg seg-used ${cls}" style="width:${usedPct || 0}%"><span class="label">Utilisée</span></div><div class="seg seg-free" style="width:${freePct}%"><span class="label">Libre</span></div></div>`;
+      container.appendChild(card);
+    }
+  }
+  function colorClassDisk(pct) {
+    if (pct < 70)
+      return 'color-info';
+    if (pct < 90)
+      return 'color-warning';
+    return 'color-danger';
+  }
+  function renderDisks(disks) {
+    const container = document.getElementById('disksContainer');
+    container.innerHTML = '';
+    if (!Array.isArray(disks) || !disks.length) {
+      container.innerHTML = '<div class="empty">Aucun disque détecté.</div>';
+      return;
+    }
+    disks.forEach((disk) => {
+      const pct = parseFloat(disk.used_percent) || 0;
+      const card = document.createElement('div');
+      card.className = 'disk-card';
+      card.innerHTML = `<div class="proc-row"><span class="proc-name">${disk.mountpoint} <span class="badge-total">${disk.size}</span></span><div class="proc-bars"><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><span class="fill ${colorClassDisk(pct)}" style="width:0"></span><span class="value">${pct}%</span></div></div></div><div class="ram-text">${disk.used} / ${disk.size} (${disk.available} libre)</div>`;
+      container.appendChild(card);
+      const fill = card.querySelector('.bar .fill');
+      const valueEl = card.querySelector('.bar .value');
+      requestAnimationFrame(() => {
+        fill.style.width = pct + '%';
+        adjustBarValue(valueEl, fill, pct);
+      });
+    });
+  }
+  function renderTopProcesses(data, containerId, main) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+    const items = data?.slice(1, 6) || [];
+    if (!items.length) {
+      container.innerHTML = '<div class="empty">Aucun processus significatif</div>';
+      return;
+    }
+    let total = 0;
+    items.forEach((p) => {
+      const cpu = Number(p.cpu);
+      const mem = Number(p.mem);
+      if (main === 'cpu')
+        total += cpu;
+      else
+        total += mem;
+      const row = document.createElement('div');
+      row.className = 'proc-row';
+      row.tabIndex = 0;
+      row.title = `CPU ${cpu}% — RAM ${mem}%`;
+      const icon = iconFor(p.cmd);
+      row.innerHTML = `<span class="proc-icon">${icon}</span><span class="proc-name">${p.cmd}</span><div class="proc-bars"><div class="bar bar-cpu" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${cpu}"><span class="fill ${colorClassCpu(cpu)}" style="width:0"></span><span class="value">${cpu}%</span></div><div class="bar bar-ram" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${mem}"><span class="fill ${colorClassRam(mem)}" style="width:0"></span><span class="value">${mem}%</span></div></div>`;
+      container.appendChild(row);
+      const fills = row.querySelectorAll('.bar .fill');
+      const values = row.querySelectorAll('.bar .value');
+      requestAnimationFrame(() => {
+        fills[0].style.width = cpu + '%';
+        fills[1].style.width = mem + '%';
+        adjustBarValue(values[0], fills[0], cpu);
+        adjustBarValue(values[1], fills[1], mem);
+      });
+    });
+    const footer = document.createElement('div');
+    footer.className = 'total-summary';
+    footer.innerHTML = `Total ${main === 'cpu' ? 'CPU' : 'RAM'} des 5 : <span class="badge-total">${total.toFixed(1)}%</span>`;
+    container.appendChild(footer);
+  }
+
   // audits/scripts/modules/audits.js
   function renderInfo(data = {}) {
     const hostname = document.getElementById("hostname");
@@ -471,6 +756,12 @@
       showStatus("Chargement\u2026", "loading");
       const data = await loadAudit(entry.file);
       renderInfo(data);
+      renderLoadAverage(data.load_average, data.cpu?.cores);
+      renderCpu(data.cpu);
+      renderMemory(data.memory);
+      renderDisks(data.disks);
+      renderTopProcesses(data.top_cpu, 'topCpu', 'cpu');
+      renderTopProcesses(data.top_mem, 'topMem', 'mem');
       renderServices(data.services || []);
       renderDocker(data.docker || []);
       showStatus("");
