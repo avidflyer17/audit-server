@@ -19,13 +19,13 @@ services:
     labels:
       - "traefik.enable=true"
       # ROUTEUR
-      - "traefik.http.routers.audit-server.rule=Host(`audit.damswallace.fr`)"
+      - "traefik.http.routers.audit-server.rule=Host(`audit.mondomaine.fr`)"
       - "traefik.http.routers.audit-server.entrypoints=websecure"
       - "traefik.http.routers.audit-server.tls=true"
       # SERVICE
       - "traefik.http.services.audit-server.loadbalancer.server.port=80"
       # (OPTIONNEL) MIDDLEWARE IP WHITELIST uniquement pour HA
-      - "traefik.http.routers.audit-server.middlewares=geoblock@file"
+      - "traefik.http.routers.audit-server.middlewares=middleware@file"
 networks:
-   br-dams:
+   mon-reseau:
      external: true
