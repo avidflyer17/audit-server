@@ -1,7 +1,7 @@
 # 📘 Audit Server Documentation
 
 This document provides extra details on how to use the audit script and serve the resulting reports. It applies to
-version 1.2.0 of the project. For installation instructions, see [INSTALLATION.md](INSTALLATION.md).
+version 1.3.0 of the project. For installation instructions, see [INSTALLATION.md](INSTALLATION.md).
 
 ## 📊 Generating reports
 

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-09-30
+
+- Added automatic theme detection and dark/light mode support.
+- Refactored front-end modules and templates for services and Docker.
 - Removed open ports section from audit report generation and frontend viewer.
 
 ## [1.2.0] - 2025-08-27
