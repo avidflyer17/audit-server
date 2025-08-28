@@ -1,0 +1,192 @@
+    .top-bar {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100%;
+      box-sizing: border-box;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      background: var(--block-bg);
+      padding: 0.5rem 1rem;
+      z-index: 1100;
+    }
+
+    .top-brand {
+      justify-self: center;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap-1);
+    }
+
+    .brand-line {
+      display: flex;
+      align-items: center;
+      gap: var(--gap-2);
+      justify-content: center;
+    }
+
+    .brand-line i { font-size: 1.5rem; }
+    .brand-title { font-weight: 600; }
+
+    .brand-host {
+      margin: 0;
+      font-size: var(--font-md);
+      opacity: 0.7;
+    }
+
+    .brand-meta {
+      display: flex;
+      gap: var(--gap-3);
+      justify-content: center;
+      flex-wrap: wrap;
+      font-size: var(--font-sm);
+    }
+
+    .brand-meta .meta-item {
+      display: flex;
+      gap: var(--gap-1);
+      align-items: center;
+    }
+
+    .brand-meta .meta-label {
+      font-weight: 600;
+    }
+
+    .menu-toggle {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .menu-toggle:focus {
+      outline: none;
+    }
+
+    .menu-toggle:focus-visible {
+      outline: 2px solid var(--heading);
+      outline-offset: 2px;
+    }
+
+    .menu-toggle i {
+      transition: transform 0.3s ease;
+    }
+
+    .menu-toggle.open i {
+      transform: rotate(90deg);
+    }
+
+    #themeSwitchWrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .theme-icon {
+      color: var(--text);
+      font-size: 1.2rem;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #444;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    .switch input:checked + .slider {
+      background-color: #2196F3;
+    }
+    .switch input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+  @media screen and (max-width: 600px) {
+    .top-bar {
+      padding: 10px var(--gap-4);
+    }
+    #themeSwitchWrapper { gap: 0.5rem; }
+    .switch { width: 40px; height: 20px; }
+    .slider:before { height: 14px; width: 14px; }
+    .switch input:checked + .slider:before { transform: translateX(20px); }
+  }
+
+  @media (min-width: 900px){
+    /* grille du header + padding vertical plus serré */
+    .top-bar{
+      grid-template-columns: 44px 1fr auto;  /* menu | brand | switch */
+      padding-block: .4rem;
+    }
+
+    /* la marque passe sur UNE SEULE ligne */
+    .top-brand{
+      justify-self: start;     /* au lieu de center */
+      text-align: left;
+      display: flex;
+      flex-direction: row;     /* au lieu de column */
+      align-items: center;
+      gap: var(--gap-3);
+    }
+
+    .brand-line{
+      display: flex;
+      align-items: center;
+      gap: var(--gap-2);
+      margin-right: var(--gap-3);
+    }
+
+    /* hostname en ligne, non wrap */
+    .brand-host{
+      margin: 0;
+      opacity: .7;
+      white-space: nowrap;
+    }
+    .brand-host::before{
+      margin: 0 var(--gap-2);
+      opacity: .5;
+    }
+
+    /* "Généré / Uptime" sur une ligne pour éviter que le header regrossisse */
+    .brand-meta{
+      display: flex;
+      gap: var(--gap-4);
+      flex-wrap: nowrap;
+      white-space: nowrap;
+      font-size: var(--font-sm);
+    }
+
+    /* le switch thème reste bien collé à droite */
+    #themeSwitchWrapper{
+      justify-self: end;
+    }
+  }
+
