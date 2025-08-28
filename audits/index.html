@@ -156,8 +156,26 @@
         <span id="servicesCount">0 service</span>
       </div>
     </div>
+  <p class="services-help">Survolez un service pour voir sa description.</p>
   <div class="block-wrapper">
-    <div id="servicesList" class="services-grid"></div>
+    <input type="text" id="serviceSearch" placeholder="Filtrer un service… ex. ssh" />
+    <div id="categoryFilters" class="filter-chips"></div>
+    <div class="services-toolbar">
+      <select id="serviceSort">
+        <option value="az">A→Z</option>
+        <option value="za">Z→A</option>
+        <option value="cat">Par catégorie</option>
+      </select>
+    </div>
+    <div id="servicesList" class="services-grid">
+      <div class="service-skeleton skeleton"></div>
+      <div class="service-skeleton skeleton"></div>
+      <div class="service-skeleton skeleton"></div>
+    </div>
+    <div id="servicesEmpty" class="empty hidden">
+      Aucun service ne correspond au filtre.
+      <button id="resetFilters" class="btn">Réinitialiser les filtres</button>
+    </div>
   </div>
 
   <div class="top-grid">
