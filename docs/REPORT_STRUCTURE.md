@@ -23,7 +23,6 @@ the format used in Audit Server version 1.2.0. The top-level object contains:
 - `services`: array of active systemd service names.
 - `top_cpu`: list of processes consuming the most CPU (`pid`, `cmd`, `cpu`, `mem`).
 - `top_mem`: list of processes consuming the most memory (`pid`, `cmd`, `mem`, `cpu`).
-- `ports`: array of listening network ports (`proto`, `port`).
 - `docker`: object with `containers` array, each entry containing:
   - `name`, `state`, `health`, `uptime`.
   - `has_stats`: `true` if resource statistics are available.
@@ -64,7 +63,6 @@ A minimal example:
   "services": ["sshd.service"],
   "top_cpu": [],
   "top_mem": [],
-  "ports": [ { "proto": "tcp", "port": "22" } ],
   "docker": { "containers": [] }
 }
 ```

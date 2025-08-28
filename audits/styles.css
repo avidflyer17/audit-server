@@ -909,24 +909,6 @@ h1 {
     }
     .mem .badge[data-tip] { position: relative; }
     .mem .spark { width: 60px; height: 20px; }
-    .ports-filters { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem; }
-    .ports-actions { display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem; }
-    #portSearch { flex:1; min-width:180px; }
-    .ports-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
-    .ports-table th, .ports-table td { padding:0.3rem 0.4rem; border-bottom:1px solid var(--card-border); }
-    .ports-table th { position:sticky; top:0; background:var(--bg); cursor:pointer; }
-    .ports-table tbody tr:nth-child(even) { background:rgba(255,255,255,0.03); }
-    .ports-table tr.port-row { cursor:pointer; }
-    .ports-table td .badge { margin-right:0.2rem; }
-    .details-row.hidden { display:none; }
-    .bindings-table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
-    .bindings-table th, .bindings-table td { padding:0.2rem 0.3rem; border-bottom:1px solid var(--card-border); font-size:0.85rem; }
-    .bindings-table tbody tr:nth-child(even) { background:rgba(255,255,255,0.03); }
-    .badge.risk-critical { background:var(--crit); color:#fff; }
-    .badge.risk-warn { background:var(--warn); color:#000; }
-    .badge.risk-local { background:var(--info); color:#fff; }
-    .badge.risk-low { background:var(--chip-bg); color:var(--text); }
-    .iface { color:var(--text-muted); }
     .filter-chip .count { margin-left:0.25rem; opacity:0.7; }
 
     .load-container {
