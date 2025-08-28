@@ -107,15 +107,69 @@
     </div>
   </div>
 
-  <div class="services-title-row">
-    <h2><i class="fa-solid fa-list-check heading-icon"></i>Services actifs</h2>
-    <div class="services-actions">
-      <span id="servicesCount">0 service</span>
+  <h2 id="loadTitle"><i class="fa-solid fa-gauge-high heading-icon"></i>Charge moyenne</h2>
+  <div id="loadCard" class="card" aria-labelledby="loadTitle">
+    <div id="loadAvg" class="load-container">
+      <div class="load-main">
+        <div id="loadGauge" class="gauge" tabindex="0" role="img">
+          <svg viewBox="0 0 36 36">
+            <path class="bg" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32"/>
+            <path id="loadGaugePath" class="progress" d="M18 2a16 16 0 1 1 0 32 16 16 0 1 1 0-32" stroke-dasharray="0 100"/>
+          </svg>
+          <div class="gauge-value"><span id="load1Val">--</span></div>
+        </div>
+        <div class="gauge-label">sur 1 min <i id="loadTrend" class="trend fa-solid fa-chevron-right"></i></div>
+      </div>
+      <div class="load-cards">
+        <div id="load5Card" class="mini-card" tabindex="0">
+            <div class="mini-title"><span id="load5Dot" class="status-dot"></span>5 min</div>
+            <div class="mini-bar-row">
+              <div class="bar" id="load5Bar"><span id="load5Fill" class="fill"></span></div>
+              <span id="load5Val" class="mini-val">--</span>
+            </div>
+            <div id="load5Trend" class="mini-trend">--</div>
+          </div>
+          <div id="load15Card" class="mini-card" tabindex="0">
+            <div class="mini-title"><span id="load15Dot" class="status-dot"></span>15 min</div>
+            <div class="mini-bar-row">
+              <div class="bar" id="load15Bar"><span id="load15Fill" class="fill"></span></div>
+              <span id="load15Val" class="mini-val">--</span>
+            </div>
+            <div id="load15Trend" class="mini-trend">--</div>
+          </div>
+      </div>
     </div>
+  </div>
+
+  <h2 id="cpuTitle"><i class="fa-solid fa-gear heading-icon"></i>CPU</h2>
+  <section id="cpuSection" class="cpu"></section>
+
+  <h2><i class="fa-solid fa-memory heading-icon"></i>Mémoire RAM / Swap</h2>
+  <section id="memorySection" class="mem grid"></section>
+
+  <h2><i class="fa-solid fa-hard-drive heading-icon"></i>Disques</h2>
+  <div id="disksContainer" class="disk-grid"></div>
+
+    <div class="services-title-row">
+      <h2><i class="fa-solid fa-list-check heading-icon"></i>Services actifs</h2>
+      <div class="services-actions">
+        <span id="servicesCount">0 service</span>
+      </div>
     </div>
   <div class="block-wrapper">
     <div id="servicesGrid" class="docker-grid"></div>
     <div id="servicesEmpty" class="empty hidden">Aucun service actif</div>
+  </div>
+
+  <div class="top-grid">
+    <div class="top-panel">
+      <h2><i class="fa-solid fa-fire heading-icon"></i>Top 5 processus - CPU</h2>
+      <div id="topCpu" class="report-card proc-list"></div>
+    </div>
+    <div class="top-panel">
+      <h2><i class="fa-solid fa-memory heading-icon"></i>Top 5 processus - RAM</h2>
+      <div id="topMem" class="report-card proc-list"></div>
+    </div>
   </div>
 
   <h2><i class="fa-brands fa-docker heading-icon"></i>Conteneurs Docker</h2>
