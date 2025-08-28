@@ -204,6 +204,28 @@
       <option value="name" selected>Nom</option>
     </select>
   </div>
+  <template id="tpl-docker-card">
+    <div class="docker-card" tabindex="0">
+      <div class="docker-head">
+        <div class="docker-title">
+          <span class="docker-icon"></span>
+          <span class="docker-name"></span>
+        </div>
+        <span class="status-badge"></span>
+      </div>
+      <div class="docker-uptime"></div>
+      <div class="docker-bars">
+        <div class="bar-outer cpu">
+          <div class="fill"></div>
+          <span class="bar-value"></span>
+        </div>
+        <div class="bar-outer ram">
+          <div class="fill"></div>
+          <span class="bar-value"></span>
+        </div>
+      </div>
+    </div>
+  </template>
   <div id="dockerGrid" class="docker-grid"></div>
   <div id="dockerEmpty" class="empty hidden">Aucun conteneur actif</div>
   </main>
