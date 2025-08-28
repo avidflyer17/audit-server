@@ -1453,6 +1453,7 @@ main {
   text-align: right;
   display: flex;
   gap: var(--gap-3);
+  flex-wrap: wrap;
   font-size: var(--font-sm);
 }
 .top-meta .meta-item {
