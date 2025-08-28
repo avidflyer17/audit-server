@@ -1310,7 +1310,7 @@ function renderDisks(disks){
     const usedStr = disk.used || '';
     const freeStr = disk.available || '';
     const card = document.createElement('div');
-    card.className = 'disk-card';
+    card.className = 'card disk-card';
     card.tabIndex = 0;
     const aria = `Disque ${disk.mountpoint} : ${pctDisplay}% utilisés, ${usedStr} utilisés, ${freeStr} libres, total ${totalStr}`;
     card.innerHTML = `
