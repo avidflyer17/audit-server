@@ -32,7 +32,10 @@
 
     .brand-host {
       margin: 0;
-      font-size: var(--font-md);
+      font-size: var(--font-lg);
+      font-weight: 700;
+      color: var(--heading);
+      text-align: center;
       opacity: 0.7;
     }
 
