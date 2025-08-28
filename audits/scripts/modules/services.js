@@ -35,6 +35,7 @@ let activeServiceCats = new Set(SERVICE_CATEGORIES);
 let serviceSearch = '';
 let serviceSort = 'az';
 let servicesInit = false;
+let servicesList;
 
 function getServiceMeta(name) {
   for (const p of SERVICE_PATTERNS) {
@@ -49,6 +50,7 @@ function initServicesUI() {
   const searchInput = document.getElementById('serviceSearch');
   const sortSelect = document.getElementById('serviceSort');
   const filtersDiv = document.getElementById('categoryFilters');
+  servicesList = document.getElementById('servicesList');
   SERVICE_CATEGORIES.forEach((cat) => {
     const chip = document.createElement('button');
     chip.className = 'filter-chip active';
@@ -81,6 +83,9 @@ function initServicesUI() {
       .forEach((c) => c.classList.add('active'));
     applyServiceFilters();
   });
+
+  servicesList.addEventListener('click', handleServicesListClick);
+  servicesList.addEventListener('keydown', handleServicesListKeydown);
 }
 
 function applyServiceFilters() {
@@ -101,9 +106,36 @@ function applyServiceFilters() {
   renderServicesList();
 }
 
+function toggleServiceItem(item) {
+  const expanded = item.classList.toggle('expanded');
+  item.setAttribute('aria-expanded', expanded);
+}
+
+function handleServicesListClick(e) {
+  const copyBtn = e.target.closest('.copy-btn');
+  if (copyBtn) {
+    e.stopPropagation();
+    navigator.clipboard
+      .writeText(copyBtn.dataset.name)
+      .then(() => alert('Copié dans le presse-papiers !'));
+    return;
+  }
+  const item = e.target.closest('.service-item');
+  if (item) toggleServiceItem(item);
+}
+
+function handleServicesListKeydown(e) {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  if (e.target.closest('.copy-btn')) return;
+  const item = e.target.closest('.service-item');
+  if (item) {
+    e.preventDefault();
+    toggleServiceItem(item);
+  }
+}
+
 function renderServicesList() {
-  const list = document.getElementById('servicesList');
-  list.textContent = '';
+  servicesList.textContent = '';
   const countSpan = document.getElementById('servicesCount');
   if (filteredServices.length === 0) {
     countSpan.textContent = '0 service';
@@ -152,6 +184,7 @@ function renderServicesList() {
     copyBtn.className = 'copy-btn small';
     copyBtn.title = 'Copier le nom';
     copyBtn.textContent = '📋';
+    copyBtn.dataset.name = s.name;
     nameDiv.append(strongName, ' ', code, ' ', copyBtn);
     details.appendChild(nameDiv);
 
@@ -169,26 +202,9 @@ function renderServicesList() {
 
     item.appendChild(details);
 
-    copyBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      navigator.clipboard
-        .writeText(s.name)
-        .then(() => alert('Copié dans le presse-papiers !'));
-    });
-    const toggle = () => {
-      const expanded = item.classList.toggle('expanded');
-      item.setAttribute('aria-expanded', expanded);
-    };
-    item.addEventListener('click', toggle);
-    item.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        toggle();
-      }
-    });
     frag.appendChild(item);
   });
-  list.appendChild(frag);
+  servicesList.appendChild(frag);
   countSpan.textContent = `${filteredServices.length} service${filteredServices.length > 1 ? 's' : ''}`;
 }
 
