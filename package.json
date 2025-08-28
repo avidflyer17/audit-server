@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "esbuild audits/scripts/main.js --bundle --outfile=audits/scripts/viewer.js",
+    "build": "esbuild audits/scripts/main.js --bundle --outfile=audits/scripts/viewer.js && esbuild audits/styles/index.css --bundle --outfile=audits/styles.css",
     "lint": "eslint \"audits/scripts/**/*.js\"",
     "format": "prettier -w \"audits/scripts/**/*.js\"",
     "test": "./tests/run.sh"

@@ -1,0 +1,38 @@
+    .service-item {
+      background: var(--block-bg);
+      padding: 0.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .service-item:focus-visible {
+      outline: 2px solid var(--heading);
+      outline-offset: 2px;
+    }
+    .service-main {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .service-icon {
+      width: 1.5rem;
+      text-align: center;
+    }
+    .service-name {
+      font-weight: bold;
+    }
+    .service-badge {
+      margin-left: auto;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      background: #555;
+      font-family: var(--font-mono);
+    }
+    .service-details {
+      display: none;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .service-item.expanded .service-details {
+      display: block;
+    }
