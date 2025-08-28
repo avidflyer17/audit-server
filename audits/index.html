@@ -156,7 +156,10 @@
         <span id="servicesCount">0 service</span>
       </div>
     </div>
+  <p class="services-help">Survolez un service pour voir sa description.</p>
   <div class="block-wrapper">
+    <input type="text" id="serviceSearch" placeholder="Filtrer un service… ex. ssh" />
+    <div id="categoryFilters" class="filter-chips"></div>
     <div class="services-toolbar">
       <select id="serviceSort">
         <option value="az">A→Z</option>
@@ -170,7 +173,7 @@
       <div class="service-skeleton skeleton"></div>
     </div>
     <template id="tpl-service-item">
-      <div class="service-item">
+      <div class="service-item" tabindex="0" aria-expanded="false">
         <div class="service-main">
           <span class="service-icon"></span>
           <span class="service-name"></span>
@@ -194,7 +197,8 @@
       </div>
     </template>
     <div id="servicesEmpty" class="empty hidden">
-      Aucun service à afficher.
+      Aucun service ne correspond au filtre.
+      <button id="resetFilters" class="btn">Réinitialiser les filtres</button>
     </div>
   </div>
 
