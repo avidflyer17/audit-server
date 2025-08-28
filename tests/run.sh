@@ -19,8 +19,8 @@ jq -e '.disks[0] != null' "$file" >/dev/null
 jq empty "$file"
 jq -e '.cpu.model | length > 0' "$file" >/dev/null
 jq -e '.cpu.cores | tonumber > 0' "$file" >/dev/null
-jq -e '.ports | type == "array"' "$file" >/dev/null
 jq -e '.docker.containers | type == "array"' "$file" >/dev/null
+jq -e 'has("ports") | not' "$file" >/dev/null
 
 rm -rf "$tmp_dir"
 

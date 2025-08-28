@@ -6,8 +6,8 @@ after this tag has been discarded.
 Audit Server generates periodic JSON reports describing the state of a host and exposes them through a static web
 viewer. The solution is composed of three parts:
 
-* `generate-audit-json.sh` – Bash script that collects metrics (CPU, memory, disks, services, open ports and
-  Docker containers) and stores them as timestamped JSON files.
+* `generate-audit-json.sh` – Bash script that collects metrics (CPU, memory, disks, services and Docker
+  containers) and stores them as timestamped JSON files.
 * `audits/` – static HTML, CSS and JavaScript viewer that loads and renders those JSON files in a browser.
 * `docker-compose.yaml` and `nginx.conf` – optional container setup to serve the viewer with Nginx.
 
