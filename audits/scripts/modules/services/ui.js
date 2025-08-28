@@ -42,64 +42,21 @@ export function renderServicesList() {
   }
   document.getElementById('servicesEmpty').classList.add('hidden');
   const frag = document.createDocumentFragment();
+  const tpl = document.getElementById('tpl-service-item');
   list.forEach((s) => {
-    const item = document.createElement('div');
-    item.className = 'service-item';
-    item.tabIndex = 0;
+    const item = tpl.content.firstElementChild.cloneNode(true);
     item.title = s.desc;
-    item.setAttribute('aria-expanded', 'false');
-
-    const main = document.createElement('div');
-    main.className = 'service-main';
-
-    const iconSpan = document.createElement('span');
-    iconSpan.className = 'service-icon';
-    iconSpan.textContent = s.icon;
-    main.appendChild(iconSpan);
-
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'service-name';
-    nameSpan.textContent = s.name;
-    main.appendChild(nameSpan);
-
-    const badgeSpan = document.createElement('span');
-    badgeSpan.className =
-      'service-badge cat-' + s.category.toLowerCase().replace(/[\s/]+/g, '-');
-    badgeSpan.textContent = s.category;
-    main.appendChild(badgeSpan);
-
-    item.appendChild(main);
-
-    const details = document.createElement('div');
-    details.className = 'service-details';
-
-    const nameDiv = document.createElement('div');
-    const strongName = document.createElement('strong');
-    strongName.textContent = 'Nom de l’unité :';
-    const code = document.createElement('code');
-    code.textContent = s.name;
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'copy-btn small';
-    copyBtn.title = 'Copier le nom';
-    copyBtn.textContent = '📋';
+    item.querySelector('.service-icon').textContent = s.icon;
+    item.querySelector('.service-name').textContent = s.name;
+    const badge = item.querySelector('.service-badge');
+    badge.textContent = s.category;
+    badge.classList.add(
+      'cat-' + s.category.toLowerCase().replace(/[\s/]+/g, '-')
+    );
+    item.querySelector('.service-unit').textContent = s.name;
+    const copyBtn = item.querySelector('.copy-btn');
     copyBtn.dataset.name = s.name;
-    nameDiv.append(strongName, ' ', code, ' ', copyBtn);
-    details.appendChild(nameDiv);
-
-    const typeDiv = document.createElement('div');
-    const strongType = document.createElement('strong');
-    strongType.textContent = 'Type :';
-    typeDiv.append(strongType, ' service');
-    details.appendChild(typeDiv);
-
-    const descDiv = document.createElement('div');
-    const strongDesc = document.createElement('strong');
-    strongDesc.textContent = 'Description :';
-    descDiv.append(strongDesc, ' ', s.desc);
-    details.appendChild(descDiv);
-
-    item.appendChild(details);
-
+    item.querySelector('.service-desc').textContent = s.desc;
     frag.appendChild(item);
   });
   servicesList.appendChild(frag);
