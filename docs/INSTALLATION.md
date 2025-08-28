@@ -1,6 +1,6 @@
 # 🛠️ Installation Guide
 
-This guide explains how to set up Audit Server version 1.3.0 from scratch.
+This guide explains how to set up Audit Server version 1.3.1 from scratch.
 
 ## 1. Clone the repository
 

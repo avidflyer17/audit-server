@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.3.1] - 2025-10-15
+
+- Updated documentation for release v1.3.1.
+
 ## [1.3.0] - 2025-09-30
 
 - Added automatic theme detection and dark/light mode support.

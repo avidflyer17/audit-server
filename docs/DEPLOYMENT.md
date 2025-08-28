@@ -1,7 +1,7 @@
 # 🚀 Deployment Guide
 
 This guide explains how to serve audit reports through Nginx running in Docker with Traefik. It applies to
-Audit Server version 1.3.0.
+Audit Server version 1.3.1.
 
 1. Generate audits (or schedule the script):
 
