@@ -526,6 +526,7 @@ h1 {
     }
     .mem .badge[data-tip] { position: relative; }
     .mem .spark { width: 60px; height: 20px; }
+    .filter-chip .count { margin-left:0.25rem; opacity:0.7; }
 
     .load-container {
       display: flex;
@@ -602,6 +603,36 @@ h1 {
       align-items: center;
       gap: 0.5rem;
       font-size: 0.9rem;
+    }
+    .services-help {
+      font-size: 0.9rem;
+      color: #bbb;
+      margin-top: -0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    #serviceSearch {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .filter-chip {
+      background: var(--chip-bg);
+      color: var(--chip-text);
+      border: none;
+      border-radius: 9999px;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+    }
+    .filter-chip.active {
+      background: var(--chip-active-bg);
+      color: var(--bg);
     }
     .services-toolbar {
       display: flex;
@@ -797,6 +828,7 @@ h1 {
     @media (max-width: 600px) {
       .services-grid { grid-template-columns: 1fr; }
       .services-toolbar { justify-content: flex-start; }
+      .filter-chips { position: sticky; top: 0; background: var(--bg); padding-top: 0.5rem; }
       .cpu .card-head { flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:4px; }
       .cpu .summary { flex-direction:row; gap:4px; }
       .cpu .core-list { margin-top:var(--gap-2); gap:4px; }
