@@ -253,21 +253,5 @@
   <div id="dockerGrid" class="docker-grid"></div>
   <div id="dockerEmpty" class="empty hidden">Aucun conteneur actif</div>
   </main>
-  <script>
-    const themeSwitch = document.getElementById("themeToggle");
-    const themeIcon = document.getElementById("themeIcon");
-      function applyTheme(t){
-        document.body.setAttribute("data-theme", t);
-        themeSwitch.checked = t === "light";
-        if (themeIcon) themeIcon.className = t === "light" ? "fas fa-sun theme-icon" : "fas fa-moon theme-icon";
-      }
-    themeSwitch.addEventListener("change", () => {
-      const next = themeSwitch.checked ? "light" : "dark";
-      localStorage.setItem("theme", next);
-      applyTheme(next);
-    });
-    applyTheme(localStorage.getItem("theme") || "dark");
-  </script>
-
 </body>
 </html>
