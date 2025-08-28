@@ -216,20 +216,19 @@
   <div class="ports-actions">
     <input type="text" id="portSearch" placeholder="Rechercher un port ou un service…" aria-label="Rechercher un port ou un service…" />
   </div>
-  <table id="portsTable" class="ports-table">
-    <thead>
-      <tr>
-        <th data-sort="port">Port</th>
-        <th data-sort="service">Service</th>
-        <th>Catégorie</th>
-        <th>Exposition</th>
-        <th>Processus</th>
-        <th class="bindings-header">Bindings</th>
-        <th data-sort="risk">Risque</th>
-      </tr>
-    </thead>
-    <tbody id="portsBody"></tbody>
-  </table>
+  <div id="portsTable" class="ports-table">
+    <div class="ports-header ports-row">
+      <div data-sort="port">Port</div>
+      <div data-sort="service">Service</div>
+      <div>Catégorie</div>
+      <div>Exposition</div>
+      <div class="col-processus">Processus</div>
+      <div class="col-bindings">Bindings</div>
+      <div data-sort="risk">Risque</div>
+    </div>
+    <div id="portsBody" class="ports-body"></div>
+  </div>
+  <div id="portsCards" class="ports-cards"></div>
   <div id="portsEmpty" class="empty hidden">Aucun port ne correspond. <button id="portsReset" class="btn">Réinitialiser</button></div>
   </main>
   <script>
