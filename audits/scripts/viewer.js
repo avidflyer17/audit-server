@@ -454,6 +454,103 @@
     );
     return auditsMap;
   }
+  function fmtDate(d) {
+    return d.toISOString().slice(0, 10);
+  }
+  function toggleSidebar(open) {
+    const sidebar = document.getElementById("sidebar");
+    if (!sidebar)
+      return;
+    if (open)
+      sidebar.classList.add("open");
+    else
+      sidebar.classList.remove("open");
+  }
+  async function loadAndRender(entry) {
+    try {
+      showStatus("Chargement\u2026", "loading");
+      const data = await loadAudit(entry.file);
+      renderInfo(data);
+      renderServices(data.services || []);
+      renderDocker(data.docker || []);
+      showStatus("");
+      const chips = document.querySelectorAll(".time-chip");
+      chips.forEach((c) => c.classList.remove("active"));
+      const active = Array.from(chips).find((c) => c.textContent === entry.time);
+      if (active)
+        active.classList.add("active");
+    } catch (err) {
+      console.error(err);
+      showStatus("Impossible de charger le rapport: " + err.message, "error");
+    }
+  }
+  function selectDay(dateStr) {
+    const timeline = document.getElementById("timeTimeline");
+    if (!timeline)
+      return;
+    timeline.textContent = "";
+    document.querySelectorAll(".day-control .seg").forEach((b) => b.classList.remove("active"));
+    const today = fmtDate(/* @__PURE__ */ new Date());
+    const y = /* @__PURE__ */ new Date();
+    y.setDate(y.getDate() - 1);
+    const yesterday = fmtDate(y);
+    const btnToday = document.getElementById("dayToday");
+    const btnYest = document.getElementById("dayYesterday");
+    if (dateStr === today)
+      btnToday?.classList.add("active");
+    else if (dateStr === yesterday)
+      btnYest?.classList.add("active");
+    const entries = auditsMap[dateStr] || [];
+    if (!entries.length) {
+      showStatus("Aucun rapport pour ce jour", "empty");
+      return;
+    }
+    showStatus("");
+    entries.forEach((entry) => {
+      const btn = document.createElement("button");
+      btn.className = "time-chip";
+      btn.textContent = entry.time;
+      btn.addEventListener("click", () => {
+        loadAndRender(entry);
+        toggleSidebar(false);
+      });
+      timeline.appendChild(btn);
+    });
+  }
+  function initNav() {
+    const menuToggle = document.getElementById("menuToggle");
+    const overlay = document.getElementById("menuOverlay");
+    menuToggle?.addEventListener("click", () => toggleSidebar(true));
+    overlay?.addEventListener("click", () => toggleSidebar(false));
+    const btnLatest = document.getElementById("btnLatest");
+    const latestInfo = document.getElementById("latestInfo");
+    if (btnLatest && latestEntry) {
+      const when = latestEntry.iso.toLocaleString();
+      if (latestInfo)
+        latestInfo.textContent = when;
+      btnLatest.addEventListener("click", () => {
+        selectDay(latestEntry.date);
+        loadAndRender(latestEntry);
+        toggleSidebar(false);
+      });
+    }
+    const dayToday = document.getElementById("dayToday");
+    const dayYesterday = document.getElementById("dayYesterday");
+    const dayCalendar = document.getElementById("dayCalendar");
+    const datePicker = document.getElementById("datePicker");
+    const todayStr = fmtDate(/* @__PURE__ */ new Date());
+    const y = /* @__PURE__ */ new Date();
+    y.setDate(y.getDate() - 1);
+    const yesterdayStr = fmtDate(y);
+    dayToday?.addEventListener("click", () => selectDay(todayStr));
+    dayYesterday?.addEventListener("click", () => selectDay(yesterdayStr));
+    dayCalendar?.addEventListener(
+      "click",
+      () => datePicker?.showPicker ? datePicker.showPicker() : datePicker?.click()
+    );
+    datePicker?.addEventListener("change", () => selectDay(datePicker.value));
+    selectDay(latestEntry.date);
+  }
   function showStatus(message, type) {
     const div = document.getElementById("selectorStatus");
     div.className = type || "";
@@ -468,11 +565,8 @@
         showStatus("Aucun rapport", "empty");
         return;
       }
-      const data = await loadAudit(latestEntry.file);
-      renderInfo(data);
-      renderServices(data.services || []);
-      renderDocker(data.docker || []);
-      showStatus("");
+      initNav();
+      await loadAndRender(latestEntry);
     } catch (err) {
       console.error(err);
       showStatus("Impossible de charger les rapports: " + err.message, "error");
