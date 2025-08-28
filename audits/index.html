@@ -266,8 +266,19 @@
       localStorage.setItem("theme", next);
       applyTheme(next);
     });
-    applyTheme(localStorage.getItem("theme") || "dark");
+    const storedTheme = localStorage.getItem("theme");
+    if (storedTheme) {
+      applyTheme(storedTheme);
+    } else {
+      const mql = window.matchMedia("(prefers-color-scheme: light)");
+      applyTheme(mql.matches ? "light" : "dark");
+      mql.addEventListener("change", e => {
+        if (!localStorage.getItem("theme")) {
+          applyTheme(e.matches ? "light" : "dark");
+        }
+      });
+    }
   </script>
 
 </body>
-</html>
+  </html>
