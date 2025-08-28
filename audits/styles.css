@@ -912,16 +912,13 @@ h1 {
     .ports-filters { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.5rem; }
     .ports-actions { display:flex; gap:0.5rem; align-items:center; margin-bottom:0.5rem; }
     #portSearch { flex:1; min-width:180px; }
-    .ports-table { width:100%; font-size:0.9rem; }
-    .ports-header { position:sticky; top:0; background:var(--bg); box-shadow:0 1px 2px rgba(0,0,0,0.1); }
-    .ports-row { display:grid; grid-template-columns:110px 1.2fr 0.9fr 1.2fr 100px 110px 110px; gap:12px; align-items:center; padding:0.3rem 0.4rem; border-bottom:1px solid var(--card-border); cursor:pointer; }
-    .ports-row > * { min-width:0; }
-    .ports-body .ports-row:nth-child(even) { background:rgba(255,255,255,0.03); }
-    .truncate { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .wrap { white-space:normal; word-break:break-word; overflow-wrap:anywhere; }
-    .chips { display:flex; flex-wrap:wrap; gap:4px; }
-    .col-processus, .col-bindings { }
-    .row-details.hidden { display:none; }
+    .ports-table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+    .ports-table th, .ports-table td { padding:0.3rem 0.4rem; border-bottom:1px solid var(--card-border); }
+    .ports-table th { position:sticky; top:0; background:var(--bg); cursor:pointer; }
+    .ports-table tbody tr:nth-child(even) { background:rgba(255,255,255,0.03); }
+    .ports-table tr.port-row { cursor:pointer; }
+    .ports-table td .badge { margin-right:0.2rem; }
+    .details-row.hidden { display:none; }
     .bindings-table { width:100%; border-collapse:collapse; margin-top:0.5rem; }
     .bindings-table th, .bindings-table td { padding:0.2rem 0.3rem; border-bottom:1px solid var(--card-border); font-size:0.85rem; }
     .bindings-table tbody tr:nth-child(even) { background:rgba(255,255,255,0.03); }
@@ -931,37 +928,6 @@ h1 {
     .badge.risk-low { background:var(--chip-bg); color:var(--text); }
     .iface { color:var(--text-muted); }
     .filter-chip .count { margin-left:0.25rem; opacity:0.7; }
-
-    .ports-cards { display:none; }
-    .port-card { border:1px solid var(--card-border); border-radius:12px; padding:12px; display:grid; gap:8px; }
-    .port-card .title { display:flex; justify-content:space-between; font-weight:600; }
-    .counts { font-size:0.85rem; }
-    .card-details.hidden { display:none; }
-
-    .chip { padding:2px 8px; border-radius:999px; font-size:12px; opacity:.9; }
-    .chip-public { background:#0e7490; color:#e0f2fe; }
-    .chip-docker { background:#1d4ed8; color:#dbeafe; }
-    .chip-localhost { background:#374151; color:#e5e7eb; }
-
-    .badge-admin { background:#2d3748; color:#e2e8f0; }
-    .badge-web { background:#1f2937; color:#e5e7eb; }
-    .badge-infra { background:#4b5563; color:#e5e7eb; }
-    .badge-fileshare { background:#374151; color:#e5e7eb; }
-    .badge-db { background:#1e40af; color:#e0e7ff; }
-    .badge-system { background:#065f46; color:#d1fae5; }
-    .badge-unknown { background:#6b7280; color:#f9fafb; }
-    .badge-other { background:#6b7280; color:#f9fafb; }
-
-    @media (max-width:1023px){
-      .col-processus, .col-bindings { display:none; }
-      .ports-row { grid-template-columns:100px 1.3fr 1fr 1fr 120px; }
-    }
-
-    @media (max-width:767px){
-      .ports-table { display:none; }
-      .ports-cards { display:flex; flex-direction:column; gap:12px; }
-      .bindings-table { display:block; overflow-x:auto; }
-    }
 
     .load-container {
       display: flex;
