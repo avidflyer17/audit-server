@@ -1,14 +1,3 @@
-export const SERVICE_CATEGORIES = [
-  'Système',
-  'Réseau',
-  'Stockage/Partages',
-  'Conteneurs',
-  'Sécurité',
-  'Journalisation',
-  'Mises à jour',
-  'Autre',
-];
-
 export const SERVICE_PATTERNS = [
   { regex: /docker|containerd/i, icon: '🐳', category: 'Conteneurs' },
   { regex: /ssh/i, icon: '🔐', category: 'Sécurité' },

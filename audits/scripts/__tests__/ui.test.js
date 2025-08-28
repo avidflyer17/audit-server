@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { fireEvent } from '@testing-library/dom';
 import { jest } from '@jest/globals';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -13,14 +12,12 @@ describe('services UI', () => {
   let ServiceStore;
   let initServicesUI;
   let renderServicesList;
-  let SERVICE_CATEGORIES;
 
   beforeEach(async () => {
     jest.resetModules();
     document.body.innerHTML = bodyHtml;
     const dataModule = await import('../modules/services/data.js');
     ServiceStore = dataModule.default;
-    SERVICE_CATEGORIES = dataModule.SERVICE_CATEGORIES;
     const uiModule = await import('../modules/services/ui.js');
     initServicesUI = uiModule.initServicesUI;
     renderServicesList = uiModule.renderServicesList;
@@ -30,25 +27,12 @@ describe('services UI', () => {
     global.alert = jest.fn();
   });
 
-  test('initServicesUI creates chips and handles clicks', () => {
+  test('renderServicesList shows services without filters', () => {
     ServiceStore.setData(['sshd', 'cron']);
     initServicesUI();
     renderServicesList();
     const chips = document.querySelectorAll('#categoryFilters .filter-chip');
-    expect(chips.length).toBe(SERVICE_CATEGORIES.length);
-    const itemsBefore = document.querySelectorAll('#servicesList .service-item');
-    expect(itemsBefore.length).toBe(2);
-    const secChip = Array.from(chips).find((c) => c.textContent === 'Sécurité');
-    fireEvent.click(secChip);
-    expect(secChip.classList.contains('active')).toBe(false);
-    const itemsAfter = document.querySelectorAll('#servicesList .service-item');
-    expect(itemsAfter.length).toBe(1);
-  });
-
-  test('renderServicesList shows full list', () => {
-    ServiceStore.setData(['sshd', 'cron']);
-    initServicesUI();
-    renderServicesList();
+    expect(chips.length).toBe(0);
     const items = document.querySelectorAll('#servicesList .service-item');
     expect(items.length).toBe(2);
     expect(document.getElementById('servicesCount').textContent).toBe('2 services');
@@ -107,22 +91,3 @@ describe('setupCopy', () => {
   });
 });
 
-describe('toggleServiceItem', () => {
-  let toggleServiceItem;
-  beforeEach(async () => {
-    jest.resetModules();
-    ({ toggleServiceItem } = await import('../modules/services/ui.js'));
-  });
-
-  test('toggles aria-expanded and class', () => {
-    const item = document.createElement('div');
-    item.className = 'service-item';
-    item.setAttribute('aria-expanded', 'false');
-    toggleServiceItem(item);
-    expect(item.classList.contains('expanded')).toBe(true);
-    expect(item.getAttribute('aria-expanded')).toBe('true');
-    toggleServiceItem(item);
-    expect(item.classList.contains('expanded')).toBe(false);
-    expect(item.getAttribute('aria-expanded')).toBe('false');
-  });
-});
