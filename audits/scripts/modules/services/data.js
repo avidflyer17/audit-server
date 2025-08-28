@@ -29,69 +29,68 @@ export const SERVICE_PATTERNS = [
   { regex: /thermald/i, icon: '🌡️', category: 'Système' },
 ];
 
-export let servicesData = [];
-export let filteredServices = [];
-export let activeServiceCats = new Set(SERVICE_CATEGORIES);
-export let serviceSearch = '';
-export let serviceSort = 'az';
-
-export function getServiceMeta(name) {
+function getServiceMeta(name) {
   for (const p of SERVICE_PATTERNS) {
     if (p.regex.test(name)) return p;
   }
   return { icon: '⬜', category: 'Autre' };
 }
 
-export function setServicesData(names) {
-  servicesData = (names || []).map((n) => {
-    const meta = getServiceMeta(n);
-    return {
-      name: n,
-      icon: meta.icon,
-      category: meta.category,
-      desc: 'Service systemd',
-    };
-  });
-  return applyServiceFilters();
-}
-
-export function applyServiceFilters() {
-  filteredServices = servicesData.filter(
-    (s) =>
-      activeServiceCats.has(s.category) &&
-      s.name.toLowerCase().includes(serviceSearch),
-  );
-  if (serviceSort === 'az')
-    filteredServices.sort((a, b) => a.name.localeCompare(b.name));
-  else if (serviceSort === 'za')
-    filteredServices.sort((a, b) => b.name.localeCompare(a.name));
-  else if (serviceSort === 'cat')
-    filteredServices.sort(
-      (a, b) =>
-        a.category.localeCompare(b.category) || a.name.localeCompare(b.name),
+export const ServiceStore = {
+  data: [],
+  filtered: [],
+  activeCats: new Set(SERVICE_CATEGORIES),
+  search: '',
+  sort: 'az',
+  setData(names) {
+    this.data = (names || []).map((n) => {
+      const meta = getServiceMeta(n);
+      return {
+        name: n,
+        icon: meta.icon,
+        category: meta.category,
+        desc: 'Service systemd',
+      };
+    });
+    return this.applyFilters();
+  },
+  applyFilters() {
+    this.filtered = this.data.filter(
+      (s) =>
+        this.activeCats.has(s.category) &&
+        s.name.toLowerCase().includes(this.search),
     );
-  return filteredServices;
-}
-
-export function updateSearch(value) {
-  serviceSearch = value.toLowerCase();
-  return applyServiceFilters();
-}
-
-export function updateSort(value) {
-  serviceSort = value;
-  return applyServiceFilters();
-}
-
-export function toggleCategory(cat) {
-  if (activeServiceCats.has(cat)) activeServiceCats.delete(cat);
-  else activeServiceCats.add(cat);
-  return applyServiceFilters();
-}
-
-export function resetFilters() {
-  serviceSearch = '';
-  serviceSort = 'az';
-  activeServiceCats = new Set(SERVICE_CATEGORIES);
-  return applyServiceFilters();
-}
+    if (this.sort === 'az')
+      this.filtered.sort((a, b) => a.name.localeCompare(b.name));
+    else if (this.sort === 'za')
+      this.filtered.sort((a, b) => b.name.localeCompare(a.name));
+    else if (this.sort === 'cat')
+      this.filtered.sort(
+        (a, b) =>
+          a.category.localeCompare(b.category) || a.name.localeCompare(b.name),
+      );
+    return this.filtered;
+  },
+  updateSearch(value) {
+    this.search = value.toLowerCase();
+    return this.applyFilters();
+  },
+  updateSort(value) {
+    this.sort = value;
+    return this.applyFilters();
+  },
+  toggleCategory(cat) {
+    if (this.activeCats.has(cat)) this.activeCats.delete(cat);
+    else this.activeCats.add(cat);
+    return this.applyFilters();
+  },
+  resetFilters() {
+    this.search = '';
+    this.sort = 'az';
+    this.activeCats = new Set(SERVICE_CATEGORIES);
+    return this.applyFilters();
+  },
+  getFiltered() {
+    return this.filtered;
+  },
+};

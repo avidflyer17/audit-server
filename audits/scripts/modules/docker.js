@@ -1,10 +1,46 @@
 import { iconFor, colorClassCpu, colorClassRam } from './ui.js';
 
-let dockerData = [];
-let dockerFiltered = [];
-let dockerFilters = new Set(['healthy', 'unhealthy', 'running', 'exited']);
-let dockerSearch = '';
-let dockerSort = 'name';
+export const DockerStore = {
+  data: [],
+  filtered: [],
+  filters: new Set(['healthy', 'unhealthy', 'running', 'exited']),
+  search: '',
+  sort: 'name',
+  setData(arr) {
+    this.data = arr;
+    return this.applyFilters();
+  },
+  setSearch(val) {
+    this.search = val.toLowerCase();
+    return this.applyFilters();
+  },
+  setSort(val) {
+    this.sort = val;
+    return this.applyFilters();
+  },
+  toggleFilter(f) {
+    if (this.filters.has(f)) this.filters.delete(f);
+    else this.filters.add(f);
+    return this.applyFilters();
+  },
+  applyFilters() {
+    this.filtered = this.data.filter((c) => {
+      const status = c.health === 'starting' ? 'running' : c.health || c.state;
+      return (
+        this.filters.has(status) &&
+        c.name.toLowerCase().includes(this.search)
+      );
+    });
+    if (this.sort === 'cpu') this.filtered.sort((a, b) => b.cpu - a.cpu);
+    else if (this.sort === 'ram') this.filtered.sort((a, b) => b.mem - a.mem);
+    else this.filtered.sort((a, b) => a.name.localeCompare(b.name));
+    return this.filtered;
+  },
+  getFiltered() {
+    return this.filtered;
+  },
+};
+
 let dockerInit = false;
 
 function formatBytes(b) {
@@ -68,48 +104,35 @@ function initDockerUI() {
   const sortSel = document.getElementById('dockerSort');
   const chips = document.querySelectorAll('#dockerFilters .chip');
   search.addEventListener('input', (e) => {
-    dockerSearch = e.target.value.toLowerCase();
-    applyDockerFilters();
+    DockerStore.setSearch(e.target.value);
+    renderDockerList();
   });
   sortSel.addEventListener('change', (e) => {
-    dockerSort = e.target.value;
-    applyDockerFilters();
+    DockerStore.setSort(e.target.value);
+    renderDockerList();
   });
   chips.forEach((ch) => {
     ch.addEventListener('click', () => {
       const f = ch.dataset.filter;
-      if (dockerFilters.has(f)) dockerFilters.delete(f);
-      else dockerFilters.add(f);
+      DockerStore.toggleFilter(f);
       ch.classList.toggle('active');
-      applyDockerFilters();
+      renderDockerList();
     });
   });
 }
 
-function applyDockerFilters() {
-  dockerFiltered = dockerData.filter((c) => {
-    const status = c.health === 'starting' ? 'running' : c.health || c.state;
-    return (
-      dockerFilters.has(status) && c.name.toLowerCase().includes(dockerSearch)
-    );
-  });
-  if (dockerSort === 'cpu') dockerFiltered.sort((a, b) => b.cpu - a.cpu);
-  else if (dockerSort === 'ram') dockerFiltered.sort((a, b) => b.mem - a.mem);
-  else dockerFiltered.sort((a, b) => a.name.localeCompare(b.name));
-  renderDockerList();
-}
-
 function renderDockerList() {
+  const list = DockerStore.getFiltered();
   const grid = document.getElementById('dockerGrid');
   grid.textContent = '';
-  if (!dockerFiltered.length) {
+  if (!list.length) {
     document.getElementById('dockerEmpty').classList.remove('hidden');
     return;
   }
   document.getElementById('dockerEmpty').classList.add('hidden');
   const frag = document.createDocumentFragment();
   const updates = [];
-  dockerFiltered.forEach((c) => {
+  list.forEach((c) => {
     const card = document.createElement('div');
     card.setAttribute('class', 'docker-card');
     card.setAttribute('tabindex', '0');
@@ -201,6 +224,7 @@ export function renderDocker(list) {
     : list && Array.isArray(list.containers)
       ? list.containers
       : [];
-  dockerData = arr.map(parseDocker);
-  applyDockerFilters();
+  const data = arr.map(parseDocker);
+  DockerStore.setData(data);
+  renderDockerList();
 }
