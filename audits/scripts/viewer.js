@@ -346,33 +346,11 @@ let sortKey = 'risk';
 let sortDir = 1;
 let portsInit = false;
 
-function formatPort(proto, port){
-  return `${proto}/${port}`;
-}
-
-function firstService(services){
-  return services && services.length ? services[0] : 'unknown';
-}
-
-function uniqueScopes(scopes){
-  const order = ['Public', 'Docker', 'Localhost'];
-  const set = new Set(scopes || []);
-  return order.filter(s => set.has(s));
-}
-
-function riskToBadge(level){
-  return `badge risk-${level}`;
-}
-
-function categoryToBadge(cat){
-  return `badge badge-${cat}`;
-}
-
 function renderPortDetails(p){
   const wrap = document.createElement('div');
   const info = document.createElement('div');
   const reasons = p.risk.reasons.join(' + ');
-  info.className = 'wrap details-title';
+  info.className = 'details-info';
   info.textContent = `Services: ${p.services.join(', ')}${reasons ? ' — ' + reasons : ''}`;
   wrap.appendChild(info);
   const table = document.createElement('table');
@@ -478,131 +456,81 @@ function toggleRow(row, detail){
 
 function renderPortsTable(){
   const tbody = document.getElementById('portsBody');
-  const cards = document.getElementById('portsCards');
   tbody.textContent = '';
-  cards.textContent = '';
   if (!filteredPorts.length){
     document.getElementById('portsEmpty').classList.remove('hidden');
     return;
   }
   document.getElementById('portsEmpty').classList.add('hidden');
   filteredPorts.forEach(p => {
-    const row = document.createElement('div');
-    row.className = 'ports-row';
+    const row = document.createElement('tr');
+    row.className = 'port-row';
     row.tabIndex = 0;
-    row.setAttribute('role', 'button');
     row.setAttribute('aria-expanded', 'false');
 
-    const portDiv = document.createElement('div');
-    portDiv.textContent = formatPort(p.proto, p.port);
-    row.appendChild(portDiv);
+    const portTd = document.createElement('td');
+    portTd.textContent = `${p.proto}/${p.port}`;
+    row.appendChild(portTd);
 
-    const svcDiv = document.createElement('div');
-    svcDiv.className = 'truncate';
-    const svc = firstService(p.services);
-    svcDiv.textContent = svc;
-    svcDiv.title = svc;
-    row.appendChild(svcDiv);
+    const svcTd = document.createElement('td');
+    const svc = p.services[0] || '';
+    svcTd.textContent = svc;
+    if (p.services.length > 1){
+      const more = document.createElement('span');
+      more.className = 'more-svc';
+      more.textContent = ` (+${p.services.length - 1})`;
+      svcTd.appendChild(more);
+    }
+    row.appendChild(svcTd);
 
-    const catDiv = document.createElement('div');
+    const catTd = document.createElement('td');
     const catMeta = PORT_CATS.find(c => c.key === p.category);
     const catBadge = document.createElement('span');
-    catBadge.className = categoryToBadge(p.category);
+    catBadge.className = `badge cat-${p.category}`;
     catBadge.textContent = catMeta ? catMeta.label : p.category;
-    catDiv.appendChild(catBadge);
-    row.appendChild(catDiv);
+    catTd.appendChild(catBadge);
+    row.appendChild(catTd);
 
-    const scopeDiv = document.createElement('div');
-    scopeDiv.className = 'chips';
-    uniqueScopes(p.scopes).forEach(s => {
-      const chip = document.createElement('span');
-      chip.className = `chip chip-${s.toLowerCase()}`;
-      chip.textContent = s;
-      scopeDiv.appendChild(chip);
+    const scopeTd = document.createElement('td');
+    p.scopes.forEach(s => {
+      const b = document.createElement('span');
+      b.className = 'badge scope-badge';
+      b.textContent = s;
+      scopeTd.appendChild(b);
     });
-    row.appendChild(scopeDiv);
+    row.appendChild(scopeTd);
 
-    const procDiv = document.createElement('div');
-    procDiv.className = 'col-processus';
-    procDiv.textContent = p.counts.processes;
-    row.appendChild(procDiv);
+    const procTd = document.createElement('td');
+    procTd.textContent = p.counts.processes;
+    row.appendChild(procTd);
 
-    const bindDiv = document.createElement('div');
-    bindDiv.className = 'col-bindings';
-    bindDiv.textContent = p.counts.bindings;
-    row.appendChild(bindDiv);
+    const bindTd = document.createElement('td');
+    bindTd.className = 'bindings-cell';
+    bindTd.textContent = p.counts.bindings;
+    row.appendChild(bindTd);
 
-    const riskDiv = document.createElement('div');
+    const riskTd = document.createElement('td');
     const riskBadge = document.createElement('span');
-    riskBadge.className = riskToBadge(p.risk.level);
+    riskBadge.className = `badge risk-${p.risk.level}`;
     riskBadge.textContent = p.risk.level;
     if (p.risk.reasons && p.risk.reasons.length) riskBadge.title = p.risk.reasons.join(' + ');
-    riskDiv.appendChild(riskBadge);
-    row.appendChild(riskDiv);
+    riskTd.appendChild(riskBadge);
+    row.appendChild(riskTd);
 
-    const detailRow = document.createElement('div');
-    detailRow.className = 'row-details hidden';
+    const detailRow = document.createElement('tr');
+    detailRow.className = 'details-row hidden';
     detailRow.setAttribute('aria-hidden', 'true');
-    detailRow.appendChild(renderPortDetails(p));
+    const detailTd = document.createElement('td');
+    detailTd.colSpan = 7;
+    detailTd.appendChild(renderPortDetails(p));
+    detailRow.appendChild(detailTd);
 
     const toggle = () => toggleRow(row, detailRow);
     row.addEventListener('click', toggle);
-    row.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(); } });
-    bindDiv.addEventListener('click', e => { e.stopPropagation(); toggle(); });
+    bindTd.addEventListener('click', e => { e.stopPropagation(); toggle(); });
 
     tbody.appendChild(row);
     tbody.appendChild(detailRow);
-
-    const card = document.createElement('div');
-    card.className = 'port-card';
-    card.tabIndex = 0;
-    card.setAttribute('role', 'button');
-    card.setAttribute('aria-expanded', 'false');
-
-    const title = document.createElement('div');
-    title.className = 'title';
-    const left = document.createElement('span');
-    left.textContent = `${formatPort(p.proto, p.port)} • ${firstService(p.services)}`;
-    const right = document.createElement('span');
-    const rb = document.createElement('span');
-    rb.className = riskToBadge(p.risk.level);
-    rb.textContent = p.risk.level;
-    if (p.risk.reasons && p.risk.reasons.length) rb.title = p.risk.reasons.join(' + ');
-    right.appendChild(rb);
-    title.appendChild(left);
-    title.appendChild(right);
-    card.appendChild(title);
-
-    const chipsLine = document.createElement('div');
-    chipsLine.className = 'chips';
-    const catB = document.createElement('span');
-    catB.className = categoryToBadge(p.category);
-    catB.textContent = catMeta ? catMeta.label : p.category;
-    chipsLine.appendChild(catB);
-    uniqueScopes(p.scopes).forEach(s => {
-      const chip = document.createElement('span');
-      chip.className = `chip chip-${s.toLowerCase()}`;
-      chip.textContent = s;
-      chipsLine.appendChild(chip);
-    });
-    card.appendChild(chipsLine);
-
-    const countsLine = document.createElement('div');
-    countsLine.className = 'counts';
-    countsLine.textContent = `Proc. ${p.counts.processes} • Bind. ${p.counts.bindings}`;
-    card.appendChild(countsLine);
-
-    const cardDetails = document.createElement('div');
-    cardDetails.className = 'card-details hidden';
-    cardDetails.setAttribute('aria-hidden', 'true');
-    cardDetails.appendChild(renderPortDetails(p));
-    card.appendChild(cardDetails);
-
-    const toggleCard = () => toggleRow(card, cardDetails);
-    card.addEventListener('click', toggleCard);
-    card.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggleCard(); } });
-
-    cards.appendChild(card);
   });
 }
 
@@ -640,7 +568,7 @@ function initPortsUI(){
     t = setTimeout(() => { portSearch = e.target.value.toLowerCase(); applyPortFilters(); }, 250);
   });
 
-  document.querySelectorAll('.ports-header [data-sort]').forEach(th => {
+  document.querySelectorAll('#portsTable th[data-sort]').forEach(th => {
     th.addEventListener('click', () => {
       const key = th.dataset.sort;
       if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
