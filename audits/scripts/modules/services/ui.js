@@ -1,11 +1,4 @@
-import {
-  SERVICE_CATEGORIES,
-  filteredServices,
-  updateSearch,
-  updateSort,
-  toggleCategory,
-  resetFilters,
-} from './data.js';
+import { SERVICE_CATEGORIES, ServiceStore } from './data.js';
 
 let servicesInit = false;
 let servicesList;
@@ -39,16 +32,17 @@ function handleServicesListKeydown(e) {
 }
 
 export function renderServicesList() {
+  const list = ServiceStore.getFiltered();
   servicesList.textContent = '';
   const countSpan = document.getElementById('servicesCount');
-  if (filteredServices.length === 0) {
+  if (list.length === 0) {
     countSpan.textContent = '0 service';
     document.getElementById('servicesEmpty').classList.remove('hidden');
     return;
   }
   document.getElementById('servicesEmpty').classList.add('hidden');
   const frag = document.createDocumentFragment();
-  filteredServices.forEach((s) => {
+  list.forEach((s) => {
     const item = document.createElement('div');
     item.className = 'service-item';
     item.tabIndex = 0;
@@ -109,7 +103,7 @@ export function renderServicesList() {
     frag.appendChild(item);
   });
   servicesList.appendChild(frag);
-  countSpan.textContent = `${filteredServices.length} service${filteredServices.length > 1 ? 's' : ''}`;
+  countSpan.textContent = `${list.length} service${list.length > 1 ? 's' : ''}`;
 }
 
 export function initServicesUI() {
@@ -125,22 +119,22 @@ export function initServicesUI() {
     chip.textContent = cat;
     chip.dataset.cat = cat;
     chip.addEventListener('click', () => {
-      toggleCategory(cat);
+      ServiceStore.toggleCategory(cat);
       chip.classList.toggle('active');
       renderServicesList();
     });
     filtersDiv.appendChild(chip);
   });
   searchInput.addEventListener('input', (e) => {
-    updateSearch(e.target.value);
+    ServiceStore.updateSearch(e.target.value);
     renderServicesList();
   });
   sortSelect.addEventListener('change', (e) => {
-    updateSort(e.target.value);
+    ServiceStore.updateSort(e.target.value);
     renderServicesList();
   });
   document.getElementById('resetFilters').addEventListener('click', () => {
-    resetFilters();
+    ServiceStore.resetFilters();
     searchInput.value = '';
     sortSelect.value = 'az';
     document
