@@ -1,23 +1,23 @@
 {
-  "generated": "26/08/2025 à 22:00",
+  "generated": "28/08/2025 à 08:14",
   "hostname": "homelabz",
   "ip_local": "192.168.1.30",
   "ip_pub": "90.78.117.33",
-  "uptime": "up 1 week, 1 day, 41 minutes",
-  "load_average": "0,05,0,19,0,37",
+  "uptime": "up 1 week, 2 days, 10 hours, 55 minutes",
+  "load_average": "0.87,0.66,0.36",
   "memory": {
     "ram": {
       "total": "15Gi",
-      "used": "4,8Gi",
-      "free": "2,3Gi",
-      "shared": "128Mi",
-      "buff_cache": "8,7Gi",
+      "used": "4.9Gi",
+      "free": "570Mi",
+      "shared": "91Mi",
+      "buff_cache": "10Gi",
       "available": "10Gi"
     },
     "swap": {
-      "total": "4,0Gi",
-      "used": "108Mi",
-      "free": "3,9Gi"
+      "total": "4.0Gi",
+      "used": "406Mi",
+      "free": "3.6Gi"
     }
   },
   "disks": [
@@ -44,37 +44,37 @@
     "usage": [
       {
         "core": "0",
-        "usage": 0.0
+        "usage": 3.0
       },
       {
         "core": "1",
-        "usage": 4.0
+        "usage": 1.0
       },
       {
         "core": "2",
-        "usage": 0.0
+        "usage": 1.0
       },
       {
         "core": "3",
-        "usage": 0.0
+        "usage": 1.0
       }
     ],
     "temperatures": [
       {
         "core": 0,
-        "temp": 76.0
+        "temp": 77.0
       },
       {
         "core": 1,
-        "temp": 76.0
+        "temp": 77.0
       },
       {
         "core": 2,
-        "temp": 76.0
+        "temp": 77.0
       },
       {
         "core": 3,
-        "temp": 76.0
+        "temp": 77.0
       }
     ]
   },
@@ -109,34 +109,34 @@
       "mem": "%MEM"
     },
     {
-      "pid": "1007225",
-      "cmd": "AdGuardHome",
-      "cpu": "5.7",
-      "mem": "0.7"
+      "pid": "2996817",
+      "cmd": "node",
+      "cpu": "25.9",
+      "mem": "0.5"
     },
     {
-      "pid": "1471414",
-      "cmd": "python3",
-      "cpu": "1.9",
-      "mem": "7.8"
+      "pid": "2996772",
+      "cmd": "node",
+      "cpu": "17.6",
+      "mem": "3.7"
     },
     {
-      "pid": "98530",
-      "cmd": "redis-server",
-      "cpu": "1.3",
+      "pid": "2985854",
+      "cmd": "bash",
+      "cpu": "8.3",
       "mem": "0.0"
     },
     {
-      "pid": "1256679",
-      "cmd": "node-red",
-      "cpu": "1.1",
-      "mem": "1.1"
+      "pid": "1007225",
+      "cmd": "AdGuardHome",
+      "cpu": "5.5",
+      "mem": "0.8"
     },
     {
-      "pid": "2891",
-      "cmd": "python",
-      "cpu": "0.8",
-      "mem": "0.8"
+      "pid": "2991625",
+      "cmd": "node",
+      "cpu": "4.4",
+      "mem": "0.6"
     }
   ],
   "top_mem": [
@@ -147,34 +147,34 @@
       "cpu": "%CPU"
     },
     {
-      "pid": "1683",
-      "cmd": "jellyfin",
-      "mem": "9.7",
-      "cpu": "0.8"
-    },
-    {
       "pid": "1471414",
       "cmd": "python3",
-      "mem": "7.8",
+      "mem": "10.5",
       "cpu": "1.9"
     },
     {
-      "pid": "3699542",
-      "cmd": "node",
-      "mem": "3.8",
+      "pid": "1683",
+      "cmd": "jellyfin",
+      "mem": "7.2",
       "cpu": "0.8"
+    },
+    {
+      "pid": "2996772",
+      "cmd": "node",
+      "mem": "3.7",
+      "cpu": "17.6"
+    },
+    {
+      "pid": "2879391",
+      "cmd": "traefik",
+      "mem": "0.9",
+      "cpu": "0.1"
     },
     {
       "pid": "1256679",
       "cmd": "node-red",
-      "mem": "1.1",
-      "cpu": "1.1"
-    },
-    {
-      "pid": "2891",
-      "cmd": "python",
       "mem": "0.8",
-      "cpu": "0.8"
+      "cpu": "1.1"
     }
   ],
   "ports": [
@@ -1789,6 +1789,42 @@
       }
     },
     {
+      "proto": "tcp",
+      "port": 33495,
+      "ip_versions": [
+        "ipv4"
+      ],
+      "services": [
+        "unknown"
+      ],
+      "scopes": [
+        "Localhost"
+      ],
+      "category": "unknown",
+      "bindings": [
+        {
+          "local_address": "127.0.0.1",
+          "ip_version": "ipv4",
+          "scope": "Localhost",
+          "pid": 2996652,
+          "process": "code-6f17636121",
+          "user": "damswallace",
+          "state": "LISTEN"
+        }
+      ],
+      "counts": {
+        "bindings": 1,
+        "public_bindings": 0,
+        "processes": 1
+      },
+      "risk": {
+        "level": "local",
+        "reasons": [
+          "Bind localhost uniquement"
+        ]
+      }
+    },
+    {
       "proto": "udp",
       "port": 38098,
       "ip_versions": [
@@ -1825,42 +1861,6 @@
       }
     },
     {
-      "proto": "tcp",
-      "port": 39109,
-      "ip_versions": [
-        "ipv4"
-      ],
-      "services": [
-        "unknown"
-      ],
-      "scopes": [
-        "Localhost"
-      ],
-      "category": "unknown",
-      "bindings": [
-        {
-          "local_address": "127.0.0.1",
-          "ip_version": "ipv4",
-          "scope": "Localhost",
-          "pid": 3699483,
-          "process": "code-6f17636121",
-          "user": "damswallace",
-          "state": "LISTEN"
-        }
-      ],
-      "counts": {
-        "bindings": 1,
-        "public_bindings": 0,
-        "processes": 1
-      },
-      "risk": {
-        "level": "local",
-        "reasons": [
-          "Bind localhost uniquement"
-        ]
-      }
-    },
-    {
       "proto": "udp",
       "port": 42342,
       "ip_versions": [
@@ -1888,6 +1888,42 @@
         "bindings": 1,
         "public_bindings": 0,
         "processes": 0
+      },
+      "risk": {
+        "level": "local",
+        "reasons": [
+          "Bind localhost uniquement"
+        ]
+      }
+    },
+    {
+      "proto": "tcp",
+      "port": 43987,
+      "ip_versions": [
+        "ipv4"
+      ],
+      "services": [
+        "unknown"
+      ],
+      "scopes": [
+        "Localhost"
+      ],
+      "category": "unknown",
+      "bindings": [
+        {
+          "local_address": "127.0.0.1",
+          "ip_version": "ipv4",
+          "scope": "Localhost",
+          "pid": 2991525,
+          "process": "code-6f17636121",
+          "user": "damswallace",
+          "state": "LISTEN"
+        }
+      ],
+      "counts": {
+        "bindings": 1,
+        "public_bindings": 0,
+        "processes": 1
       },
       "risk": {
         "level": "local",
@@ -2334,32 +2370,21 @@
   "docker": {
     "containers": [
       {
-        "name": "homepage",
-        "state": "created",
-        "health": null,
-        "uptime": "4 days ago",
-        "has_stats": false,
-        "cpu_pct": null,
-        "mem_pct": null,
-        "mem_used_bytes": null,
-        "mem_limit_bytes": null
-      },
-      {
-        "name": "homeassistant",
+        "name": "traefik",
         "state": "running",
         "health": null,
-        "uptime": "4 days ago",
+        "uptime": "6 hours ago",
         "has_stats": true,
-        "cpu_pct": 1.17,
-        "mem_pct": 7.92,
-        "mem_used_bytes": 1308891283,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.45,
+        "mem_used_bytes": 74459382,
         "mem_limit_bytes": 16535624090
       },
       {
         "name": "portainer",
         "state": "created",
         "health": null,
-        "uptime": "5 days ago",
+        "uptime": "6 hours ago",
         "has_stats": false,
         "cpu_pct": null,
         "mem_pct": null,
@@ -2367,18 +2392,7 @@
         "mem_limit_bytes": null
       },
       {
-        "name": "adguardhome",
-        "state": "running",
-        "health": "healthy",
-        "uptime": "5 days ago",
-        "has_stats": true,
-        "cpu_pct": 1.06,
-        "mem_pct": 0.73,
-        "mem_used_bytes": 121425101,
-        "mem_limit_bytes": 16535624090
-      },
-      {
-        "name": "grafana",
+        "name": "homepage",
         "state": "created",
         "health": null,
         "uptime": "6 days ago",
@@ -2389,36 +2403,69 @@
         "mem_limit_bytes": null
       },
       {
+        "name": "homeassistant",
+        "state": "running",
+        "health": null,
+        "uptime": "6 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.80,
+        "mem_pct": 10.89,
+        "mem_used_bytes": 1801738781,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "adguardhome",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "7 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.27,
+        "mem_pct": 0.76,
+        "mem_used_bytes": 126038835,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "grafana",
+        "state": "created",
+        "health": null,
+        "uptime": "8 days ago",
+        "has_stats": false,
+        "cpu_pct": null,
+        "mem_pct": null,
+        "mem_used_bytes": null,
+        "mem_limit_bytes": null
+      },
+      {
         "name": "redis",
         "state": "running",
         "health": null,
-        "uptime": "7 days ago",
+        "uptime": "9 days ago",
         "has_stats": true,
-        "cpu_pct": 1.32,
+        "cpu_pct": 1.41,
         "mem_pct": 0.01,
-        "mem_used_bytes": 2178941,
+        "mem_used_bytes": 1998586,
         "mem_limit_bytes": 16535624090
       },
       {
         "name": "lldap",
         "state": "running",
         "health": "healthy",
-        "uptime": "8 days ago",
+        "uptime": "10 days ago",
         "has_stats": true,
-        "cpu_pct": 0.05,
+        "cpu_pct": 0.04,
         "mem_pct": 0.05,
-        "mem_used_bytes": 8633975,
+        "mem_used_bytes": 8831107,
         "mem_limit_bytes": 16535624090
       },
       {
         "name": "audit-server",
         "state": "running",
         "health": null,
-        "uptime": "11 days ago",
+        "uptime": "12 days ago",
         "has_stats": true,
         "cpu_pct": 0.00,
         "mem_pct": 0.01,
-        "mem_used_bytes": 2240807,
+        "mem_used_bytes": 2416968,
         "mem_limit_bytes": 16535624090
       },
       {
@@ -2427,9 +2474,9 @@
         "health": null,
         "uptime": "2 weeks ago",
         "has_stats": true,
-        "cpu_pct": 0.04,
-        "mem_pct": 0.18,
-        "mem_used_bytes": 29307699,
+        "cpu_pct": 0.03,
+        "mem_pct": 0.16,
+        "mem_used_bytes": 26350715,
         "mem_limit_bytes": 16535624090
       },
       {
@@ -2438,9 +2485,9 @@
         "health": null,
         "uptime": "3 weeks ago",
         "has_stats": true,
-        "cpu_pct": 0.03,
-        "mem_pct": 0.61,
-        "mem_used_bytes": 100443095,
+        "cpu_pct": 0.01,
+        "mem_pct": 0.54,
+        "mem_used_bytes": 89443533,
         "mem_limit_bytes": 16535624090
       },
       {
@@ -2449,20 +2496,20 @@
         "health": null,
         "uptime": "3 weeks ago",
         "has_stats": true,
-        "cpu_pct": 0.08,
-        "mem_pct": 0.10,
-        "mem_used_bytes": 16179528,
+        "cpu_pct": 0.21,
+        "mem_pct": 0.12,
+        "mem_used_bytes": 19870515,
         "mem_limit_bytes": 16535624090
       },
       {
         "name": "nodered",
         "state": "running",
         "health": "healthy",
-        "uptime": "3 weeks ago",
+        "uptime": "4 weeks ago",
         "has_stats": true,
-        "cpu_pct": 7.47,
-        "mem_pct": 0.89,
-        "mem_used_bytes": 147429786,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.98,
+        "mem_used_bytes": 161795277,
         "mem_limit_bytes": 16535624090
       },
       {
@@ -2473,40 +2520,29 @@
         "has_stats": true,
         "cpu_pct": 0.00,
         "mem_pct": 0.10,
-        "mem_used_bytes": 16420700,
+        "mem_used_bytes": 16546529,
         "mem_limit_bytes": 16535624090
       },
       {
         "name": "twingate_connector",
         "state": "running",
         "health": "healthy",
-        "uptime": "4 weeks ago",
+        "uptime": "5 weeks ago",
         "has_stats": true,
-        "cpu_pct": 0.46,
-        "mem_pct": 0.21,
-        "mem_used_bytes": 34466693,
+        "cpu_pct": 1.46,
+        "mem_pct": 0.20,
+        "mem_used_bytes": 33145487,
         "mem_limit_bytes": 16535624090
       },
       {
         "name": "crowdsec",
         "state": "running",
         "health": null,
-        "uptime": "4 weeks ago",
+        "uptime": "5 weeks ago",
         "has_stats": true,
-        "cpu_pct": 0.03,
-        "mem_pct": 0.41,
-        "mem_used_bytes": 68262298,
-        "mem_limit_bytes": 16535624090
-      },
-      {
-        "name": "traefik",
-        "state": "running",
-        "health": null,
-        "uptime": "4 weeks ago",
-        "has_stats": true,
-        "cpu_pct": 0.16,
-        "mem_pct": 0.51,
-        "mem_used_bytes": 84431340,
+        "cpu_pct": 0.04,
+        "mem_pct": 0.48,
+        "mem_used_bytes": 78790001,
         "mem_limit_bytes": 16535624090
       },
       {
@@ -2516,8 +2552,8 @@
         "uptime": "5 weeks ago",
         "has_stats": true,
         "cpu_pct": 0.09,
-        "mem_pct": 0.14,
-        "mem_used_bytes": 22879928,
+        "mem_pct": 0.10,
+        "mem_used_bytes": 15885926,
         "mem_limit_bytes": 16535624090
       },
       {
@@ -2527,8 +2563,8 @@
         "uptime": "6 weeks ago",
         "has_stats": true,
         "cpu_pct": 0.03,
-        "mem_pct": 12.83,
-        "mem_used_bytes": 40359690,
+        "mem_pct": 12.17,
+        "mem_used_bytes": 38283510,
         "mem_limit_bytes": 314572800
       },
       {
@@ -2537,9 +2573,9 @@
         "health": "healthy",
         "uptime": "2 months ago",
         "has_stats": true,
-        "cpu_pct": 0.03,
-        "mem_pct": 9.69,
-        "mem_used_bytes": 1603096543,
+        "cpu_pct": 0.02,
+        "mem_pct": 9.44,
+        "mem_used_bytes": 1561220612,
         "mem_limit_bytes": 16535624090
       },
       {
@@ -2548,9 +2584,9 @@
         "health": "healthy",
         "uptime": "4 months ago",
         "has_stats": true,
-        "cpu_pct": 0.00,
+        "cpu_pct": 0.02,
         "mem_pct": 0.07,
-        "mem_used_bytes": 11911823,
+        "mem_used_bytes": 12048138,
         "mem_limit_bytes": 16535624090
       },
       {
@@ -2559,9 +2595,9 @@
         "health": null,
         "uptime": "4 months ago",
         "has_stats": true,
-        "cpu_pct": 0.38,
-        "mem_pct": 0.84,
-        "mem_used_bytes": 139041178,
+        "cpu_pct": 0.39,
+        "mem_pct": 0.80,
+        "mem_used_bytes": 131806003,
         "mem_limit_bytes": 16535624090
       },
       {
@@ -2581,9 +2617,9 @@
         "health": null,
         "uptime": "4 months ago",
         "has_stats": true,
-        "cpu_pct": 0.07,
+        "cpu_pct": 0.14,
         "mem_pct": 0.03,
-        "mem_used_bytes": 4538237,
+        "mem_used_bytes": 4448059,
         "mem_limit_bytes": 16535624090
       }
     ]

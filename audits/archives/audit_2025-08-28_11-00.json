@@ -1,0 +1,437 @@
+{
+  "generated": "28/08/2025 à 11:00",
+  "hostname": "homelabz",
+  "ip_local": "192.168.1.30",
+  "ip_pub": "90.78.117.33",
+  "uptime": "up 1 week, 2 days, 13 hours, 41 minutes",
+  "load_average": "5,45,5,35,4,38",
+  "memory": {
+    "ram": {
+      "total": "15Gi",
+      "used": "5,5Gi",
+      "free": "200Mi",
+      "shared": "98Mi",
+      "buff_cache": "10Gi",
+      "available": "9,9Gi"
+    },
+    "swap": {
+      "total": "4,0Gi",
+      "used": "412Mi",
+      "free": "3,6Gi"
+    }
+  },
+  "disks": [
+    {
+      "filesystem": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+      "size": "98G",
+      "used": "30G",
+      "available": "64G",
+      "used_percent": "32%",
+      "mountpoint": "/"
+    },
+    {
+      "filesystem": "/dev/mapper/ubuntu--vg-lv--0",
+      "size": "367G",
+      "used": "17G",
+      "available": "332G",
+      "used_percent": "5%",
+      "mountpoint": "/home"
+    }
+  ],
+  "cpu": {
+    "model": "                          Intel(R) N95",
+    "cores": 4,
+    "usage": [
+      {
+        "core": "0",
+        "usage": 100.0
+      },
+      {
+        "core": "1",
+        "usage": 99.0
+      },
+      {
+        "core": "2",
+        "usage": 100.0
+      },
+      {
+        "core": "3",
+        "usage": 99.0
+      }
+    ],
+    "temperatures": [
+      {
+        "core": 0,
+        "temp": 89.0
+      },
+      {
+        "core": 1,
+        "temp": 89.0
+      },
+      {
+        "core": 2,
+        "temp": 89.0
+      },
+      {
+        "core": 3,
+        "temp": 89.0
+      }
+    ]
+  },
+  "cpu_load_color": "red",
+  "services": [
+    "bluetooth.service",
+    "containerd.service",
+    "cron.service",
+    "dbus-broker.service",
+    "docker.service",
+    "nmbd.service",
+    "ntpsec.service",
+    "polkit.service",
+    "rpc-statd.service",
+    "rpcbind.service",
+    "rsyslog.service",
+    "smbd.service",
+    "ssh.service",
+    "systemd-journald.service",
+    "systemd-logind.service",
+    "systemd-networkd.service",
+    "systemd-resolved.service",
+    "systemd-udevd.service",
+    "thermald.service",
+    "unattended-upgrades.service"
+  ],
+  "top_cpu": [
+    {
+      "pid": "PID",
+      "cmd": "COMMAND",
+      "cpu": "%CPU",
+      "mem": "%MEM"
+    },
+    {
+      "pid": "3479209",
+      "cmd": "ffmpeg",
+      "cpu": "350",
+      "mem": "2.7"
+    },
+    {
+      "pid": "3489305",
+      "cmd": "cscli",
+      "cpu": "300",
+      "mem": "0.2"
+    },
+    {
+      "pid": "3489312",
+      "cmd": "ps",
+      "cpu": "100",
+      "mem": "0.0"
+    },
+    {
+      "pid": "3489279",
+      "cmd": "docker",
+      "cpu": "20.0",
+      "mem": "0.1"
+    },
+    {
+      "pid": "1007225",
+      "cmd": "AdGuardHome",
+      "cpu": "5.5",
+      "mem": "0.8"
+    }
+  ],
+  "top_mem": [
+    {
+      "pid": "PID",
+      "cmd": "COMMAND",
+      "mem": "%MEM",
+      "cpu": "%CPU"
+    },
+    {
+      "pid": "1471414",
+      "cmd": "python3",
+      "mem": "10.3",
+      "cpu": "1.9"
+    },
+    {
+      "pid": "1683",
+      "cmd": "jellyfin",
+      "mem": "8.4",
+      "cpu": "0.9"
+    },
+    {
+      "pid": "3483186",
+      "cmd": "node",
+      "mem": "4.0",
+      "cpu": "3.1"
+    },
+    {
+      "pid": "3479209",
+      "cmd": "ffmpeg",
+      "mem": "2.7",
+      "cpu": "350"
+    },
+    {
+      "pid": "2879391",
+      "cmd": "traefik",
+      "mem": "0.8",
+      "cpu": "0.1"
+    }
+  ],
+  "docker": {
+    "containers": [
+      {
+        "name": "traefik",
+        "state": "running",
+        "health": null,
+        "uptime": "9 hours ago",
+        "has_stats": true,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.41,
+        "mem_used_bytes": 68010639,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "portainer",
+        "state": "created",
+        "health": null,
+        "uptime": "9 hours ago",
+        "has_stats": false,
+        "cpu_pct": null,
+        "mem_pct": null,
+        "mem_used_bytes": null,
+        "mem_limit_bytes": null
+      },
+      {
+        "name": "homepage",
+        "state": "created",
+        "health": null,
+        "uptime": "6 days ago",
+        "has_stats": false,
+        "cpu_pct": null,
+        "mem_pct": null,
+        "mem_used_bytes": null,
+        "mem_limit_bytes": null
+      },
+      {
+        "name": "homeassistant",
+        "state": "running",
+        "health": null,
+        "uptime": "6 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.57,
+        "mem_pct": 10.63,
+        "mem_used_bytes": 1758789108,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "adguardhome",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "7 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.03,
+        "mem_pct": 0.76,
+        "mem_used_bytes": 126248550,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "grafana",
+        "state": "created",
+        "health": null,
+        "uptime": "8 days ago",
+        "has_stats": false,
+        "cpu_pct": null,
+        "mem_pct": null,
+        "mem_used_bytes": null,
+        "mem_limit_bytes": null
+      },
+      {
+        "name": "redis",
+        "state": "running",
+        "health": null,
+        "uptime": "9 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.83,
+        "mem_pct": 0.01,
+        "mem_used_bytes": 1945108,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "lldap",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "10 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.02,
+        "mem_pct": 0.04,
+        "mem_used_bytes": 6328156,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "audit-server",
+        "state": "running",
+        "health": null,
+        "uptime": "12 days ago",
+        "has_stats": true,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.01,
+        "mem_used_bytes": 2445279,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "authelia",
+        "state": "running",
+        "health": null,
+        "uptime": "2 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.01,
+        "mem_pct": 0.16,
+        "mem_used_bytes": 26665288,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "zigbee2mqtt",
+        "state": "running",
+        "health": null,
+        "uptime": "3 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.52,
+        "mem_used_bytes": 85951775,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "sablier",
+        "state": "running",
+        "health": null,
+        "uptime": "3 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.05,
+        "mem_pct": 0.11,
+        "mem_used_bytes": 17836278,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "nodered",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "4 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.79,
+        "mem_used_bytes": 130442854,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "adguard-exporter",
+        "state": "running",
+        "health": null,
+        "uptime": "4 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.10,
+        "mem_used_bytes": 15990784,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "twingate_connector",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "5 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.31,
+        "mem_pct": 0.18,
+        "mem_used_bytes": 29664215,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "crowdsec",
+        "state": "running",
+        "health": null,
+        "uptime": "5 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.01,
+        "mem_pct": 0.47,
+        "mem_used_bytes": 77321994,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "mqtt5",
+        "state": "running",
+        "health": null,
+        "uptime": "5 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.05,
+        "mem_pct": 0.09,
+        "mem_used_bytes": 14313062,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "prometheus",
+        "state": "running",
+        "health": null,
+        "uptime": "6 weeks ago",
+        "has_stats": true,
+        "cpu_pct": 0.05,
+        "mem_pct": 11.60,
+        "mem_used_bytes": 36500931,
+        "mem_limit_bytes": 314572800
+      },
+      {
+        "name": "jellyfin",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "2 months ago",
+        "has_stats": true,
+        "cpu_pct": 379.82,
+        "mem_pct": 12.62,
+        "mem_used_bytes": 2087354106,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "watchtower",
+        "state": "running",
+        "health": "healthy",
+        "uptime": "4 months ago",
+        "has_stats": true,
+        "cpu_pct": 0.00,
+        "mem_pct": 0.08,
+        "mem_used_bytes": 13946061,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "myelectricaldata",
+        "state": "running",
+        "health": null,
+        "uptime": "4 months ago",
+        "has_stats": true,
+        "cpu_pct": 0.28,
+        "mem_pct": 0.79,
+        "mem_used_bytes": 131386573,
+        "mem_limit_bytes": 16535624090
+      },
+      {
+        "name": "it-tools",
+        "state": "exited",
+        "health": "0",
+        "uptime": "4 months ago",
+        "has_stats": false,
+        "cpu_pct": null,
+        "mem_pct": null,
+        "mem_used_bytes": null,
+        "mem_limit_bytes": null
+      },
+      {
+        "name": "dockersocket",
+        "state": "running",
+        "health": null,
+        "uptime": "4 months ago",
+        "has_stats": true,
+        "cpu_pct": 0.02,
+        "mem_pct": 0.02,
+        "mem_used_bytes": 3244294,
+        "mem_limit_bytes": 16535624090
+      }
+    ]
+  }
+}
