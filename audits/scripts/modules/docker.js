@@ -111,20 +111,79 @@ function renderDockerList() {
   const updates = [];
   dockerFiltered.forEach((c) => {
     const card = document.createElement('div');
-    card.className = 'docker-card';
-    card.tabIndex = 0;
+    card.setAttribute('class', 'docker-card');
+    card.setAttribute('tabindex', '0');
     const health = c.health ?? '';
-    card.title = `CPU ${c.cpu}% — RAM ${c.mem}%${health ? ` — Status ${health}` : ''}`;
+    card.setAttribute(
+      'title',
+      `CPU ${c.cpu}% — RAM ${c.mem}%${health ? ` — Status ${health}` : ''}`,
+    );
     const cpuColor = colorClassCpu(c.cpu);
     const ramColor = colorClassRam(c.mem);
     const icon = iconFor(c.name);
-    const badge = health
-      ? `<span class="status-badge status-${health}">${health}</span>`
-      : '';
     const memDisplay = c.memText || `${c.mem}%`;
-    card.innerHTML = `<div class="docker-head"><div class="docker-title"><span class="docker-icon">${icon}</span><span class="docker-name">${c.name}</span></div>${badge}</div><div class="docker-uptime">${c.uptime}</div><div class="docker-bars"><div class="bar-outer cpu"><div class="fill ${cpuColor}"></div><span class="bar-value">${c.cpu}%</span></div><div class="bar-outer ram"><div class="fill ${ramColor}"></div><span class="bar-value">${memDisplay}</span></div></div>`;
+
+    const head = document.createElement('div');
+    head.setAttribute('class', 'docker-head');
+
+    const title = document.createElement('div');
+    title.setAttribute('class', 'docker-title');
+
+    const iconSpan = document.createElement('span');
+    iconSpan.setAttribute('class', 'docker-icon');
+    iconSpan.textContent = icon;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.setAttribute('class', 'docker-name');
+    nameSpan.textContent = c.name;
+
+    title.appendChild(iconSpan);
+    title.appendChild(nameSpan);
+    head.appendChild(title);
+
+    if (health) {
+      const badge = document.createElement('span');
+      badge.setAttribute('class', `status-badge status-${health}`);
+      badge.textContent = health;
+      head.appendChild(badge);
+    }
+
+    const uptimeDiv = document.createElement('div');
+    uptimeDiv.setAttribute('class', 'docker-uptime');
+    uptimeDiv.textContent = c.uptime;
+
+    const bars = document.createElement('div');
+    bars.setAttribute('class', 'docker-bars');
+
+    const cpuOuter = document.createElement('div');
+    cpuOuter.setAttribute('class', 'bar-outer cpu');
+    const cpuFill = document.createElement('div');
+    cpuFill.classList.add('fill', cpuColor);
+    const cpuValue = document.createElement('span');
+    cpuValue.setAttribute('class', 'bar-value');
+    cpuValue.textContent = `${c.cpu}%`;
+    cpuOuter.appendChild(cpuFill);
+    cpuOuter.appendChild(cpuValue);
+
+    const ramOuter = document.createElement('div');
+    ramOuter.setAttribute('class', 'bar-outer ram');
+    const ramFill = document.createElement('div');
+    ramFill.classList.add('fill', ramColor);
+    const ramValue = document.createElement('span');
+    ramValue.setAttribute('class', 'bar-value');
+    ramValue.textContent = memDisplay;
+    ramOuter.appendChild(ramFill);
+    ramOuter.appendChild(ramValue);
+
+    bars.appendChild(cpuOuter);
+    bars.appendChild(ramOuter);
+
+    card.appendChild(head);
+    card.appendChild(uptimeDiv);
+    card.appendChild(bars);
+
     frag.appendChild(card);
-    updates.push({ fills: card.querySelectorAll('.fill'), cpu: c.cpu, mem: c.mem });
+    updates.push({ fills: [cpuFill, ramFill], cpu: c.cpu, mem: c.mem });
   });
   grid.appendChild(frag);
   requestAnimationFrame(() => {
