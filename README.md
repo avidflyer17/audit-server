@@ -1,6 +1,6 @@
 # Audit Server
 
-**Version 1.3.0** – this repository contains the latest updates, including automatic theme detection and
+**Version 1.3.1** – this repository contains the latest updates, including automatic theme detection and
 front-end refactors.
 
 Audit Server generates periodic JSON reports describing the state of a host and exposes them through a static web
