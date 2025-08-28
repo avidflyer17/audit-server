@@ -1811,16 +1811,6 @@ main {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  display: inline-block;
-}
-.service-item:hover .service-name.scrollable,
-.service-item:focus-within .service-name.scrollable {
-  animation: service-name-scroll 5s linear infinite alternate;
-}
-@keyframes service-name-scroll {
-  to {
-    transform: translateX(var(--scroll-distance, 0));
-  }
 }
 .service-badge {
   margin-left: auto;

@@ -18,8 +18,7 @@ export function renderServicesList() {
   list.forEach((s) => {
     const item = tpl.content.firstElementChild.cloneNode(true);
     item.querySelector('.service-icon').textContent = s.icon;
-    const nameEl = item.querySelector('.service-name');
-    nameEl.textContent = s.name;
+    item.querySelector('.service-name').textContent = s.name;
     const badge = item.querySelector('.service-badge');
     badge.textContent = s.category;
     badge.classList.add(
@@ -28,13 +27,6 @@ export function renderServicesList() {
     frag.appendChild(item);
   });
   servicesList.appendChild(frag);
-  servicesList.querySelectorAll('.service-name').forEach((el) => {
-    const diff = el.scrollWidth - el.clientWidth;
-    if (diff > 0) {
-      el.classList.add('scrollable');
-      el.style.setProperty('--scroll-distance', `-${diff}px`);
-    }
-  });
   countSpan.textContent = `${list.length} service${list.length > 1 ? 's' : ''}`;
 }
 
