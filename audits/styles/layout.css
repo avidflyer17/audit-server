@@ -604,49 +604,10 @@ h1 {
       gap: 0.5rem;
       font-size: 0.9rem;
     }
-    .services-help {
-      font-size: 0.9rem;
-      color: #bbb;
-      margin-top: -0.5rem;
-      margin-bottom: 0.5rem;
-    }
-    #serviceSearch {
-      width: 100%;
-      margin-bottom: 0.5rem;
-    }
-    .filter-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .filter-chip {
-      background: var(--chip-bg);
-      color: var(--chip-text);
-      border: none;
-      border-radius: 9999px;
-      padding: 0.25rem 0.6rem;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-family: var(--font-mono);
-    }
-    .filter-chip.active {
-      background: var(--chip-active-bg);
-      color: var(--bg);
-    }
-    .services-toolbar {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 0.5rem;
-    }
     .services-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 0.5rem;
-    }
-    .service-skeleton {
-      height: 2rem;
-      border-radius: 6px;
+      grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+      gap: var(--gap-4);
     }
     .empty {
       text-align: center;
@@ -659,14 +620,14 @@ h1 {
       color: #bbb;
     }
     .empty.hidden { display: none; }
-    .service-badge.cat-systeme { background: #6c757d; }
-    .service-badge.cat-reseau { background: #0d6efd; }
-    .service-badge.cat-stockage-partages { background: #6f42c1; }
-    .service-badge.cat-conteneurs { background: #198754; }
-    .service-badge.cat-securite { background: #d63384; }
-    .service-badge.cat-journalisation { background: #fd7e14; }
-    .service-badge.cat-mises-a-jour { background: #20c997; }
-    .service-badge.cat-autre { background: #adb5bd; }
+    .badge.cat-systeme { background: #6c757d; }
+    .badge.cat-reseau { background: #0d6efd; }
+    .badge.cat-stockage-partages { background: #6f42c1; }
+    .badge.cat-conteneurs { background: #198754; }
+    .badge.cat-securite { background: #d63384; }
+    .badge.cat-journalisation { background: #fd7e14; }
+    .badge.cat-mises-a-jour { background: #20c997; }
+    .badge.cat-autre { background: #adb5bd; }
 
     /* Top processus */
     .top-grid { display: flex; flex-direction: column; gap: 1rem; }
@@ -826,9 +787,6 @@ h1 {
     .cpu .crit-badge { margin-left:var(--gap-2); }
 
     @media (max-width: 600px) {
-      .services-grid { grid-template-columns: 1fr; }
-      .services-toolbar { justify-content: flex-start; }
-      .filter-chips { position: sticky; top: 0; background: var(--bg); padding-top: 0.5rem; }
       .cpu .card-head { flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:4px; }
       .cpu .summary { flex-direction:row; gap:4px; }
       .cpu .core-list { margin-top:var(--gap-2); gap:4px; }

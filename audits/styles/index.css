@@ -4,5 +4,5 @@
 @import "./components/sidebar.css";
 @import "./components/timeline.css";
 @import "./components/update-badge.css";
-@import "./components/service-item.css";
+@import "./components/service-card.css";
 @import "./components/docker-card.css";

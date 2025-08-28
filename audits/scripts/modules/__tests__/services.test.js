@@ -1,27 +1,21 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import ServiceStore from '../services/data.js';
+import { renderServices } from '../services.js';
 
-describe('ServiceStore', () => {
+describe('renderServices', () => {
   beforeEach(() => {
-    ServiceStore.resetFilters();
-    ServiceStore.setData([]);
+    document.body.innerHTML = '<div id="servicesGrid"></div><div id="servicesEmpty" class="hidden"></div><span id="servicesCount"></span>';
   });
 
-  it('classifies services', () => {
-    const result = ServiceStore.setData(['sshd', 'unknown']);
-    const ssh = result.find((s) => s.name === 'sshd');
-    const other = result.find((s) => s.name === 'unknown');
-    expect(ssh.category).toBe('Sécurité');
-    expect(other.category).toBe('Autre');
+  it('renders sorted services', () => {
+    renderServices([{ id: 'b.service' }, { id: 'a.service' }]);
+    const names = Array.from(document.querySelectorAll('.docker-name')).map((el) => el.textContent);
+    expect(names).toEqual(['a.service', 'b.service']);
+    expect(document.getElementById('servicesCount').textContent).toBe('2 services');
   });
 
-  it('filters by category', () => {
-    ServiceStore.setData(['sshd', 'cron']);
-    ServiceStore.toggleCategory('Sécurité');
-    const filtered = ServiceStore.getFiltered().map((s) => s.name);
-    expect(filtered).toEqual(['cron']);
-    ServiceStore.toggleCategory('Sécurité');
-    const again = ServiceStore.getFiltered().map((s) => s.name);
-    expect(again).toContain('sshd');
+  it('handles missing fields', () => {
+    renderServices([{}]);
+    const card = document.querySelector('.docker-card');
+    expect(card.querySelector('.docker-name').textContent).toBe('—');
   });
 });
