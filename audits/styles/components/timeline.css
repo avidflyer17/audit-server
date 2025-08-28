@@ -1,0 +1,91 @@
+    @media (min-width: 601px) {
+      .report-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "btn"
+          "day"
+          "status"
+          "timeline";
+        gap: 0.5rem;
+      }
+      #btnLatest { grid-area: btn; }
+      .day-control { grid-area: day; }
+      #selectorStatus { grid-area: status; }
+      .timeline-wrapper { grid-area: timeline; }
+    }
+
+    .day-control {
+      display: flex;
+      border: 1px solid #555;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .day-control .seg {
+      background: transparent;
+      color: var(--text);
+      padding: 0.5rem 0.8rem;
+      border: none;
+      cursor: pointer;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .day-control .seg:hover { background: #333; }
+    .day-control .seg:active { background: #444; }
+    .day-control .seg.active {
+      background: var(--heading);
+      color: var(--bg);
+    }
+
+    .day-control .seg:focus-visible {
+      outline: 2px solid var(--heading);
+      outline-offset: -2px;
+    }
+
+    .timeline-wrapper {
+      overflow-x: auto;
+      padding: 0.5rem;
+    }
+
+    .timeline { display: flex; gap: 0.5rem; }
+
+    .time-chip {
+      background: #444;
+      color: var(--text);
+      border: none;
+      border-radius: 9999px;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: var(--font-mono);
+    }
+
+    .time-chip:hover { background: #555; }
+    .time-chip:active { background: #666; }
+
+    .time-chip.active {
+      background: var(--heading);
+      color: var(--bg);
+    }
+
+    @media (min-width: 1024px) {
+      .timeline-wrapper {
+        overflow-x: visible;
+      }
+      .timeline {
+        flex-wrap: wrap;
+      }
+      .time-chip {
+        flex: 1 1 45%;
+      }
+    }
+
+    .time-chip:focus-visible {
+      outline: 2px solid var(--heading);
+      outline-offset: 4px;
+    }
+

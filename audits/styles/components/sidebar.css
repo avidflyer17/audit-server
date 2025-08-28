@@ -1,0 +1,50 @@
+    .sidebar .card {
+      border: none;
+      box-shadow: none;
+    }
+
+    .sidebar .card:hover {
+      box-shadow: none;
+    }
+
+    /* Sidebar navigation */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      max-width: 80%;
+      height: 100%;
+      background: var(--block-bg);
+      overflow-y: auto;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      padding: 4rem 1rem 1rem;
+    }
+
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+    #menuOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 900;
+    }
+
+    .sidebar.open ~ #menuOverlay {
+      display: block;
+    }
+
+    @media (min-width: 1024px) {
+      .sidebar {
+        width: 320px;
+      }
+    }
+
