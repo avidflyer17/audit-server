@@ -8,5 +8,15 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "rules": {}
+  "rules": {},
+  "overrides": [
+    {
+      "files": ["**/__tests__/**/*.js"],
+      "env": {
+        "browser": true,
+        "node": true,
+        "jest": true
+      }
+    }
+  ]
 }
