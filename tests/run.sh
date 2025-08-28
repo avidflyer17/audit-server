@@ -14,6 +14,11 @@ fi
 # Positive validation
 ./tests/validate_report.sh "$file"
 
+# Positive: validation should allow optional null disk entry
+null_disk=$(mktemp)
+jq '.disks[1] = null' "$file" > "$null_disk"
+./tests/validate_report.sh "$null_disk"
+
 # Negative: missing field
 missing=$(mktemp)
 jq 'del(.hostname)' "$file" > "$missing"
@@ -38,6 +43,6 @@ if ./tests/validate_report.sh "$bad_container" 2>/dev/null; then
   exit 1
 fi
 
-rm -rf "$tmp_dir" "$missing" "$wrong_type" "$bad_container"
+rm -rf "$tmp_dir" "$missing" "$wrong_type" "$bad_container" "$null_disk"
 
 echo "Test passed: audit JSON report generated and validated at $file"

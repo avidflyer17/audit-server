@@ -20,7 +20,7 @@ jq -e '.memory.swap | (.total|type=="string") and (.used|type=="string") and (.f
 
 # Disks array
 jq -e '.disks | type == "array" and length == 2' "$file" >/dev/null
-jq -e 'all(.disks[]; (.filesystem|type=="string") and (.size|type=="string") and (.used|type=="string") and (.available|type=="string") and (.used_percent|type=="string") and (.mountpoint|type=="string"))' "$file" >/dev/null
+jq -e '.disks[0] != null and all(.disks[]; . == null or ((.filesystem|type=="string") and (.size|type=="string") and (.used|type=="string") and (.available|type=="string") and (.used_percent|type=="string") and (.mountpoint|type=="string")))' "$file" >/dev/null
 
 # CPU object
 jq -e '.cpu.model | type=="string" and length > 0' "$file" >/dev/null
