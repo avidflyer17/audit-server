@@ -13,6 +13,12 @@ describe('renderServices', () => {
     expect(document.getElementById('servicesCount').textContent).toBe('2 services');
   });
 
+  it('sorts by unit_name when id missing', () => {
+    renderServices([{ unit_name: 'b.service' }, { unit_name: 'a.service' }]);
+    const names = Array.from(document.querySelectorAll('.docker-name')).map((el) => el.textContent);
+    expect(names).toEqual(['a.service', 'b.service']);
+  });
+
   it('handles missing fields', () => {
     renderServices([{}]);
     const card = document.querySelector('.docker-card');

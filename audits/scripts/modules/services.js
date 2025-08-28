@@ -102,9 +102,11 @@ export function renderServices(list = []) {
   const normalized = (list || []).map((s) =>
     typeof s === 'string' ? { id: s } : s || {}
   );
-  const sorted = [...normalized].sort((a, b) =>
-    String(a.id || '').localeCompare(String(b.id || ''))
-  );
+  const sorted = [...normalized].sort((a, b) => {
+    const nameA = a.id ?? a.unit_name ?? '';
+    const nameB = b.id ?? b.unit_name ?? '';
+    return String(nameA).localeCompare(String(nameB));
+  });
   countSpan.textContent = `${sorted.length} service${sorted.length > 1 ? 's' : ''}`;
   if (!sorted.length) {
     grid.textContent = '';
