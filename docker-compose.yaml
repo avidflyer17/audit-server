@@ -15,7 +15,7 @@ services:
         max-file: "3"
     networks:
       br-dams:
-        ipv4_address: 172.18.0.133
+        ipv4_address: x.x.x.x
     labels:
       - "traefik.enable=true"
       # ROUTEUR
