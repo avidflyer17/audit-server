@@ -1415,7 +1415,7 @@ main {
   width: 100%;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto auto 1fr auto;
   align-items: center;
   background: var(--block-bg);
   padding: 0.5rem 1rem;
@@ -1449,12 +1449,12 @@ main {
   opacity: 0.7;
 }
 .top-meta {
-  justify-self: end;
-  text-align: right;
+  justify-self: stretch;
   display: flex;
   gap: var(--gap-3);
   flex-wrap: wrap;
   font-size: var(--font-sm);
+  justify-content: space-evenly;
 }
 .top-meta .meta-item {
   display: flex;
@@ -1554,7 +1554,7 @@ main {
 }
 @media (min-width: 900px) {
   .top-bar {
-    grid-template-columns: 44px 1fr auto auto;
+    grid-template-columns: 44px auto 1fr auto;
     padding-block: .4rem;
   }
   .top-brand {
@@ -1586,6 +1586,7 @@ main {
     flex-wrap: nowrap;
     white-space: nowrap;
     font-size: var(--font-sm);
+    justify-content: space-evenly;
   }
   #themeSwitchWrapper {
     justify-self: end;
