@@ -11,17 +11,33 @@ if [ ! -f "$file" ]; then
   exit 1
 fi
 
-# Validate disk entries
-jq -e '.disks | length == 2' "$file" >/dev/null
-jq -e '.disks[0] != null' "$file" >/dev/null
+# Positive validation
+./tests/validate_report.sh "$file"
 
-# Generic checks
-jq empty "$file"
-jq -e '.cpu.model | length > 0' "$file" >/dev/null
-jq -e '.cpu.cores | tonumber > 0' "$file" >/dev/null
-jq -e '.docker.containers | type == "array"' "$file" >/dev/null
-jq -e 'has("ports") | not' "$file" >/dev/null
+# Negative: missing field
+missing=$(mktemp)
+jq 'del(.hostname)' "$file" > "$missing"
+if ./tests/validate_report.sh "$missing" 2>/dev/null; then
+  echo "Validation should fail for report missing required fields" >&2
+  exit 1
+fi
 
-rm -rf "$tmp_dir"
+# Negative: wrong type
+wrong_type=$(mktemp)
+jq '.cpu.cores = "four"' "$file" > "$wrong_type"
+if ./tests/validate_report.sh "$wrong_type" 2>/dev/null; then
+  echo "Validation should fail for wrong field types" >&2
+  exit 1
+fi
+
+# Negative: invalid docker container entry
+bad_container=$(mktemp)
+jq '.docker.containers = [{}]' "$file" > "$bad_container"
+if ./tests/validate_report.sh "$bad_container" 2>/dev/null; then
+  echo "Validation should fail for malformed docker container" >&2
+  exit 1
+fi
+
+rm -rf "$tmp_dir" "$missing" "$wrong_type" "$bad_container"
 
 echo "Test passed: audit JSON report generated and validated at $file"
