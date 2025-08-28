@@ -7,13 +7,23 @@ export let latestEntry = null;
 
 export async function fetchIndex() {
   const res = await fetch('/archives/index.json');
+  if (!res.ok) throw new Error(`Index inaccessible (${res.status})`);
   return await res.json();
 }
 
 export async function loadAudit(file) {
-  const res = await fetch('/archives/' + file);
-  if (!res.ok) throw new Error('Fichier inaccessible');
-  return await res.json();
+  try {
+    const res = await fetch('/archives/' + file);
+    if (!res.ok) throw new Error(`Fichier inaccessible (${res.status})`);
+    try {
+      return await res.json();
+    } catch (err) {
+      throw new Error('JSON invalide: ' + err.message);
+    }
+  } catch (err) {
+    console.error('loadAudit error:', err);
+    throw err;
+  }
 }
 
 export function parseIndex(list) {
@@ -58,6 +68,6 @@ export async function init() {
     showStatus('');
   } catch (err) {
     console.error(err);
-    showStatus('Impossible de charger les rapports', 'error');
+    showStatus('Impossible de charger les rapports: ' + err.message, 'error');
   }
 }
