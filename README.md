@@ -1,7 +1,7 @@
 # Audit Server
 
-**Version 1.2.0** – this repository reflects the state of the project at release v1.2.0. All work that occurred
-after this tag has been discarded.
+**Version 1.3.0** – this repository contains the latest updates, including automatic theme detection and
+front-end refactors.
 
 Audit Server generates periodic JSON reports describing the state of a host and exposes them through a static web
 viewer. The solution is composed of three parts:
@@ -10,6 +10,8 @@ viewer. The solution is composed of three parts:
   containers) and stores them as timestamped JSON files.
 * `audits/` – static HTML, CSS and JavaScript viewer that loads and renders those JSON files in a browser.
 * `docker-compose.yaml` and `nginx.conf` – optional container setup to serve the viewer with Nginx.
+
+The viewer automatically matches the system's light or dark theme.
 
 The front‑end code is written as ES modules and bundled with [esbuild](https://esbuild.github.io/). Development
 dependencies such as `esbuild`, `eslint` and `prettier` are listed in `package.json`.

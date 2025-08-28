@@ -1,7 +1,7 @@
 # 🧾 Audit Report Structure
 
 The `generate-audit-json.sh` script outputs a JSON file summarizing system metrics. This specification describes
-the format used in Audit Server version 1.2.0. The top-level object contains:
+the format used in Audit Server version 1.3.0. The top-level object contains:
 
 - `generated`: human-readable timestamp of report generation.
 - `hostname`: system hostname.
