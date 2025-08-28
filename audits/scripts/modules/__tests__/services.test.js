@@ -15,13 +15,13 @@ describe('ServiceStore', () => {
     expect(other.category).toBe('Autre');
   });
 
-  it('filters by category', () => {
-    ServiceStore.setData(['sshd', 'cron']);
-    ServiceStore.toggleCategory('Sécurité');
-    const filtered = ServiceStore.getFiltered().map((s) => s.name);
-    expect(filtered).toEqual(['cron']);
-    ServiceStore.toggleCategory('Sécurité');
-    const again = ServiceStore.getFiltered().map((s) => s.name);
-    expect(again).toContain('sshd');
+  it('sorts services', () => {
+    ServiceStore.setData(['b.service', 'a.service']);
+    ServiceStore.setSort('az');
+    const az = ServiceStore.getFiltered().map((s) => s.name);
+    expect(az).toEqual(['a.service', 'b.service']);
+    ServiceStore.setSort('za');
+    const za = ServiceStore.getFiltered().map((s) => s.name);
+    expect(za).toEqual(['b.service', 'a.service']);
   });
 });

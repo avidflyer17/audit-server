@@ -28,11 +28,3 @@
       background: #555;
       font-family: var(--font-mono);
     }
-    .service-details {
-      display: none;
-      margin-top: 0.5rem;
-      font-size: 0.85rem;
-    }
-    .service-item.expanded .service-details {
-      display: block;
-    }
