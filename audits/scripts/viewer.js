@@ -222,6 +222,7 @@ function renderServicesList(){
   sortedServices.forEach(s => {
     const item = document.createElement('div');
     item.className = 'service-item';
+    item.tabIndex = 0;
 
     const main = document.createElement('div');
     main.className = 'service-main';

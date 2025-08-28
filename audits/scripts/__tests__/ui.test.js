@@ -35,6 +35,7 @@ describe('services UI', () => {
     expect(chips.length).toBe(0);
     const items = document.querySelectorAll('#servicesList .service-item');
     expect(items.length).toBe(2);
+    items.forEach((item) => expect(item.tabIndex).toBe(0));
     expect(document.getElementById('servicesCount').textContent).toBe('2 services');
   });
 });
