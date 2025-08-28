@@ -5,7 +5,7 @@
       width: 100%;
       box-sizing: border-box;
       display: grid;
-      grid-template-columns: auto 1fr auto auto;
+      grid-template-columns: auto auto 1fr auto;
       align-items: center;
       background: var(--block-bg);
       padding: 0.5rem 1rem;
@@ -40,12 +40,12 @@
     }
 
     .top-meta {
-      justify-self: end;
-      text-align: right;
+      justify-self: stretch;
       display: flex;
       gap: var(--gap-3);
       flex-wrap: wrap;
       font-size: var(--font-sm);
+      justify-content: space-evenly;
     }
 
     .top-meta .meta-item {
@@ -148,7 +148,7 @@
   @media (min-width: 900px){
     /* grille du header + padding vertical plus serré */
     .top-bar{
-      grid-template-columns: 44px 1fr auto auto;  /* menu | brand | meta | switch */
+      grid-template-columns: 44px auto 1fr auto;  /* menu | brand | meta | switch */
       padding-block: .4rem;
     }
 
@@ -187,6 +187,7 @@
       flex-wrap: nowrap;
       white-space: nowrap;
       font-size: var(--font-sm);
+      justify-content: space-evenly;
     }
 
     /* le switch thème reste bien collé à droite */
