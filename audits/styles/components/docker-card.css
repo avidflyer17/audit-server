@@ -51,3 +51,19 @@
   background: #4caf50;
   color: #fff;
 }
+.status-failed {
+  background: #f44336;
+  color: #fff;
+}
+.status-inactive {
+  background: #777;
+  color: #fff;
+}
+.status-activating {
+  background: #ff9800;
+  color: #000;
+}
+.status-unknown {
+  background: #999;
+  color: #fff;
+}

@@ -20,7 +20,8 @@ the format used in Audit Server version 1.3.1. The top-level object contains:
   - `usage`: array of `{ core, usage }` records.
   - `temperatures`: array of `{ core, temp }` if available.
 - `cpu_load_color`: traffic-light color representing overall CPU usage.
-- `services`: array of active systemd service names.
+- `services`: array of objects describing active systemd services. Fields are tolerant of missing values and may include `id`,
+  `unit_name`, `type`, `description`, `category`, `state`, `since` and `enabled`.
 - `top_cpu`: list of processes consuming the most CPU (`pid`, `cmd`, `cpu`, `mem`).
 - `top_mem`: list of processes consuming the most memory (`pid`, `cmd`, `mem`, `cpu`).
 - `docker`: object with `containers` array, each entry containing:
@@ -60,7 +61,18 @@ A minimal example:
     "temperatures": []
   },
   "cpu_load_color": "green",
-  "services": ["sshd.service"],
+  "services": [
+    {
+      "id": "ssh.service",
+      "unit_name": "ssh.service",
+      "type": "service",
+      "description": "Service systemd",
+      "category": "Sécurité",
+      "state": "running",
+      "since": "2025-08-15T10:22:00Z",
+      "enabled": true
+    }
+  ],
   "top_cpu": [],
   "top_mem": [],
   "docker": { "containers": [] }
