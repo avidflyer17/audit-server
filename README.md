@@ -1,5 +1,9 @@
 # Audit Server
 
+<img width="1629" height="983" alt="image" src="https://github.com/user-attachments/assets/6d88a37a-24f1-40a8-8ee6-dabb77bd4b0a" />
+
+<img width="1630" height="977" alt="image" src="https://github.com/user-attachments/assets/1c67dd82-8d65-42fa-b5fe-164e06c1fafc" />
+
 **Version 1.3.1** – this repository contains the latest updates, including automatic theme detection and
 front-end refactors.
 
